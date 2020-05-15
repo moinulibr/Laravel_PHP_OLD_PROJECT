@@ -1,0 +1,20 @@
+
+
+	in the controller 
+		
+		function show($id)
+		{
+			$id = \Crypt::decrypt($id);
+		}	
+
+
+
+
+	in the balde.php file
+	
+		<a href="{{url('myurl')}}/{{\Crypt::encrypt($row->id)}}"
+
+	
+	
+
+	

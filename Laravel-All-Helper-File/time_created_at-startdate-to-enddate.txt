@@ -1,0 +1,137 @@
+		Very Very Inportent.. Month or Year . or Day... Converter
+================================================================================================
+		
+		{{ date('d-m-Y',strtotime($item->created_at)) }}
+
+
+ 	$startDate = date('d-m-Y');
+         $endDate = date('d-m-Y');
+        
+        $start = date("Y-m-d",strtotime($startDate));
+        $end = date("Y-m-d",strtotime($endDate."+1 day"));
+
+
+	date('Y-m-d',strtotime(date('d-m-Y')));
+
+
+	 $endDate = Carbon::now()->subYears(1);
+     	 return  $end = date("Y-m-d",strtotime($endDate."+0 day"));
+
+
+	  $endDate = Carbon::now()->subMonths(3);
+      return  $end = date("Y-m-d",strtotime($endDate."+0 day"));
+
+
+===================================================================================================
+	<td>{{ date('d-m-Y  -  h:i:s',strtotime($item->created_at)) }}</td> 
+============================================================================================
+	 $data['startDate'] = $request->startDate;
+            $data['EndDate'] = $request->endDate;
+            $startDate = $request->startDate;
+            $endDate = $request->endDate;
+            
+            $data['testpatientsq'] = Patienttest::where('proceed',1)->get();
+
+             /*--this is for whereBetween query-----end ..copy always */
+       $start = date("Y-m-d",strtotime($request->input('startDate')));
+       $end = date("Y-m-d",strtotime($request->input('endDate')."+1 day"));
+            
+     $data['testpatients'] =   $data['testpatientsq']->whereBetween('created_at',[$start,$end]);
+              /*--this is for whereBetween query-----end ..copy always */
+
+
+================================================================================================
+
+ 	$startDate = date('d-m-Y');
+         $endDate = date('d-m-Y');
+        
+        $start = date("Y-m-d",strtotime($startDate));
+        $end = date("Y-m-d",strtotime($endDate."+1 day"));
+
+
+	date('Y-m-d',strtotime(date('d-m-Y')));
+
+
+	 $endDate = Carbon::now()->subYears(1);
+     	 return  $end = date("Y-m-d",strtotime($endDate."+0 day"));
+
+
+	  $endDate = Carbon::now()->subMonths(3);
+      return  $end = date("Y-m-d",strtotime($endDate."+0 day"));
+
+
+===================================================================================================
+  $data['testdeliveryStatusTodayOnlyQuery'] = Delivery_history_detail::where('delivery',1)->get();
+
+        if($request->startDate == "" && $request->endDate == "")
+        {
+            $EndDate =  date('Y-m-d');
+            $start = date('Y-m-d');
+            $end = date("Y-m-d",strtotime($EndDate."+1 day"));
+            /*already delivered section only for Todays */
+            $data['testdeliveryStatusTodayOnly'] = $data['testdeliveryStatusTodayOnlyQuery']->whereBetween('created_at',[$start,$end]);
+        }
+        else{
+            $data['startDate'] = $request->startDate;
+            $data['EndDate'] = $request->endDate;
+            $startDate = $request->startDate;
+            $endDate = $request->endDate;
+
+                /*--this is for whereBetween query-----end ..copy always */
+                $start = date("Y-m-d",strtotime($request->input('startDate')));
+                $end = date("Y-m-d",strtotime($request->input('endDate')."+1 day"));
+
+                $data['testdeliveryStatusTodayOnly'] =   $data['testdeliveryStatusTodayOnlyQuery']->whereBetween('created_at',[$start,$end]);
+                /*--this is for whereBetween query-----end ..copy always */
+        }
+
+        $data['searchByDateForOtherDayDeliveryTestReport'] = 1 ;
+
+
+
+
+===================================================================================================
+	Date to date different
+	======================
+
+	$searchStarTDay = "2020-02-20";
+        $searchEndTDay  = "2020-02-22";
+	
+	===============
+       return date_diff(
+            date_create($searchEndTDay),  
+            date_create($searchStarTDay)
+        )->format('%a');
+        ============
+
+	====or another way====
+        function daysBetween($dt1, $dt2) {
+            return date_diff(
+                date_create($dt2),  
+                date_create($dt1)
+            )->format('%a');
+        }
+        return daysBetween($searchStarTDay,$searchEndTDay);
+	====or another way====
+
+
+	==========================================================
+       $days = (strtotime($searchEndTDay) - strtotime($searchStarTDay)) / (60 * 60 * 24);
+        return $days;
+	========================================================
+
+	$start  = date_create('1988-08-10');
+$end    = date_create(); // Current time and date
+$diff   = date_diff( $start, $end );
+
+echo 'The difference is ';
+echo  $diff->y . ' years, ';
+echo  $diff->m . ' months, ';
+echo  $diff->d . ' days, ';
+echo  $diff->h . ' hours, ';
+echo  $diff->i . ' minutes, ';
+echo  $diff->s . ' seconds';
+// Output: The difference is 28 years, 5 months, 19 days, 20 hours, 34 minutes, 36 seconds
+
+echo 'The difference in days : ' . $diff->days;
+// Output: The difference in days : 10398

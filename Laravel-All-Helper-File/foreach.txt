@@ -1,0 +1,24 @@
+
+
+
+
+---------------------------- 
+	only for laravel  like as foreach
+	@forelse($alldata as $data)
+	
+	@empty
+	if no data found...
+	@endforelse
+----------------------------
+
+
+
+
+
+
+
+
+
+
+
+paginate().... to link... {{ $post->links() }}... out of foreach 

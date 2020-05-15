@@ -1,0 +1,380 @@
+CREATE TABLE salesdetails(
+id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+salesid TINYINT UNSIGNED,
+productid INT UNSIGNED,
+price DOUBLE(8,2),
+vat DOUBLE(8,2),
+discount DOUBLE(8,2),
+quantity TINYINT(3) UNSIGNED,
+   FOREIGN KEY (salesid) REFERENCES sales (id),
+   FOREIGN KEY (productid) REFERENCES products (id),
+reg_date TIMESTAMP
+)
+------------------------
+CREATE TABLE productsizes(
+id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+sizeid TINYINT UNSIGNED,
+productid INT UNSIGNED,
+status TINYINT(3) UNSIGNED,
+   FOREIGN KEY (sizeid) REFERENCES sizes (id),
+   FOREIGN KEY (productid) REFERENCES products (id),
+reg_date TIMESTAMP
+)
+------------------------
+CREATE TABLE productcolors(
+id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+colorid TINYINT UNSIGNED,
+productid INT UNSIGNED,
+status TINYINT(3) UNSIGNED,
+   FOREIGN KEY (colorid) REFERENCES colors (id),
+   FOREIGN KEY (productid) REFERENCES products (id),
+reg_date TIMESTAMP
+)
+---------------------------
+CREATE TABLE wishlists(
+id TINYINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+productid INT UNSIGNED,
+customersid INT UNSIGNED,
+    FOREIGN KEY (productid) REFERENCES products(id),
+    FOREIGN KEY (customersid) REFERENCES customers (id),
+reg_date TIMESTAMP
+)
+---------------------
+CREATE TABLE products(
+id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+title  VARCHAR(50),
+description VARCHAR(150),
+price DOUBLE(8,2),
+address VARCHAR(100),
+vat DOUBLE(8,2),
+discount DOUBLE(8,2),
+video VARCHAR(50),
+unitid TINYINT UNSIGNED ,
+subcategoryid TINYINT UNSIGNED,
+stock VARCHAR(50),
+partnersid INT UNSIGNED , 
+couponid TINYINT UNSIGNED,
+picture1 VARCHAR(4),
+picture2 VARCHAR(4),
+picture3 VARCHAR(4),
+picture4 VARCHAR(4),
+    FOREIGN KEY (unitid) REFERENCES units (id),
+    FOREIGN KEY (subcategoryid) REFERENCES subcategories (id),
+    FOREIGN KEY (partnersid) REFERENCES partners (id),
+reg_date TIMESTAMP
+)
+===
+CREATE TABLE units(
+id TINYINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+name VARCHAR(100) NOT NULL,
+reg_date TIMESTAMP
+)
+==========================
+CREATE TABLE sales(
+id TINYINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+customerid INT UNSIGNED,
+address VARCHAR(100),
+couponid TINYINT UNSIGNED,
+shippingid TINYINT UNSIGNED,
+paymentid INT UNSIGNED,
+date DATETIME,
+status TINYINT(2),
+    FOREIGN KEY (customerid) REFERENCES customers (id),
+    FOREIGN KEY (couponid) REFERENCES coupons (id),
+    FOREIGN KEY (shippingid) REFERENCES shipping (id),
+    FOREIGN KEY (paymentid) REFERENCES payments (id),
+reg_date TIMESTAMP
+)
+----------------------
+CREATE TABLE payments(
+id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+name VARCHAR(100) NOT NULL,
+reg_date TIMESTAMP
+)
+================
+CREATE TABLE customers (
+id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+name VARCHAR(100) NOT NULL,
+email VARCHAR(100) NOT NULL,
+password VARCHAR(100) NOT NULL,
+dob DATETIME,
+gender TINYINT(2),
+address VARCHAR(100) NOT NULL,
+cityid TINYINT UNSIGNED ,
+contact VARCHAR(20) NOT NULL,
+verify TINYINT(2),
+picture TINYINT(4),
+FOREIGN KEY (cityid) REFERENCES cities(id),
+reg_date TIMESTAMP
+)
+------------------------------------
+CREATE TABLE partners (
+id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+name VARCHAR(100) NOT NULL,
+email VARCHAR(100) NOT NULL,
+password VARCHAR(100) NOT NULL,
+identity_type TINYINT(2) UNSIGNED,
+identity_number TINYINT(2) UNSIGNED,
+address VARCHAR(100) NOT NULL,
+cityid TINYINT UNSIGNED ,
+contact VARCHAR(20) NOT NULL,
+verify TINYINT(2),
+picture TINYINT(4),
+FOREIGN KEY (cityid) REFERENCES cities(id),
+reg_date TIMESTAMP
+)
+-------------------------
+CREATE TABLE accounts(
+id TINYINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+partnersid INT UNSIGNED,
+bankid TINYINT UNSIGNED,
+    FOREIGN KEY (partnersid) REFERENCES partners(id),
+    FOREIGN KEY (bankid) REFERENCES banks (id),
+reg_date TIMESTAMP
+)
+---------------------------------
+CREATE TABLE banks(
+id TINYINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+name VARCHAR(100) NOT NULL,
+branch VARCHAR(50),
+cityid TINYINT UNSIGNED,
+countryid TINYINT UNSIGNED, 
+    FOREIGN KEY (cityid) REFERENCES cities(id),
+    FOREIGN KEY (countryid) REFERENCES countries(id),
+reg_date TIMESTAMP
+)
+----------------------------
+CREATE TABLE countries(
+id TINYINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+name VARCHAR(100) NOT NULL,
+reg_date TIMESTAMP
+)
+===
+CREATE TABLE countries(
+id TINYINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+name VARCHAR(100) NOT NULL,
+reg_date TIMESTAMP
+)
+====
+CREATE TABLE cities(
+id TINYINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+name VARCHAR(100) NOT NULL,
+countryid TINYINT UNSIGNED,
+    FOREIGN KEY (countryid) REFERENCES countries(id),
+reg_date TIMESTAMP
+)
+===============================
+------------------------------
+CREATE TABLE admins (
+id TINYINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+name VARCHAR(100) NOT NULL,
+email VARCHAR(100) NOT NULL,
+password VARCHAR(100) NOT NULL,
+type TINYINT(2)
+)
+-------------------------------
+CREATE TABLE colors  (
+id TINYINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+name VARCHAR(100) NOT NULL
+)
+-----------------------------------
+CREATE TABLE sizes  (
+id TINYINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+name VARCHAR(100) NOT NULL
+)
+--------------------------------
+CREATE TABLE categories  (
+id TINYINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+name VARCHAR(100) NOT NULL
+)
+------------------------------
+CREATE TABLE coupons(
+id TINYINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+name VARCHAR(100) NOT NULL,
+amount DOUBLE(8,2),
+date DATETIME,
+reg_date TIMESTAMP
+)
+----------------------------
+CREATE TABLE shipping(
+id TINYINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+Countryid TINYINT UNSIGNED,
+amount DOUBLE(8,2),
+FOREIGN KEY (countryid) REFERENCES countries(id),
+reg_date TIMESTAMP
+)
+---------------------------------------------------
+CREATE TABLE subcategories(
+id TINYINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+name VARCHAR(100) NOT NULL,
+categoryid TINYINT UNSIGNED,
+ FOREIGN KEY (categoryid) REFERENCES categories(id),
+reg_date TIMESTAMP
+)
+-------------------------------
+CREATE TABLE transactions(
+id TINYINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+bankid TINYINT UNSIGNED,
+amount DOUBLE(8,2),
+date DATETIME,
+accounted TINYINT UNSIGNED,
+    FOREIGN KEY (bankid) REFERENCES banks (id),
+reg_date TIMESTAMP
+)
+---------------------------------------------
+--------------------------------------
+---------------------------------
+ FOREIGN KEY (partnersid) REFERENCES partners(id),
+    FOREIGN KEY (bankid) REFERENCES banks (id),
+-------------------------------------
+Customers
+id
+name
+email
+password
+dob
+genderid 
+address
+cityid
+contact
+verify
+picture	
+------------------
+Cities
+Id
+Name
+countryid	
+----------------
+Countries
+Id
+name	
+-----------------------
+partners 
+id
+name
+email
+password
+identity_type
+identity_number
+address
+cityid
+contact
+verify
+picture
+------------------------
+	Banks
+Id
+name
+branch
+cityid
+countryid 
+----------------------------------				
+	Accounts
+Id
+Partnersid
+bankid
+----------------------
+	admin
+id
+name
+email
+password
+type	
+---------------------
+	Products
+id
+Title
+Description 
+Price
+Vat
+Discount
+Video
+Unitid
+Subcategoryid
+Stock
+partnersid 
+Picture1
+Picture2
+Picture3
+Picture4	
+------------------
+	Units
+Id
+name	
+--------------------
+	Subcategories
+Id
+Name
+categoryid
+--------------------
+	Categories
+Id
+name
+-----------------------------
+		Wishlists
+Id
+Productid
+Customersid
+----------------------
+Colors 
+Id
+name
+-------------------------
+	Sizes
+Id
+name	
+------------------------
+	Sales
+id
+Customerid
+Address
+Couponid
+shippingid
+paymentid
+date
+status	
+--------------------
+	Shipping
+Id
+Countryid
+Amount
+--------------------
+	Coupons
+Id
+Name
+Amount
+Date
+
+
+Payments
+----------------
+Id
+name
+	
+Transaction
+Id
+Bankid
+Amount
+Date
+accountid	
+
+Productcolor
+Id
+Colorid
+Productid
+status	
+
+Productsize
+Id
+sizeid
+Productid
+status	
+
+Salesdetails
+Id
+salesid
+Productid
+Price
+Vat
+Discount
+Quantity

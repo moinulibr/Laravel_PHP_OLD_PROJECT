@@ -1,0 +1,183 @@
+	
+						#### Multi Auth ####
+						#==================#
+
+	/*
+	|---------------------------------------------------------------------------------------------------
+	| 		Inportent Issue / Part
+	|	Have To Create guard in the config/auth.ph file...
+	|---------------------------------------------------------------------------------------------------
+	*/
+
+		'guards' => [
+        		'web' => [
+            			'driver' => 'session',
+            			'provider' => 'users',
+        			],
+        		'admin' => [
+            			'driver' => 'session',
+            			'provider' => 'admin',
+        		],
+
+        		'api' => [
+            			'driver' => 'token',
+            			'provider' => 'users',
+            			'hash' => false,
+        		],
+    		],
+
+
+
+	
+    		'providers' => [
+            		'users' => [
+                		'driver' => 'eloquent',
+                		'model' => App\User::class,
+            			],
+            		'admin' => [
+                		'driver' => 'eloquent',
+                		'model' => App\Model\Backend\Admin\Admin::class,
+            			],
+    			],
+
+
+
+
+		'passwords' => [
+        		'users' => [
+            			'provider' => 'users',
+            			'table' => 'password_resets',
+            			'expire' => 60,
+            			'throttle' => 60,
+        		],
+        		'admin' => [
+            			'provider' => 'admin',
+            			'table' => 'password_resets',
+           		 	'expire' => 60,
+            			'throttle' => 60,
+        		],
+    		],
+	
+	/*
+	|--------------------------------------------------------------------------------------------
+	|  Have To Create Admin Table, Then , Create Model For Admin Table like as User model,, [same to User model]
+	|  Set Route:
+	|--------------------------------------------------------------------------------------------
+	*/		Olny For Login and Logout [though others is same]
+		Route:: get('admin/login', 'Auth\Admin\LoginController@showLoginForm')->name('admin.login.form');
+		Route:: post('admin/login', 'Auth\Admin\LoginController@login')->name('admin.login');
+		Route:: post('admin/logout', 'Auth\Admin\LoginController@logout')->name('admin.logout');
+
+
+	/*
+	|----------------------------------------------------------------------------------------------------
+	| Copy The All Auth Folder from Controller/Auth and resources/views/auth => then Change the namespace
+	|		Here is Only Login Controller Changed namespace and other
+	|----------------------------------------------------------------------------------------------------
+	*/
+		
+		namespace App\Http\Controllers\Auth\Admin;
+
+		use App\Http\Controllers\Controller;
+		use App\Providers\RouteServiceProvider;
+		use Illuminate\Foundation\Auth\AuthenticatesUsers;
+		use Illuminate\Http\Request;
+		use Illuminate\Http\Response;
+		use Illuminate\Support\Facades\Auth;
+		use Illuminate\Validation\ValidationException;
+
+		class LoginController extends Controller
+		{
+			 use AuthenticatesUsers;
+
+		 	protected $redirectTo = "/admin/home";
+
+		 	public function __construct()
+    			{
+       				// $this->middleware('guest')->except('logout');
+        			$this->middleware('guest:admin')->except('logout');
+    			}
+
+			public function showLoginForm()
+    			{
+        			return view('auth.admin.login');
+    			}
+
+
+		 	public function logout(Request $request)
+    			{
+        			$this->guard()->logout();
+        			$request->session()->invalidate();
+        			$request->session()->regenerateToken();
+        			if ($response = $this->loggedOut($request)) {
+            				return $response;
+        			}
+
+        			return $request->wantsJson()
+            			? new Response('', 204)
+            			: redirect('admin/login');
+    			}
+
+
+		  	protected function guard()
+    			{
+        		 	return Auth::guard('admin');
+    			}
+		}
+
+	/*
+	|---------------------------------------------------------------------------------------------------
+	| 	Now App\Middleware RedirectIfAuthenticated.php file
+	|		Have to Changes 
+	|---------------------------------------------------------------------------------------------------
+	*/
+			if ($guard == "admin" && Auth::guard($guard)->check()) 
+        		{
+            			//return redirect('/home');
+            			return redirect()->route('admin.loginRedirect');
+        		}
+        		if (Auth::guard($guard)->check()) 
+        		{
+            			return redirect('/home');
+        		}
+
+        		return $next($request);
+
+
+	/*
+	|---------------------------------------------------------------------------------------------------
+	|	Create A Controller name = AdminHomeController 
+	|		And Change The Middleware
+	|---------------------------------------------------------------------------------------------------
+	*/	
+		    	public function __construct()
+    			{
+				//$this->middleware('auth');
+      				$this->middleware('auth:admin');
+    			}
+
+
+
+
+
+
+
+
+
+
+
+		If we add some thing in the Admin table, then 
+			Copy this copy from AuthenticatesUsers.php class
+
+				protected function attemptLogin(Request $request)
+    				{
+        				return $this->guard()->attempt(
+            				$this->credentials($request), $request->filled('remember')
+        				);
+    				}
+
+			add this code in this attemptLogin() [method]
+				$user = auth()->user();
+				$user->last_login = Carbon::now();
+				$user->save();
+			

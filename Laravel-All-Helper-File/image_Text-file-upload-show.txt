@@ -1,0 +1,621 @@
+
+	we can show image during uploading time
+	======================================== must jquery link is requried
+
+	<div class="form-group">
+		<img id="image" src="#" />
+	     <label for="exampleInputPassword1">Photo</label>
+	     <input type="file" name ="photo" accept="image/*"
+		 class="upload" required onchange="readURL(this);" />
+	</div>
+			---Same-----
+
+	<div class="form-group">
+             <label for="firstname" style="margin-top:1%;" class="control-label col-lg-3">Photo *</label>
+                <img id="image" src="#" />
+                <input class="col-md-offset-3" type="file"  name="photo" accept="image/*"  required onchange="readURL(this);">
+          </div>
+
+	--------- js----------------
+
+	<script type="text/javascript">
+		function readURL(input){
+			if(input.files && input.files[0]){
+			    var reader = new FileReader();
+			    reader.onload = function (e){
+				$('#image')
+					.attr('src', e.target.result)
+					.width(80)
+					.height(80);
+				};
+				reader.readAsDataURL(input.files[0]);
+			}
+		}
+	</script>
+
+
+=======================================================================================
+=======================================================================================
+
+
+
+	image upload
+	============
+		
+	composer require intervention/image  //[in the command line]
+	_________________________________________
+
+	if we upload in the public folder, then we can show it directly.. so easy ,..
+	but every body can brows it from public folder... So we should make / ensure minimum
+	security .... How is possible
+
+	if we upload or store in the storage folder.. then everybody can not excess easily
+
+	
+	If we can create a shortcurt storage link in to the public folder..then its possible
+	______________________________
+
+	php artisan storage:link
+
+	-----then we can see , created a storage shortcurt link or folder in the public folder	
+
+
+	
+========================_____========_____in the controller_____=============================
+	
+	use Illuminate\Support\Carbon;
+	use Illuminate\Support\Facades\Storage;
+	use Intervention\Image\Facades\Image;
+
+
+
+            $slug = str_slug($request->name);
+            $image = $request->file('photo');
+
+            if(isset($image)){
+                $ext = $image->getClientOriginalExtension();
+                $rand = str_random(10);
+                $date = Carbon::now()->toDateString();
+                $image_name = $slug.'-'.$date.'-'.$rand .'.'.$ext;
+
+                 //check Category file directy 
+                 if(!Storage::disk('public')->exists('category')){
+                    Storage::disk('public')->makeDirectory('category');
+                 }
+                 //resize image for upload
+                 $imageSize = Image::make($image)->resize(1600,479)->save($ext);
+                 //upload in the Storage folder..
+                 Storage::disk('public')->put('category/'.$image_name,$imageSize);
+                 
+
+                 //check Category/slider file directy 
+                 if(!Storage::disk('public')->exists('category/slider')){
+                    Storage::disk('public')->makeDirectory('category/slider');
+                 }
+                 //resize image for upload
+                 $imageSize = Image::make($image)->resize(500,333)->save($ext);
+                 //upload in the Storage folder..
+                 Storage::disk('public')->put('category/slider/'.$image_name,$imageSize);
+
+            }else{
+                $image_name ='default.png';
+            }
+
+	 $category = new Category();
+            $category->name = $request->name;
+            $category->description = $request->description;
+            $category->slug = $slug;
+            $category->photo = $image_name;
+            $save = $category->save();
+            if($save){
+                $notification = array(
+                    'messege' => 'Category Inserted Successfully!',
+                    'alert-type' => 'success'
+                );
+                return redirect()->route('admin.category.index')->with($notification);
+            }else{
+                $notification = array(
+                    'messege' => 'Category Not Inserted!',
+                    'alert-type' => 'error'
+                );
+                return redirect()->back()->with($notification);
+            }
+
+
+=================================Image update=================================
+
+
+
+ $slug = str_slug($request->name);
+            $image = $request->file('photo');
+            $category = Category::findOrFail($id);
+
+            if(isset($image)){
+                $ext = $image->getClientOriginalExtension();
+                $rand = str_random(10);
+                $date = Carbon::now()->toDateString();
+                $image_name = $slug.'-'.$date.'-'.$rand .'.'.$ext;
+
+                 //check Category file directy 
+                 if(!Storage::disk('public')->exists('category')){
+                    Storage::disk('public')->makeDirectory('category');
+                 }
+
+                //Old image check and Delete
+                 if(Storage::disk('public')->exists('category/'.$category->photo)){
+                    Storage::disk('public')->delete('category/'.$category->photo);
+                 }
+
+                 //resize image for upload
+                 $imageSize = Image::make($image)->resize(1600,479)->save($ext);
+                 //upload in the Storage folder..
+                 Storage::disk('public')->put('category/'.$image_name,$imageSize);
+                 
+                 /*------------------Image Slider------------------- */
+
+                 //check Category/slider file directy 
+                 if(!Storage::disk('public')->exists('category/slider')){
+                    Storage::disk('public')->makeDirectory('category/slider');
+                 }
+
+                  //Old image category/slider check and Delete
+                  if(Storage::disk('public')->exists('category/slider/'.$category->photo)){
+                    Storage::disk('public')->delete('category/slider/'.$category->photo);
+                 }
+                 //resize image for upload
+                 $imageSize = Image::make($image)->resize(500,333)->save($ext);
+                 //upload in the Storage folder..
+                 Storage::disk('public')->put('category/slider/'.$image_name,$imageSize);
+
+            }else{
+                $image_name =$category->photo;
+            }
+
+
+            //$category = new Category();
+            $category->name = $request->name;
+            $category->description = $request->description;
+            $category->slug = $slug;
+            $category->photo = $image_name;
+            $save = $category->save();
+            if($save){
+                $notification = array(
+                    'messege' => 'Category Updated Successfully!',
+                    'alert-type' => 'success'
+                );
+                return redirect()->route('admin.category.index')->with($notification);
+            }else{
+                $notification = array(
+                    'messege' => 'Category Not Updated!',
+                    'alert-type' => 'error'
+                );
+                return redirect()->back()->with($notification);
+            }
+
+
+
+========================Delete====================================
+
+	$category = Category::findOrFail($id);
+         //check Category file directy 
+         if(!Storage::disk('public')->exists('category')){
+            Storage::disk('public')->makeDirectory('category');
+         }
+
+        //Old image check and Delete
+         if(Storage::disk('public')->exists('category/'.$category->photo)){
+            Storage::disk('public')->delete('category/'.$category->photo);
+         }
+
+         /*------------------Image Slider------------------- */
+
+         //check Category/slider file directy 
+         if(!Storage::disk('public')->exists('category/slider')){
+            Storage::disk('public')->makeDirectory('category/slider');
+         }
+
+          //Old image category/slider check and Delete
+          if(Storage::disk('public')->exists('category/slider/'.$category->photo)){
+            Storage::disk('public')->delete('category/slider/'.$category->photo);
+         }
+         $category->delete();
+
+
+==================show=================
+
+  @if(Storage::disk('public')->exists('category/slider/',$item->photo))
+     <img src="{{ asset('storage/category/slider/'.$item->photo) }}" alt="" width="50" height="40">
+   @endif
+
+
+	-----------Kit is end--------------------
+
+=======================================================================================
+=======================================================================================
+
+	My Hasan Sir
+   ------------------------
+	laravel Image file
+	=================
+		best way
+		--------
+		=========
+	/$photo  =  $request->photo;
+        
+            if ($request->photo) {
+                 $ext1 = strtolower($request->file('photo')->getClientOriginalExtension());
+                if ($ext1 != "jpg" && $ext1 != "jpeg" && $ext1 != "png" && $ext1 != "gif") {
+                  $ext1 = "";
+                } else {
+                    $employee->photo = $ext1;
+                    $employee->save();
+                    $insertedId = $employee->id;
+                    $destinationPath = "admin/profile/picture "; 
+                    $request->file('photo')->move($destinationPath,"admin-profile-{$insertedId}-1.{$ext1}");
+                  }
+              }else {
+                $ext1 = "default.png";
+              }
+              
+            $employee->photo = $ext1;
+           $employee->save();	
+	______________________
+
+	
+
+
+
+=======================================================================================
+=======================================================================================
+
+	show
+	=======================
+	@if (file_exists("admin/profile/picture/admin-profile-{$employee->id}-1.{$employee->photo}"))
+            <img src="{{ asset("admin/profile/picture/admin-profile-{$employee->id}-1.{$employee->photo}") }}" alt="imgae" style="width:60px; height:60px;"/>
+                  @else 
+              <img  src="{{ asset("admin/profile/picture/default/default.png") }}"  style="width:60px; height:60px;" />
+
+        @endif
+
+
+	
+					@if (file_exists("product-image/{$item->id}.{$item->image}"))
+                                            yes
+                                            <img src="{{ asset("product-image/{$item->id}.{$item->image}") }}" alt="imgae" style="width:60px; height:60px;"/>
+                                                  @else 
+                                                  no
+                                              <img  src="{{ asset("admin/profile/picture/default/default.png") }}"  style="width:60px; height:60px;" />
+                                            @endif
+
+=======================================================================================
+=======================================================================================
+
+		Updating
+		========
+ if ($request->photo) {
+                 $ext1 = strtolower($request->file('photo')->getClientOriginalExtension());
+                if ($ext1 != "jpg" && $ext1 != "jpeg" && $ext1 != "png" && $ext1 != "gif") {
+                  $ext1 = "";
+                } else {
+
+                    if(file_exists("admin/profile/picture/admin-profile-{$employee->id}-1.{$employee->photo}")) {
+                        unlink("admin/profile/picture/admin-profile-{$employee->id}-1.{$employee->photo}");
+                    }
+                    $employee->photo = $ext1;
+                    $employee->save();
+                    //$insertedId = $employee->id;
+                    
+                    $destinationPath = "admin/profile/picture "; 
+                    $request->file('photo')->move($destinationPath,"admin-profile-{$employee->id}-1.{$ext1}");
+                  }
+              }else {
+                $ext1 = "default.png";
+              }
+
+
+
+
+
+=======================================================================================
+=======================================================================================
+add a form attribute into the form inside action or method
+		enctype="multipart/form-data"
+	'picture' => 'nullable|image'   // nullable field but its checked image... not image just validate result false
+   use to of controller.....
+		use Session;    //for session
+		use File;
+	................  and.......
+
+	$ext = getClientOriginalExtension();  //for extension
+	$imgName  = getClientOriginalName();  // for image/file name
+	$imgsize = getClientSize(); 	     // for size
+
+		 $picture1 = $request->file('picture1');
+	  use like echo $ext1 = $picture1->$file->getClientOriginalExtension();
+
+	 //getClientSize();
+  //getClientOriginalName()
+  //$file->getClientOriginalExtension()
+/*
+    function getExtension($file) {
+        $ext = "";
+        if ($file) {
+          $ext = strtolower($file->getClientOriginalExtension());
+          if ($ext != "jpg" && $ext != "jpeg" && $ext != "png" && $ext != "gif") {
+            $ext = "";
+          }
+        }
+        
+        return $ext;
+    }*/
+	-------------------------------------
+	uploade image file
+
+ 	if($ext1 != "")
+                {
+                    $file = $request->file('picture1');
+                    $destinationPath = "postedallimages/postimages "; //
+                    $file->move($destinationPath,"post-{$insertId}-1.{$ext1}");
+                }
+
+
+
+
+=======================================================================================
+=======================================================================================
+
+ ----for blade page--- image show
+
+	   Image file show...
+ 		 @if (file_exists("postedallimages/postimages/post-{$item->id}-1.{$item->picture1}"))
+                <img src="{{ asset("postedallimages/postimages/post-{$item->id}-1.{$item->picture1}") }}" alt="" width="200" height="300" class="border" /> &nbsp;&nbsp;
+             @else 
+            <strong> No Image</strong>     
+            @endif
+
+	------for controller... image show and update..........
+
+=======================================================================================
+=======================================================================================
+
+	update($id)
+	$udtId = DB::table('posts')
+        ->select('*')
+        ->where('id',$id)
+        ->first();
+
+      if ($request->file('picture1')) {
+            $ext1 = strtolower($request->file('picture1')->getClientOriginalExtension());
+            if ($ext1 != "jpg" && $ext1 != "jpeg" && $ext1 != "png" && $ext1 != "gif") {
+              $ext1 = $udtId->picture1;
+            } else {
+                 if (file_exists("postedallimages/postimages/post-{$udtId->id}-1.{$udtId->picture1}")) {
+                unlink("postedallimages/postimages/post-{$udtId->id}-1.{$udtId->picture1}");
+              }
+              $request->file('picture1')->move("postedallimages/postimages/", "post-{$udtId->id}-1.{$ext1}");
+            }
+          } else {
+            $ext1 = $udtId->picture1;
+          }
+.....................................................
+
+
+=======================================================================================
+=======================================================================================
+
+
+
+=======================================================================================
+=======================================================================================
+		Text File
+	=============================
+   Txt file upload ..........
+	use Storage;    //use to the controller 
+	Storage::put("postedalltxt/posttxt/{$insertId}.txt", $request->description);
+	
+    txt file read or show
+    ---------------------
+	  <textarea class="form-control col-md-7 col-xs-12" rows="10" name="descr">
+            {{ File::get(storage_path("app\products\product-$selPdt->id.txt")) }}
+      	</textarea>
+
+  		@if (file_exists(storage_path("app/postedalltxt/$item->id.txt")))
+         	<div class="viewspan">
+          	{{ File::get(storage_path("app/postedalltxt/$item->id.txt"))}}
+        	</div>
+       		 @endif
+	--------------
+	......update and show txt file..........
+	----------------------------------------
+	if(file_exists(storage_path("app/postedalltxt/$udtId->id.txt"))){
+                unlink(storage_path("app/postedalltxt/$udtId->id.txt"));
+                Storage::put("postedalltxt/$udtId->id.txt", $request->description);   
+                echo "new updated";
+            }
+            else{
+                Storage::put("postedalltxt/$udtId->id.txt", $request->description);   
+                echo "Inserted"; 
+            }
+
+		----------------------------------------------------------
+		-------------Read More------------------------
+		 @if (file_exists(storage_path("app/postedalltxt/$allpost->id.txt")))
+                     @php
+          	        $allContent =  File::get(storage_path("app/postedalltxt/$allpost->id.txt"));
+                        $contentArry = explode(" ", $allContent);
+                          $content =  array_slice($contentArry,0,100);
+                          $final = implode(" ",$content);
+                   @endphp
+                     <p>{{ $final }} </p>
+       		 @endif
+                ----------------------------------------------------------
+		-------------Read More------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------
+
+---------------------------- 
+	only for laravel  like as foreach
+	@forelse($alldata as $data)
+	
+	@empty
+	if no data found...
+	@endforelse
+----------------------------
+----------------------------------------------------------
+		Multi selector option show like edit
+
+ 		<select name="colors[]" class="test form-control" multiple="multiple">
+                  @foreach($allColors as $color) 
+                    @php $c = 0 @endphp
+                    @foreach($selColors as $sc)
+                      @if($sc->color_id == $color->id)
+                      @php $c = 1 @endphp
+                      @break
+                      @endif
+                    @endforeach  
+                    
+                    @if($c == 1)
+                    <option selected value="{{$color->id}}">{{$color->name}}</option>
+                    @else
+                    <option value="{{$color->id}}">{{$color->name}}</option>
+                    @endif
+                  @endforeach
+                </select>
+
+--------------------------------------------------------------------------
+	
+--------------------------------------------------------------------------------------
+			
+		multi table select query without jointable
+		--------------------------------------
+	
+	 $data['post'] = DB::table('posts')
+        ->select('*', DB::raw('(select sum(likes.liked) from likes where
+            likes.post_id = posts.id) as totallike'),DB::raw('(select count(comments.post_id) from comments where
+            comments.post_id = posts.id) as totalcomments'))
+        ->paginate(3);
+
+
+
+=======================================================================================
+=======================================================================================
+
+
+laravel Image file
+---------------------------
+	add a form attribute into the form inside action or method
+		enctype="multipart/form-data"
+	'picture' => 'nullable|image'   // nullable field but its checked image... not image just validate result false
+   use to of controller.....
+		use Session;    //for session
+		use File;
+	................  and.......
+
+	$ext = getClientOriginalExtension();  //for extension
+	$imgName  = getClientOriginalName();  // for image/file name
+	$imgsize = getClientSize(); 	     // for size
+
+		 $picture1 = $request->file('picture1');
+	  use like echo $ext1 = $picture1->$file->getClientOriginalExtension();
+
+	 //getClientSize();
+  //getClientOriginalName()
+  //$file->getClientOriginalExtension()
+/*
+    function getExtension($file) {
+        $ext = "";
+        if ($file) {
+          $ext = strtolower($file->getClientOriginalExtension());
+          if ($ext != "jpg" && $ext != "jpeg" && $ext != "png" && $ext != "gif") 
+	  {
+            $ext = "";
+          }
+        }
+        
+        return $ext;
+    }*/
+	-------------------------------------
+	uploade image file
+
+ 	if($ext1 != "")
+                {
+                    $file = $request->file('picture1');
+                    $destinationPath = "postedallimages/postimages "; //
+                    $file->move($destinationPath,"post-{$insertId}-1.{$ext1}");
+                }
+
+
+    ----for blade page--- image show
+
+	   Image file show...
+ 		 @if (file_exists("postedallimages/postimages/post-{$item->id}-1.{$item->picture1}"))
+                <img src="{{ asset("postedallimages/postimages/post-{$item->id}-1.{$item->picture1}") }}" alt="" width="200" height="300" class="border" /> &nbsp;&nbsp;
+             @else 
+            <strong> No Image</strong>     
+            @endif
+
+	------for controller... image show and update..........
+---------------------------------------------------------
+  		update($id)
+	$udtId = DB::table('posts')
+        ->select('*')
+        ->where('id',$id)
+        ->first();
+
+      if ($request->file('picture1')) {
+            $ext1 = strtolower($request->file('picture1')->getClientOriginalExtension());
+            if ($ext1 != "jpg" && $ext1 != "jpeg" && $ext1 != "png" && $ext1 != "gif") {
+              $ext1 = $udtId->picture1;
+            } else {
+                 if (file_exists("postedallimages/postimages/post-{$udtId->id}-1.{$udtId->picture1}")) {
+                unlink("postedallimages/postimages/post-{$udtId->id}-1.{$udtId->picture1}");
+              }
+              $request->file('picture1')->move("postedallimages/postimages/", "post-{$udtId->id}-1.{$ext1}");
+            }
+          } else {
+            $ext1 = $udtId->picture1;
+          }
+.....................................................
+
+
+  Txt file upload ..........
+	use Storage;    //use to the controller 
+	Storage::put("postedalltxt/posttxt/{$insertId}.txt", $request->description);
+	
+    txt file read or show
+    ---------------------
+	  <textarea class="form-control col-md-7 col-xs-12" rows="10" name="descr">
+            {{ File::get(storage_path("app\products\product-$selPdt->id.txt")) }}
+      	</textarea>
+
+  		@if (file_exists(storage_path("app/postedalltxt/$item->id.txt")))
+         	<div class="viewspan">
+          	{{ File::get(storage_path("app/postedalltxt/$item->id.txt"))}}
+        	</div>
+       		 @endif
+	--------------
+	......update and show txt file..........
+	----------------------------------------
+	if(file_exists(storage_path("app/postedalltxt/$udtId->id.txt"))){
+                unlink(storage_path("app/postedalltxt/$udtId->id.txt"));
+                Storage::put("postedalltxt/$udtId->id.txt", $request->description);   
+                echo "new updated";
+            }
+            else{
+                Storage::put("postedalltxt/$udtId->id.txt", $request->description);   
+                echo "Inserted"; 
+            }
+
+		----------------------------------------------------------
+		-------------Read More------------------------
+		 @if (file_exists(storage_path("app/postedalltxt/$allpost->id.txt")))
+                     @php
+          	            $allContent =  File::get(storage_path("app/postedalltxt/$allpost->id.txt"));
+                        $contentArry = explode(" ", $allContent);
+                          $content =  array_slice($contentArry,0,100);
+                          $final = implode(" ",$content);
+                   @endphp
+                     <p>{{ $final }} </p>
+       		 @endif
+                ----------------------------------------------------------
+		-------------Read More------------------------

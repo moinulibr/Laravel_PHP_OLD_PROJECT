@@ -1,0 +1,157 @@
+
+	why uses laravel?
+	================
+	1.Separations of consern
+	1. Clean and maintainable code
+	2. Dry 	== dont repet yourself---> reuseable code.. 
+	3. Fewer dependencies -= no dependency 
+
+
+	======================================
+
+	1.submit user request -> Routing (end point of the domain name) ->controller(for process , here may apply logic) <=========> Model <-->Database
+									View <----controller <----Model <-------< 
+	
+	-----------------------------------------------------------------------------------------
+
+	
+		Composer
+		========
+		composer is command line tool.. its php dependency manager.
+	-----------------------------------------------------------------------------------------	
+		dont free envent the whole ----- sclaton..
+
+	for making a website where use almost common features [like authentication, sms, mailing, notification, etc ]; . Almost common features is included when created a framework..
+	framework is a skeleton where some common features of a website 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

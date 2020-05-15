@@ -1,0 +1,36 @@
+		
+
+
+	Multi selector option show like edit
+
+ 		<select name="colors[]" class="test form-control" multiple="multiple">
+                  @foreach($allColors as $color) 
+                    @php $c = 0 @endphp
+                    @foreach($selColors as $sc)
+                      @if($sc->color_id == $color->id)
+                      @php $c = 1 @endphp
+                      @break
+                      @endif
+                    @endforeach  
+                    
+                    @if($c == 1)
+                    <option selected value="{{$color->id}}">{{$color->name}}</option>
+                    @else
+                    <option value="{{$color->id}}">{{$color->name}}</option>
+                    @endif
+                  @endforeach
+                </select>
+
+--------------------------------------------------------------------------
+	
+--------------------------------------------------------------------------------------
+			
+		multi table select query without jointable
+		--------------------------------------
+	
+	 $data['post'] = DB::table('posts')
+        ->select('*', DB::raw('(select sum(likes.liked) from likes where
+            likes.post_id = posts.id) as totallike'),DB::raw('(select count(comments.post_id) from comments where
+            comments.post_id = posts.id) as totalcomments'))
+        ->paginate(3);
+

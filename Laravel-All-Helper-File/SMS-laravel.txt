@@ -1,0 +1,277 @@
+		
+	laravel SMS intregration with nexmo
+	========================================= nexmo.com
+
+
+
+====================================================================================================================================================================
+====================================================================================================================================================================
+	
+	step..1..
+	===========
+		have to add this in the .env	file
+		
+		NEXMO_KEY=
+		NEXMO_SECRET=   
+
+		 		[its value take from nexmo.com -> getting started , and 
+				  Start testing now with your $2 free credit and API credentials..
+					key=...... Secret=......
+					]
+
+======================================================================================	
+	
+	step.2.. ->composer
+	=================
+
+		composer require nexmo/laravel
+	
+
+
+		then we can show in the require section in composer.json..
+			     {
+				"require:{
+					"nexmo/laravel":"~1.0"   [1.0 is old version.. but its set update version of nexmo like. 1.1 or 1.2 etc]
+					}
+			       }
+		
+
+======================================================================================		
+	step.3...  [it will be automatically add if use use 5.5 + version]
+	=========
+		config -> add this in the app.php -> in providers
+			
+
+
+			'providers' =>  [
+					Nexmo\laravel\NexmoServiceProvider::class,
+				],
+
+
+		if we want to use the facade interface, we can use the facade class when needed;
+			use Nexmo\Laravel\Facade\Nexmo;
+
+	Or add in the alias in our config -> app.php -> like..
+		
+
+		'aliases' =>[
+			 'Nexmo' => Nexmo\Laravel\Facade\Nexmo::class,
+			],
+
+	=====================================================================
+
+
+	No Need  just Optianal
+	 --------------------------------------------------------------------
+		NO NEED
+	------> ___------____-------____------
+	config -> nexmo.php      we can update in .env file
+		NEXMO_KEY=my_api_key
+		NEXMO_SECRET=my_secret
+		---Optionally, we could also set and application_id and private_key if required:
+			NEXMO_APPLICATION_ID=my_application_id
+			NEXMO_PRIVATE_KEY=./private_ke  		
+				___------____-------____------	
+	
+======================================================================================
+	step..4.. Configuration... in cmd have command
+	=========		
+	
+
+		php artisan vendor:publish
+	
+
+			then its shown me some options , from this options we have to select 
+			[6] provider: Nexmo\Laravel\NexmoServiceProvider
+		then press 6 and enter
+
+======================================================================================		
+	step..5
+		Usage...
+	================
+		
+	----------------------------------------------------------------------------
+	     	$mobile=  $request->mobile;
+        	$message = $request->message;
+
+        	if( $mobile != "" && $message != "")
+        	 {
+        		$basic  = new \Nexmo\Client\Credentials\Basic('2ec2c2ae', 'wkzCLLzmXiAla0Kn');
+        		$client = new \Nexmo\Client($basic);
+        
+        		$message = $client->message()->send([
+            		'to' => $mobile,
+            		'from' => 'Nexmo',
+            		'text' => $message
+        		]);
+   		   return redirect()->back()->with('msg','SMS has been sent successfully!');
+    		 }
+	-----------------------------------------------------------------------------
+	=============================================================================
+		Nexmo::message()->send([
+					'to' => '01712794033',
+					'from' => '012589644',
+					'text' => 'Using the facade to send message'
+					]);
+			OR
+
+		$nexmo = app('Nexmo\Client');
+			$nexmo->message()->send([
+					'to' => '01712794033',
+					'from' => '012589644',
+					'text' => 'Using the facade to send message'
+					]);
+
+====================================================================================================================================================================
+====================================================================================================================================================================
+
+
+
+
+
+
+
+
+
+
+dashboard.nexmo.com/your-numbers -> test number -> add a test number
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+---------------------------------------------------------------------------------------------------
+	Sendsms.php [its created by manually upon the App and just created.]
+
+	namespace App;
+	
+	class Sendsms
+	{
+		public static function SendCode($phone)
+		{
+		 	$code = rand(1111,9999);
+			$nexmo = app('Nexmo\Client');
+			$nexmo->message()->send([
+					'to' => '01712794033',
+					'from' => '012589644',
+					'text' => 'Using the facade to send message'
+					]);
+			return $code;
+		}
+	}
+
+
+
+
+
+
+
+
+-------------------------------------------------------------------------------------------------------------------
+
+	in verifyController
+	$data = DB::table... ->select('*')->where('dbCode','$request->code')->first()
+	if($data){
+		//update some field 
+		
+		'status' =1,
+		'code' =''
+		->update();
+	  return redirect()->route('login')->with('msg','your account is verified');
+	}
+	else{
+	return redirect()->back()->with('error,'Verify code is not correct,please try with correct code again ');
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,138 @@
+        //$startTime  = date('Y-m-d');
+        //return $cenvertedTime = date('d-m-Y -  H:i:s a',strtotime("+24 hour",strtotime($startTime)));
+=================================================================
+        //$from   =  strtotime('10:05 Pm');
+        $from   =  strtotime('10:05 AM');
+        $to     =  strtotime('12:20 PM');
+        $input  = strtotime('1.23 pm');
+        if($from < $input && $to < $input )
+        {
+          return "Yes , We can insert somethings here , in this time";
+        }else{
+          return "No , We can not insert anythings in this time, because";
+        }
+
+
+    // Increase one day from current date
+    echo "Date is ".date("Y-m-d", time()+86400); 
+    ."<br>" 
+    // Decrease 15 days from current date
+    echo "Date is ".date("Y-m-d",time()-(86400*15)); 
+
+
+	date_default_timezone_set("Asia/dhaka"); // set it first on the top 
+        $current_time = date('h:i:s a'); 
+        $now = strtotime($current_time)  ;
+        $input_or_get_form_datatable = "10:16 pm";
+        $input = strtotime($input_or_get_form_datatable);
+        return $now . "-----" . $input;
+
+        
+        $date = '10:20:15 11/18/2019'; 
+        return date('h:i:s a   m/d/Y', strtotime($date));
+
+
+
+	
+$startTime = new DateTime('22:00:00');
+$endTime = new DateTime('00:30:00 ');
+$duration = $startTime->diff($endTime); //$duration is a DateInterval object
+echo $duration->format("%H:%I:%S");
+
+
+============================================== Date Create by Hour=============================
+ return $cenvertedTime = date('d-m-Y -  H:i:s a',strtotime('+72 hour',strtotime($startTime)));
+	
+$startTime = date("Y-m-d H:i:s");
+
+//display the starting time
+echo 'Starting Time: '.$startTime;
+
+//add 1 hour to time
+$cenvertedTime = date('Y-m-d H:i:s',strtotime('+1 hour',strtotime($startTime)));
+
+//display the converted time
+echo 'Converted Time (added 1 hour): '.$cenvertedTime;
+
+//add 1 hour and 30 minutes to time
+$cenvertedTime = date('Y-m-d H:i:s',strtotime('+1 hour +30 minutes',strtotime($startTime)));
+
+//display the converted time
+echo 'Converted Time (added 1 hour & 30 minutes): '.$cenvertedTime;
+
+//add 1 hour, 30 minutes and 45 seconds to time
+$cenvertedTime = date('Y-m-d H:i:s',strtotime('+1 hour +30 minutes +45 seconds',strtotime($startTime)));
+
+//display the converted time
+echo 'Converted Time (added 1 hour, 30 minutes  & 45 seconds): '.$cenvertedTime;
+
+//add 1 day, 1 hour, 30 minutes and 45 seconds to time
+$cenvertedTime = date('Y-m-d H:i:s',strtotime('+1 day +1 hour +30 minutes +45 seconds',strtotime($startTime)));
+
+//display the converted time
+echo 'Converted Time (added 1 day, 1 hour, 30 minutes  & 45 seconds): '.$cenvertedTime;
+==============================================Date Create by Hour=============================
+
+	
+
+<?php 
+  
+// PHP program to add 40 days in date 
+  
+$date=date_create("2018-12-10"); 
+  
+date_add($date, date_interval_create_from_date_string("40 days")); 
+  
+echo date_format($date, "Y-m-d"); 
+  
+?> 
+
+
+===============================================================================
+	Date to date different
+	======================
+
+	$searchStarTDay = "2020-02-20";
+        $searchEndTDay  = "2020-02-22";
+	
+	===============
+       return date_diff(
+            date_create($searchEndTDay),  
+            date_create($searchStarTDay)
+        )->format('%a');
+        ============
+
+	====or another way====
+        function daysBetween($dt1, $dt2) {
+            return date_diff(
+                date_create($dt2),  
+                date_create($dt1)
+            )->format('%a');
+        }
+        return daysBetween($searchStarTDay,$searchEndTDay);
+	====or another way====
+
+	
+	============================================
+        $days = (strtotime($searchEndTDay) - strtotime($searchStarTDay)) / (60 * 60 * 24);
+        return $days;
+
+==========================================================
+$start  = date_create('1988-08-10');
+$end    = date_create(); // Current time and date
+$diff   = date_diff( $start, $end );
+
+echo 'The difference is ';
+echo  $diff->y . ' years, ';
+echo  $diff->m . ' months, ';
+echo  $diff->d . ' days, ';
+echo  $diff->h . ' hours, ';
+echo  $diff->i . ' minutes, ';
+echo  $diff->s . ' seconds';
+// Output: The difference is 28 years, 5 months, 19 days, 20 hours, 34 minutes, 36 seconds
+
+echo 'The difference in days : ' . $diff->days;
+// Output: The difference in days : 10398
+
+
+

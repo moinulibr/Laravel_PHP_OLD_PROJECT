@@ -1,0 +1,130 @@
+
+
+	Like or Favorite
+	=====================with ajax---- no refresh
+	<head>
+		<style>
+        	.addColor{
+            		color:#0275d8;
+        	}
+        	.removeColor{
+            		color:gray;
+        		}
+    		</style>
+	</head>
+	===============
+             
+         <ul class="post-footer">
+             <li>
+           @guest 
+            <a href="#"><i class="ion-heart"></i>{{ $item->favorite_to_users->count() }}</a>
+             @else
+		@php
+       			$post_id = $item->id;
+        		$user = Auth::user();
+       			$isFavorite = $user->favorite_posts()->where('post_id',$post_id)->count();
+      		@endphp         
+                     
+             <a class="like  {{ $isFavorite > 0 ? 'addColor' : 'removeColor' }}" id="like_id-{{ $item->id }}" href="{{ route('post.favorite') }}"><i class="ion-heart"></i>{{ $item->favorite_to_users->count() }}</a>
+             @endguest
+             </li>
+             <li><a href="#" id=""><i class="ion-chatbubble"></i>6</a></li>
+             <li><a href="#"><i class="ion-eye"></i>{{ $item->view_count }}</a></li>
+             </ul>
+    
+
+
+
+----------------------------ajax section-----------------------------------
+
+	<script>
+    $(document).ready(function () {
+        $(".like").click(function (e) {
+              var post_id =  $(this).attr('id').substr(8);
+            $.ajax({
+            url: "{{ route('post.favorite') }}",
+            type: 'GET',
+            data: {
+                "_token": $("meta[name='csrf-token']").attr("content"),
+                "post_id": post_id,
+            },
+            beforeSend: function () {
+
+            },
+            success: function (msg) {
+                //($("#like_id-{{ $item->id }}").text());
+                //alert(msg);
+                 // $(this).html(msg .add);
+                  $("#like_id-"+post_id).html(msg);
+            }
+            });
+            e.preventDefault();
+        });
+    });
+</script>
+
+=====================================================================
+
+ public function add(Request $request)
+    {
+       $post_id = $request->post_id;
+       $user = Auth::user();
+       
+       $isFavorite = $user->favorite_posts()->where('post_id',$post_id)->count();
+        if($isFavorite == 0){
+           $attach =  $user->favorite_posts()->attach($post_id);
+           $post_like = '<i class="addColor ion-heart"></i>   ';
+           $post_like .= Post::findOrFail($post_id)->favorite_to_users()->count();
+           return $post_like;
+        }
+        else{
+            $user->favorite_posts()->detach($post_id);
+            $post_like = '<i class="removeColor ion-heart"></i>   ';
+            $post_like .= Post::findOrFail($post_id)->favorite_to_users()->count();
+            return $post_like;
+        }
+
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

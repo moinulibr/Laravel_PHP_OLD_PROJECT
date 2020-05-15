@@ -1,0 +1,14 @@
+	$order_data = [];#somethings
+
+	$pdf_stream = \PDF::loadView('admin.drm_order.invoice_pdf', $order_data)->setWarnings(false)->stream();
+ 			\Mail::send('admin.drm_order.send_email_invoice', $data, function($messages) use ($data, $pdf_stream){
+ 	            $messages->from($data['setting']->email);
+                $messages->to($data['customerEmail']);
+ 	            $messages->subject($data['mail']->mail_subject);
+				$messages->attachData($pdf_stream, 'invoice.pdf', [
+                    'mime' => 'application/pdf',
+                ]);
+ 	        });	
+
+
+

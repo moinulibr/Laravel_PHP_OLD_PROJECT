@@ -1,0 +1,160 @@
+
+	Make Command
+	==============
+
+	php artisan make:command DonateableEmail
+
+	this command will be aviable in the App/Console/Commands     folder....
+	
+		DonateableEmail.php
+		------------------
+	
+	protected $signature = 'email:users';
+
+	protected $description = 'Email to the Users who are not active';
+
+
+	
+	our logic will be implements in the handle method... like.....
+
+	public function handle()
+	{
+		$user = User::with(posts)->select('email','username')->get();       //[thought it is a command , so if run this command in the terminal some result will bee shown , which provide here before mean now]
+		
+		$inactive_user = $user->filter(function(){
+			 	return $user->posts->count()== 0;
+			});
+
+			if($inactive_user->count() > 0)
+			{
+			 // $this->info($user->email);	 //[here we can use info() method , and its return result can watch in the command line]	
+			  //$this->line();
+				//info($user->email);  [for have show error in the laravel.log file]
+
+				$inactive_user->map(function($user){		//[map() as foreach(), in collection which data found , untill complete map() run and run]
+					//info($user->email);	//[for debug as founding error]
+						//[make a Email class ]
+					Mail::to($user->email)->send(new SendEmailInactiveUser($user)); // then as useal [agir moto] then... now php artisan make:mail SendEmailInactiveUser
+				});
+			}
+			
+	}
+
+		===========================
+	now have to register in the App/Console/ kernal.php file......
+		use App\Console\Commands\DonateableEmail;
+		
+		protected $commands = [
+					DonateableEmail::class,
+				];
+	______________---------------------____________________
+
+
+	now  check :::::  php artisan
+
+	now php artisan make:mail SendEmailInactiveUser
+	----------------------
+
+	we can use Queue in the SendEmailInactiveUser.php file
+	
+	use Illuminate\Contracts\Queue\ShouldQueue;
+
+	class SendMail extends Mailable implements ShouldQueue
+	{	
+		use Queueable;
+	}	
+	
+		then.....
+		=======
+	php artisan queue:work    //[con tag or Suppervisor dia run kore rakte hoi]
+	php artisan email:users
+
+
+
+		==================================== Now use Schedul for automation ====================================
+
+	now have to register in the App/Console/ kernal.php file......
+
+	protected function Schedule(Schedule $schedule)
+	{
+		
+		//$schedule->command('email:users')->hourly();	//[here set command name which we made] 
+
+		$schedule->command('email:users')->everyFiveMinutes();	//[from https://laravel.com/docs/5.8/scheduling#schedule-frequency-options]
+		//$schedule->job(SendEmailInactiveUser::class)->everyFiveMinutes();[if we use this, queue]
+		//$schedule->command('queue:work')->hourly();		// we can use queue also ...
+		
+	}
+
+	
+	then...........
+	
+	php artisan schedule:run
+
+	-------------
+	we have to create a table , failed-table...
+	
+	php artisan queue:failed-table
+
+	then.........
+	
+	php artisan migrate
+
+====================================
+
+	check 
+				what is crontab ? and what does ? and how may we use crontab?
+
+
+
+	for obonto
+	sudo crontab -e
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  protected function schedule(Schedule $schedule)
+    {
+        // $schedule->command('inspire')
+        //          ->hourly();
+        // $schedule->command('order:sync')->everyMinute();
+        
+        $schedule->call('App\Http\Controllers\AdminCommonController@getDrmUpdateAll')->everyMinute();
+        
+        $schedule->call('App\Http\Controllers\AdminCommonController@getDrmUpdateAll')->everyMinute();
+       $schedule->call('App\Http\Controllers\AdminShopSettingController@shopValidation')->everyMinute();
+    }
+
+
+         $schedule->command('shop:validation')->everyMinute();
+        
+        $schedule->call('App\Http\Controllers\AdminCommonController@getDrmUpdateAll')->everyMinute();
+
+        //$schedule->call('App\Http\Controllers\AdminShopSettingController@shopValidation')->everyMinute();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

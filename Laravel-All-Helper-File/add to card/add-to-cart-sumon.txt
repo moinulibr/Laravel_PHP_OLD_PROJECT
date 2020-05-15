@@ -1,0 +1,313 @@
+=========================Sumon Vai========================================
+			===========
+===============================================================================
+	==============For Unit price and total price ====================
+	
+	in the controller....
+	-------------------
+	$cart = [];
+		
+
+	$product = Product::findOrFail($request->input('product_id'));
+	$unit_price = ($product->discount_price != nul && $product->discount_price >0 )? $product->discount_price : $product->realprice;
+	$cart = session()->has('cart') ? session()->get('cart') ? :[];
+	
+		if(array_key_exists($product->id,$cart))
+		{
+			$cart[$product->id]['quantity']++;
+			//$cart[$product->id]['quantity'] += 1;
+			$cart[$product->id]['total_price'] = $cart[$product->id]['quantity'] * $cart[$product->id]['unit_price'];
+		}
+		else{
+			$cart[$product->id ] = [
+			'product_name' => $product->name,
+			'quantity' =>1,
+			'unit_price' => $unit_price,
+			'total_price' => $unit_price
+		    ];
+		}
+		session(['cart' => $cart]);
+
+
+
+
+	in the showcart method...
+
+	$data = [];
+	$data['cart'] = session()->has('cart') ? session()->get('cart')  :[];
+	$data['total_price'] = array_sum(array_column($data['cart'],'total_price'));
+
+
+
+-------------in the cart blade -------------------
+	Remove buttom set.....
+		in the foreach($cart as $key => $prduct)
+		<tr>
+		 	<td> Unit Price </td>
+			<td> Qty</td>
+			<td> Price </td>
+			<td> Action </td>
+		</tr>
+		<tr>	
+			<td>{{ $product['unit_price'] }}</td>
+			<td>{{ $product['quantity'] }}</td>
+			<td>{{ $product['total_price'] }}</td>
+			<td>	
+			<form action="{{ route(cart.remove) }}" method="post">
+				@csrf
+				<input type="hidden" value="{{ $key }}" name="" id="" class=""/>
+				<button type="submit" id="" class="">Remove</button>
+			</form>
+			</td>	
+		</tr>
+  __________in the removeFromCart methos_________
+	===================================
+	public function removeFromCart()
+	{
+		$cart = session()->has('cart') ? session()->get('cart') ? :[];
+		unset($cart[$request->input('product_id')]);	
+		session(['cart'=>$cart]);
+	}	
+	
+	==================
+	<a href = "{{ }}">Clear Cart </a>
+	allcrearcart()
+	{
+		session(['cart' => []]);	
+	}
+
+===============================================================================
+===============================================================================
+
+
+
+
+===============================================================================
+===============================================================================
+
+	in the controller....
+	-------------------
+	$cart = [];
+		
+
+	$product = Product::findOrFail($request->input('product_id'));
+	$cart = session()->has('cart') ? session()->get('cart')  :[];
+	
+		if(array_key_exists($product->id,$cart))
+		{
+			$cart[$product->id]['quantity']++;
+			//$cart[$product->id]['quantity'] += 1;
+		}
+		else{
+			$cart[$product->id ] = [
+			'product_name' => $product->name,
+			'quantity' =>1,
+			'price' => ($product->discount_price != nul && $product->discount_price >0 )? $product->discount_price : $product->realprice
+		    ];
+		}
+		session(['cart' => $cart]);
+
+
+
+
+	in the showcart method...
+
+	$data = [];
+	$data['cart'] = session()->has('cart') ? session()->get('cart') ? :[];
+	$data['total'] = array_sum(array_column($data['cart'],'price'));
+
+
+
+-------------in the cart blade -------------------
+	Remove buttom set.....
+		in the foreach($cart as $key => $prduct)
+		<form action="{{ route(cart.remove) }}" method="post">
+			@csrf
+			<input type="hidden" value="{{ $key }}" name="" id="" class=""/>
+		</form>	
+	
+  __________in the removeFromCart methos_________
+	
+	public function removeFromCart()
+	{
+		$cart = session()->has('cart') ? session()->get('cart') ? :[];
+		unset($cart[$request->input('product_id')]);	
+		session(['cart'=>$cart]);
+	}	
+
+
+_________________________________________________________________-
+	php number format();
+	BDT {{ number_format($total,2) }}   //BDT 250.00  its only for show.. not calculation
+===============================================================================
+===============================================================================
+
+
+
+
+
+
+===============================================================================
+
+	/*-------------------- zamela ase... problem
+	if(session()->has('cart))
+	{
+		$cart = session()->get('cart');
+		if(array_key_exists($product->id,$cart['products']))
+		{
+			$cart['products'][$product->id]['quantity'] += 1;
+		}
+		else{
+			$cart['products'][$product->id ] = [
+			'product_name' => $product->name,
+			'quantity' =>1,
+			'price' => ($product->discount_price != nul && $product->discount_price >0 )? $product->discount_price : $product->realprice
+		    ];
+		}
+	}
+	else{
+		$cart['products'][$product->id ] = [
+			'product_name' => $product->name,
+			'quantity' =>1,
+			'price' => ($product->discount_price != nul && $product->discount_price >0 )? $product->discount_price : $product->realprice
+		    ];
+	
+	}
+	
+	session(['cart'=> $cart]);
+	-------------*/
+	/*------------------
+		$cart['products'] = [
+		   	$product->id => [ ,
+			'product_name' => $product->name,
+			'quantity' =>1,
+			'price' => ($product->discount_price != nul && $product->discount_price >0 )? $product->discount_price : $product->realprice
+			]
+		];
+		
+		OR
+		==	
+	$cart['products'] = [
+		   	'id' => $product->id,
+			'product_name' => $product->name,
+			'quantity' =>1,
+			'price' => ($product->discount_price != nul && $product->discount_price >0 )? $product->discount_price : $product->realprice
+		];
+	session('cart',$cart);
+	-----------------*/
+===============================================================================
+	$td = "";
+       
+	foreach($cart as $item)
+	{
+            
+		$td.= '<td>' .$item['product_name']. '</td>';
+        
+	}
+       
+	  return response()->json([
+            
+	    'for' => $td
+        
+	]);
+------------------------------------------------------------------------------------	
+			<form action="{{ route('add.to.cart') }}" method="POST">
+                        	 @csrf
+                               <input name="id" id="id" class="id" type="hidden" value="{{ $item->id }}">
+                          <button type="submit" id="id-{{ $item->id }}" class="plus btn btn-xs btn-primary"> <i class="fa fa-plus"></i></button>
+                         </form>
+
+
+	  <script>
+                $(document).ready(function () {
+                    $(".plus").click(function (e) {
+                    var product_id = $(this).attr('id').substr(3);
+                    //alert(product_id);
+                        $.ajax({
+                        url: "{{ route('add.to.cart.ajax') }}",
+                        type: 'POST',
+                        data: {
+                            "_token": $("meta[name='csrf-token']").attr("content"),
+                            //"qty": $("#qty").val(),
+                            "product_id": product_id
+                        },
+                        beforeSend: function () {
+
+                        },
+                        success: function (msg) {
+                            //alert(msg);
+                                //$('#foreach').html(msg .for);
+                            }
+                        });
+                        e.preventDefault();
+                    });
+                });  
+            </script>
+
+
+
+
+
+===============================================================================
+
+========================Hasan Sir=============================================
+	<form action="{{url('/add-to-cart')}}" method="post" class="form-inline">               <?php
+            $spdt = Session::get("pdtId");
+            $sqty = Session::get("qtyId");
+            $value = 1;
+            if ($spdt) {
+              $index = array_search($pdt->id, $spdt);
+              if ($index !== FALSE) {
+                $value = $sqty[$index];
+              }
+            }
+            ?>
+            <p>&nbsp;</p>
+            <label>Qty:</label>
+            <input type="hidden" name="id" id="ids" value="{{$pdt->id}}" />
+            <input type="text" name="qty" id="qty" class="span1" value="{{$value}}">
+            <button class="btn btn-inverse" id="atc" type="submit">Add to cart</button>
+          </form>
+
+
+
+	
+	//Session::flush("pdtId");
+	print_r(Session::get("pdtId"));
+	print_r(Session::get("qtyId"));
+	?>
+	<script>
+  	$(document).ready(function () {
+    	$("#atc").click(function (e) {
+
+      	$.ajax({
+        url: "{{url('/')}}/add-to-cart",
+        type: 'POST',
+        data: {
+          "_token": $("meta[name='csrf-token']").attr("content"),
+          "qty": $("#qty").val(),
+          "ids": $("#ids").val()
+        },
+        beforeSend: function () {
+
+        },
+        success: function (msg) {
+          alert(msg);
+        }
+      });
+     	 e.preventDefault();
+    		});
+  	});
+	</script>
+
+===================================================================================
+
+
+
+
+
+
+
+
+
+

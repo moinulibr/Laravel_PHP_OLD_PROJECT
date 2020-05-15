@@ -1,0 +1,119 @@
+
+	Middleware 
+	==========
+
+	php artisan make:middleware AdminMiddleware
+
+	
+	----Now have to register in the kernel.php file----
+		use App\Http\Middleware\AdminMiddleware;
+
+	protected $routeMiddleware = [
+		'admin' => AdminMiddleware::class,
+	]
+
+_____________________________________________________________________
+		use Auth;
+
+		public function handle($request, Closure $next)
+		{
+			if(Auth::check() && Auth::user()->role->id == 1)
+			{
+				return $next($request);
+			}
+			else{
+				return redirect()->route('login');
+			}
+		}
+
+
+
+
+_____________________________________________________________________________________
+_____________________________________________________________________________________
+	Middleware/RedirectIfAuthenticated.php file.....
+	=============================================
+		[this redirect to the route after default login]
+	
+	public function handle($request, Closure $next, $guard = null)
+    	{
+        	if (Auth::guard($guard)->check()) {
+            		return redirect('/home');
+        	}
+
+        	return $next($request);
+    	}
+
+	===========---But We can Customization----===========
+	------------------------------------------
+	public function handle($request, Closure $next, $guard = null)
+    	{
+        	if (Auth::guard($guard)->check() && Auth::user()->role->id == 1) {
+            		//return redirect('/home');
+			return redirect()->route('admin.dashboard');
+        	}
+		elseif (Auth::guard($guard)->check() && Auth::user()->role->id == 2) {
+			return redirect()->route('author.dashboard');
+        	}
+		else{
+        		return $next($request);
+		}
+    	}
+
+=====================================================================================
+
+		Auth/loginController.php
+		========================
+
+	protected $redirectTo;
+
+	protected $redirectTo = '/home';
+
+  
+    public function __construct()
+    {
+        $this->middleware('guest')->except('logout');
+    }
+
+___________this is default___________________
+
+	
+	========Now we can customization=========
+	=========================================
+
+
+
+    protected $redirectTo;
+
+  
+    public function __construct()
+    {
+	if(Auth::check() && Auth::user()->role->id == 1){
+		$this->redirectTo = route('admin.dashboard');
+	}
+	else{
+		$this->redirectTo = route('author.dashboard');	
+	}
+        $this->middleware('guest')->except('logout');
+    }
+
+
+=====================================================================
+
+	this is same to the RegisterController.php file...
+	
+	so have to use this in the RegisterController.ph file...
+
+
+
+
+
+
+
+
+
+
+
+
+
+

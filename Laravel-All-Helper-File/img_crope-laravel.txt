@@ -1,0 +1,154 @@
+	
+	Image crope in laravel 
+=============================================================================
+
+	in the head section , have to include or link to this 3 file
+
+	<!-------------------------------- Img crope----------------------------->	
+	      <!--some script link file is upto the body--->
+	<link rel="stylesheet" href="{{ asset('admin/image-crope/bootstrap.min.css') }}" />
+	<link rel="stylesheet" href="{{ asset('admin/image-crope/croppie.css') }}" />
+	<script src="{{ asset('admin/image-crope/jquery.min.js') }}"></script> 
+	<!-------------------------------- Img crope----------------------------->
+
+	and some file have to link or include up on the body section
+	
+	<!-------------------------------- Img crope----------------------------->
+	<script src="{{ asset('admin/image-crope/bootstrap.min.js') }}"></script>
+	<script src="{{ asset('admin/image-crope/croppie.js') }}"></script>
+	<!-------------------------------- Img crope----------------------------->
+
+	
+	and on the body section 
+	
+	
+	             <div class="container">
+                        <br />
+                        <h3 align="center">Image Crop & Upload using JQuery with PHP Ajax</h3>
+                        <br />
+                        <br />
+                        <div class="col-sm-4 panel panel-default">
+                            <div class="panel-heading">Select Profile Image</div>
+                            <div class="panel-body" align="center">
+                                <input type="file" name="upload_image" id="upload_image" />
+                                <br />
+                                <div id="uploaded_image"></div>
+                            </div>
+                        </div>
+                    </div>
+
+
+		<!------------------------------->
+                <div id="uploadimageModal" class="modal" role="dialog">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                <h4 class="modal-title">Upload & Crop Image</h4>
+                            </div>
+                            <div class="modal-body">
+                                <div class="row">
+                                    <div class="col-md-8 text-center">
+                                        <div id="image_demo" style="width:350px; margin-top:30px"></div>
+                                    </div>
+                                    <div class="col-md-4" style="padding-top:30px;">
+                                        <br />
+                                        <br />
+                                        <br />
+                                        <button class="btn btn-success crop_image">Crop & Upload Image</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!------------------------------->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

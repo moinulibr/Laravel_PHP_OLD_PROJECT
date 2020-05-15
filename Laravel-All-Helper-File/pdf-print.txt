@@ -1,0 +1,200 @@
+
+	
+	pdf 
+	
+	step:1..
+	======
+	 	in composer, have to command for download some file
+
+	composer require barryvdh/laravel-dompdf
+-------------------------------------------------------------------------------------------
+	step:2
+	=======>Config ->app.php file
+	
+		'providers'  => [
+				Barryvdh\DomPDF\ServiceProvider::class,
+				],
+
+
+	and also add in alias
+	
+		'aliases'  => [
+				'PDF'  => Barryvdh\DomPDF\Facade::class,
+				],
+
+
+--------------------------------------------------------------------------------------
+
+	spet:3.
+	======= 
+	
+		in blade file.. which want to show and create pdf file and download
+	
+	<a href="{{url()}}">Download PDF</a>
+	
+	<table>
+		<tr>
+		    <th>Name</th>
+		</tr>
+		<tr>
+		   <td>Hasa </td>
+		</tr>
+	</table>
+
+
+--------------------------------------------------------------------------------------
+	in web.php file..
+		Route::get('','');
+
+-----------------------------------------------------------------------------------
+
+	step:4
+	=====
+		Now in controller have to use some things.. by using facade..
+	
+	use PDF;
+	
+	//$pdf =  PDF::loadView('view.pageName');		[created to pdf file]
+
+	
+	$pdf =  PDF::loadView('view.pageName');
+	return $pdf->download('pdfDownload_FileName.pdf');
+
+	//$pdf =  PDF::loadView('view.pageName');  [$pdf is created pdf file.]
+	//return $pdf->download('pdfDownload_FileName.pdf');  [creating downlaod, if don't want to download option, then not to do this ]
+	
+	*******
+	setp:5:  create a folder in the storage Folder.. the created folder name will be, fonts...
+			storage/fonts
+	*******	
+
+-----------------------------------------------------------------------------------
+		oR
+	
+	$pdf = \App::make('dompdf.wrapper');
+	$pdf->loadHTML(<h2></h2>);	[Html Code ,which want to convert to pdf file]
+	return $pdf->stream();   [for show pdf file]
+
+	-------------------------------------------------------
+	we can set paper size and off error..
+	
+	PDF::loadHTML($html)->setPaper('a4','landscape')->setWarnings(false)->save('myfile.pdf');
+
+	-------
+	PDF::setOptions(['dpi'=>150, 'defaultFont' => 'sans-serif']);
+
+
+	----------------
+	page break; by css
+	------------
+		
+		<style>
+			.page-break{
+				page-break-after:always;
+				}
+		</style>
+	
+		useage
+		------
+	<h2> page 1 </h2>
+	<div class="page-break"></div> [after using this css .. page will be change automaticlly.. its used below of the page]
+	<h2>page 2 </h2>
+	
+
+================================================================================================================================================
+
+
+
+
+
+=================================================================================================================================================
+
+
+
+
+
+
+================================================================================================================================================
+	print
+	=====
+	step:1		downlaod this js file for using js print . jquery printPage plugin
+	======	http://www.position-absolute.com/creation/print/jquery.printPage.js
+
+	step:2  in head section, have to add this type link...........
+	======
+	<head>
+		<link rel="stylesheet" href="css/bootstrap.css"
+		<script type="text/javascript" src="js/bootstrap.min.js"></script>
+		<script type="text/javascript" src="js/jquery-2.2.4.min.js"></script>		
+		<script type="text/javascript" src="js/jquery.printPage.js"></script>
+	</head>
+
+
+	
+	-----------------------------------------------------------
+	in the controller..
+
+		nothing extra.
+	--------------------------------------------------------------
+	step:3
+	======
+	in the blade file.. where want to create print option
+
+	<a href="{{ route('') }}" class="btnprn btn"> Print Preview </a>
+
+	
+	<script type="text/javascript">
+		$(document).ready(function(){
+			$('.btnprn').printPage();
+		});
+	</script>
+
+
+
+
+=========================================================================================================================================
+
+<a href="{{ route('') }}" class="btnPrint btn"> Print Preview </a>
+
+  <!--------for Print option ---->
+{{-- --<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script> --}}
+<script src="http://www.position-absolute.com/creation/print/jquery.printPage.js "></script>
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $('.btnPrint').printPage();
+        });
+</script>
+    <!--------for Print option ---->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

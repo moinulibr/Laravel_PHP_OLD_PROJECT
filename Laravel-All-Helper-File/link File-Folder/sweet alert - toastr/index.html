@@ -1,0 +1,63 @@
+<html>
+	<head>
+	
+	<!----- Sweet alert-------->
+		<!---For Producetion Mode--->
+	<!--<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script> -->
+	<script src="sweet-alert-js/sweetalert.min.js" ></script>
+	<!----- Sweet alert end-------->
+	<script src="jquery-3.3.1.min.js"></script>
+	</head>
+	<body>
+		<a href="" id="delete">Delete</a>
+		
+			<!---Right this---->
+		<script> 
+		// this is right code..below
+		$(document).on("click","#delete", function(e){
+		e.preventDefault();
+		var link = $(this).attr("href");
+		swal({
+		  title: "Are you sure want to Delete this?",
+		  text: "Once deleted, This will be Permanently Delete!",
+		  icon: "warning",
+		  buttons: true,
+		  dangerMode: true,
+		})
+		.then((willDelete) => {
+		  if (willDelete) {
+			window.location.href = link;
+		  } else {
+			swal("Your Data  is safe!");
+		  }
+		});
+		});
+	</script>
+		
+		
+	<script>
+			/* this for test */
+		swal({
+		  title: "Are you sure?",
+		  text: "Once deleted, you will not be able to recover this imaginary file!",
+		  icon: "warning",
+		  buttons: true,
+		  dangerMode: true,
+		})
+		.then((willDelete) => {
+		  if (willDelete) {
+			swal("Poof! Your imaginary file has been deleted!", {
+			  icon: "success",
+			});
+		  } else {
+			swal("Your imaginary file is safe!");
+		  }
+		});
+	</script>
+		
+		
+		
+	
+	
+	</body>
+</html>

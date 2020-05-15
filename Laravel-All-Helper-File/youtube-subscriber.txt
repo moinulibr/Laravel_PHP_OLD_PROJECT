@@ -1,0 +1,60 @@
+
+
+
+	Youtube subscriber button integrate on my laravel project
+		https://developers.google.com/youtube/youtube_subscribe_button
+	
+	step:1
+	======> get your youtube channel id , its copy from url  [form your youtube ]
+		www.youtube.com/channel/YOUR_YOUTUBE_CHANNEL_ID?view_as=subscriber
+
+	https://developers.google.com/youtube/youtube_subscribe_button
+	->Configure a Button
+	->Channel Name or Id:  past here which copy from youtube channel url [YOUR_YOUTUBE_CHANNEL_ID]
+	->Layout : full
+	->Theme: deafult
+	->Subscriber Count: deafult[shown]
+
+	Code
+	----
+	here is given code in a box.. copy the link ..
+	
+	and its past where want to show youtube subscriber button in your blade file..
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	

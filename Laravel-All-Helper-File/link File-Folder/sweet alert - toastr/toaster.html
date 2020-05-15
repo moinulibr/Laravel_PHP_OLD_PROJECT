@@ -1,0 +1,58 @@
+<html>
+<head>
+	
+		<!---Toastr Css--->
+	<!-- -----For Production mode-----
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.0.1/css/toastr.css"
+	rel="stylesheet" /> -->
+	<link href="toastr-css-js/toastr.css" rel="stylesheet"/>
+	<!---Toastr Css End--->
+	<script src="jquery-3.3.1.min.js"></script>
+</head>
+<body>
+	
+	in the controller.. when somethings will be create, update, delete
+	==========================================
+	if($post->save()){
+			$notification = array(
+				'messege' => 'Post Added Successfully!',
+				'alert-type' => 'success'
+			);
+			return redirect()->route()->with($notification);
+		}else{
+			return redirect()-back()
+		}
+	==================================
+  <a id='linkButton'>ClickMe</a>
+ 
+		<!---Toastr js--->
+		<!--  For Production mode-----
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.0.1/js/toastr.js" > </script> -->
+	<script src="toastr-css-js/toastr.js"></script>
+	<!---Toastr js End--->
+	
+  <script>
+		@if(Session::has('messege'))
+		var type = "{{Session::get('alert-type','info')}}"
+		switch(type){
+			case 'info':
+				toastr.info("{{ Session::get('messege') }}");
+				break;
+
+			case 'success':
+				toastr.success("{{ Session::get('messege') }}");
+				break;
+
+			case 'warning':
+				toastr.warning("{{ Session::get('messege') }}");
+				break;
+
+			case 'error':
+				toastr.error("{{ Session::get('messege') }}");
+				break;
+			}
+		@endif
+	</script>
+
+</body>
+</html>

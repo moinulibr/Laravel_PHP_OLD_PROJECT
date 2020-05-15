@@ -1,0 +1,329 @@
+	
+		
+	jquery ui autocomplete
+	
+
+
+	####make sure before starting......
+	###
+	1. jquery mother 
+	2. jquery-ui.min.js
+	3. jquery-ui.min.css
+	
+
+	bottom of the blade page..
+	
+	<script>
+		$(function(){
+			$('#product_id').autocomplete({
+				source:function(request,response){
+					$.getJSON('{{url('myurl')}}',function(data){
+						var array = $.map(data,function(row){
+							return {
+								value:row.id,
+								label:row.name,
+								name:row.name,
+								buy_rate:row.buy_rate,
+								sale_rate:row.sale_rate
+							}	
+						})
+						response($.ui.autocomplete.filter(array,request.term));
+					})	
+				},
+				minLength:3,
+				delay:500,
+				select:function(event,ui){
+					$('#name').val(ui.item.name)
+					$('#buy_rate').val(ui.item.buy_rate)
+					$('#sale_rate').val(ui.item.sale_rate)
+				},
+			});
+		});
+	</script>
+	
+
+	#when our data will be more then 5000 , then we should use below method
+	<script>
+		$(function(){
+			$('#product_id').autocomplete({
+				source:function(request,response){
+					$.getJSON('{{url('myurl')}}?term='+request.term,function(data){
+						var array = $.map(data,function(row){
+							return {
+								value:row.id,
+								label:row.name,
+								name:row.name,
+								buy_rate:row.buy_rate,
+								sale_rate:row.sale_rate
+							}	
+						})
+						response($.ui.autocomplete.filter(array,request.term));
+					})	
+				},
+				minLength:3,
+				delay:500,
+				select:function(event,ui){
+					$('#name').val(ui.item.name)
+					$('#buy_rate').val(ui.item.buy_rate)
+					$('#sale_rate').val(ui.item.sale_rate)
+				},
+			});
+		});
+	</script>
+	
+		### in the controller
+		public function mywordk(Request $request)	
+		{
+			if($request->term)
+			{
+				$search = $request->term;
+				return Product::where('name','%'.$search.'%')->get();
+			}
+		}
+
+
+
+	
+	
+	/*
+	|---------------------------------------------------------------------
+	| i try this
+	|---------------------------------------------------------------------
+	*/	
+		in the controller
+	/*
+	|---------------------------------------------------------------------
+	|
+	|---------------------------------------------------------------------
+	*/
+	
+	     	public function autocomplete(Request $request)
+    		{
+        		if($request->term)
+        		{ 
+            		   	$search = $request->term;
+            			return Product::where('name','like','%'.$search.'%')->get();
+        		}
+       			return Product::all();
+    		}
+
+
+	/*
+	|---------------------------------------------------------------------
+	|	In the blade page
+	|---------------------------------------------------------------------
+	*/
+	
+	 <input type="text" autocomplete="off" id="product_id">
+
+	### WE SHOULD DOWNLOAD THIS FROM 
+		in the head section
+		http://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css
+		<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+		https://code.jquery.com/ui/1.12.1/jquery-ui.js
+	### THIS LINK
+
+{{-- <script src="https://code.jquery.com/jquery-1.12.4.js"></script> --}}
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>  
+
+<input type="hidden" id="url" data-url="{{ route('autocomplete') }}">
+<script>
+    $(function(){
+        $('#product_id').autocomplete({
+            source:function(request,response){
+                var url = $('#url').data('url');
+                var urlWithParameter = url+'?term='+request.term;
+                $.getJSON(url+'?term='+request.term,function(data){
+                    var array = $.map(data,function(row){
+                        return {
+                            value:row.name,
+                            label:row.name,
+                            id:row.id,
+                            name:row.name,
+                            //buy_rate:row.buy_rate,
+                           //sale_rate:row.sale_rate
+                        }	
+                    })
+                    response($.ui.autocomplete.filter(array,request.term));
+                })	
+            },
+            minLength:1,
+            delay:500,
+            select:function(event,ui){
+                $('#product_id').val(ui.item.id);
+                console.log($('#product_id').val());
+               // window.location.reload();
+                
+                console.log($('#product_id').val());
+               // $('#name').val(ui.item.name)
+               //$('#buy_rate').val(ui.item.buy_rate)
+                //$('#sale_rate').val(ui.item.sale_rate)
+            },
+        });
+    });
+</script>
+
+
+	/*								      *
+	|---------------------------------------------------------------------|
+	|			THE END					      |
+	|---------------------------------------------------------------------|
+	*/								      *
+
+
+
+
+	
+	/*								      *
+	|---------------------------------------------------------------------|
+	|	Custom Auto complete by ajax				      |
+	|---------------------------------------------------------------------|
+	*/								      *
+		##REQUIRED FOR THIS
+		1. Jquery
+		2. bootstrap [bootstrap.min.js]
+		3. bootstrap [bootstrap.min.css]	
+		
+		###In the Blade Page
+		
+		<div class="form-group">
+			<input type='text' name="product_id" id="product_id_ajax" class="form-controll">
+			<div id="product_list"> </div>
+		</div>
+		<input type="hidden" id="url_ajax" data-url="{{ route('autocompleteAjax') }}">
+	/*								      *
+	|---------------------------------------------------------------------|
+	|	In the secript section 					      |
+	|---------------------------------------------------------------------|
+	*/								      *
+
+		<script>
+    			$(document).ready(function(){
+        			$.ajaxSetup({
+                			headers: {
+                   				 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                				}
+            				});
+
+      			$('#product_id_ajax').keyup(function(){
+        			var term = $(this).val();
+       
+        			if(term != '')
+        			{	
+            				var url = $('#url_ajax').data('url');
+        
+            				$.ajax({
+                				url: url,
+						type: "POST",
+                				data: {term:term},
+                				datatype: "html",
+                				success:function(data){
+                    				$('#product_list').fadeIn();
+                    				$('#product_list').html(data);
+                			    },
+            				});
+         			}
+       			});
+        
+    			/*
+    			|-----------
+    			|	
+    			|-----------
+    			*/
+    
+       			$(document).on('click','li',function(){
+            				$('#product_id_ajax').val($(this).text());
+            				$('#product_list').fadeOut();
+        			});
+    			});
+		</script>
+
+
+	/*								      *
+	|---------------------------------------------------------------------|
+	|	Now The Controller 					      |
+	|---------------------------------------------------------------------|
+	*/								      *
+		
+	     	public function autocomplete(Request $request)
+    		{
+        	    if($request->term)
+        	    { 
+            		   	$search = $request->term;
+            			$products =  Product::where('name','like','%'.$search.'%')->get();
+        		
+			$output = '<ul class="dropdown-menu" style="display:block;position:relation;">';
+			  foreach($products as $product) 
+			  {
+				$output .='<li><a href="" >'.$product->name.'</a> </li>';
+			  }
+			 $output .= "</ul>";
+			return $output;
+		   }
+    		}
+
+	/*								      *
+	|---------------------------------------------------------------------|
+	|			THE END					      |
+	|---------------------------------------------------------------------|
+	*/								      *
+
+	Route:::: create a route and use this method autocompleteAjax();
+
+
+
+
+
+
+
+
+	For Bootstrap 4
+
+	=================
+
+	
+       <div class="form-group dropdown">
+            <input type='text' name="product_id" id="product_id_ajax" class="form-controll ">
+            <div id="product_list" class="" > </div>
+            <style>
+                .dropdown .dropdown-menu {
+                     top: 25px;
+                }
+            </style>
+        </div>
+    <input type="hidden" id="url_ajax" data-url="{{ route('autocompleteAjax') }}">
+
+
+	In the Controller
+	================
+	
+    public function autocompleteAjax(Request $request)
+    {
+        if($request->term)
+        { 
+                $search = $request->term;
+                $products =  Product::where('name','like','%'.$search.'%')->get();
+        
+            $output = '<ul class="dropdown-menu" aria-labelledby="dropdownMenuButton" style="display:block;position:relation;">';
+            foreach($products as $product) 
+            {
+                $output .='<li><a href="#" class="dropdown-item">'.$product->name.'</a> </li>';
+            }
+            $output .= "</ul>";
+            return $output;
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+

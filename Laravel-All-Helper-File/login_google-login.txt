@@ -1,0 +1,363 @@
+
+	
+		Google+ login  ->google api: consoe..developers.google.com
+	=========================================== www.https://github.com/laravel/socialite/tree/2.0
+
+	step:1
+	======= > in composer
+	
+	 composer require laravel/socialite
+
+	step:2
+	======
+
+	now have to add somethings in the config -> app.php file
+	
+	'providers' => [
+			Laravel\Socialite\SocialiteServiceProvider::class,
+			],
+	
+
+	and have to add in the aliases also
+
+	'aliases' => [
+		'Socialite' => Laravel\Socialite\Facades\Socialite::class,
+			],
+
+	
+	step:3
+	=======> config -> services.php [from google api]
+	
+		'google' => [
+			'client_id'	 => env('GOOGLE_ID'),
+			'client_secret'  => env('GOOGLE_SECRET'),
+			'redirect'	 => env(GOOGLE_URL),
+				],
+
+	step:4
+	======>in the .env file
+
+	GOOGLE_ID=
+	GOOGLE_SECRET=
+	GOOGLE_URL=
+	
+
+	step:5
+	=======>>google api: consoe..developers.google.com
+	
+	Deshboard-> +ENABLE APIS AND SERVICES->
+	social [in the bottom]
+	Google+ API
+	Google ->MANAGE->
+	Dashboard
+	Credentails-> create creadentails-> OAuth Client ID -> Application type -> web application
+	Name: Display name
+	Authorized Javascript Origins
+	in the origin URL
+	http://localhost/projectName/public
+	
+	Authorized redirect URL
+	http://localhost/projectName/public/auth/google/callback
+	create
+	Then show me OAuth Client in the Popup box 
+	Here is your client ID: it will be .env file as GOOGLE_ID=
+	Here is your Client Secret: it will be .env file as GOOGLE_SECRET= 
+	
+
+	step:4
+	------->in the .env file
+
+	GOOGLE_ID= client ID
+	GOOGLE_SECRET=Client Secret
+	GOOGLE_URL=http://localhost/projectName/public/auth/google/callback
+
+	---------------------------------------------------------------
+
+	step:6
+	======= route
+	
+	//route::get('auth/{provider}','Auth\AuthController@redirectToProvider');
+	//route::get('auth/{provider}/callback','Auth\AuthController@handleProviderCallback');
+
+
+	route::get('auth/{provider}','Auth\LoginController@redirectToProvider');
+	route::get('auth/{provider}/callback','Auth\LoginController@handleProviderCallback');
+	
+
+
+	step:7
+	============> in the login controller have to use
+		
+		use Auth;
+		use Socialite;
+		use App\User;
+	
+	public function redirectToProvider($provider)
+	{
+	   return Socialite::driver($provider)->redirect();
+	}
+	
+	public function handleProviderCallback($provider)
+	{
+	   $user = Socialite::driver($provider)->stateless()->user();  //[stateless for google api. its extra]
+	   $authUser = $this->findOrCreateUser($user,$provider);
+	   Auth::login($authUser,true);
+		return redirect($this->redirectTo); 
+	}
+
+	public function findOrCreateUser($user,$provider)
+	{
+	     $authUser= User::where('provider_id',$user_id)->first();
+		if($authUser)
+		{
+		    return $authUser;
+		}
+		return User::create([
+				'name'  =>$user->name,
+				'email'  =>$user->email,
+				'provider' => $provider,
+				'provider_id' => $user_id
+				]);
+	}
+
+-------------------------------------------------------------------------------------------------------------------------
+	step:7
+	=======
+		in the blade file where want to show facebook login .. like..
+	
+	<a href="{{url('auth/google')}}" class="btn btn-facebook"><i class="fa fa-facebook"></i>google login</a>
+-------------------------------------------------------------------------------------------------------------------------
+
+	step:8
+	======
+
+		some changes in the database-> migrations: table data Schema;
+		
+		$table->increments('id');
+		$table->string('name');
+		$table->string('email')->nullable();
+		$table->string('password',100)->nullable();
+		$table->string('provider')->nullable();
+		$table->string('provider_id')->nullable();
+		$table->rememberToken();
+		$table->timestamps();
+
+	step:3
+	======
+		php artisan migrate
+
+	step:4
+	====== in the User Model
+	
+	protected $fillable = [
+			'name','email','password','provider','provider_id'
+				];
+
+
+
+
+
+
+
+
+
+
+
+
+============================================================================================================================
+
+	we can use some common code for facebook , google , twitter login..
+		only one time setup all of the item
+	2. same route
+	3. same controller. just like..
+	4. same database migration table like..
+	
+	--------------------------------------------------
+	step:1
+	======= > in composer
+	
+	 composer require laravel/socialite
+
+	step:2
+	======
+
+	now have to add somethings in the config -> app.php file
+	
+	'providers' => [
+			Laravel\Socialite\SocialiteServiceProvider::class,
+			],
+	
+
+	and have to add in the aliases also
+
+	'aliases' => [
+		'Socialite' => Laravel\Socialite\Facades\Socialite::class,
+			],
+
+	--------------------------------------------------
+
+
+
+	1.... for every api login.. no changes..  only this 2 route is enough for all
+	==============
+
+	route::get('auth/{provider}','Auth\LoginController@redirectToProvider');
+	route::get('auth/{provider}/callback','Auth\LoginController@handleProviderCallback');
+	
+
+	2.. in the controller
+	=========================
+	
+		use Auth;
+		use Socialite;
+		use App\User;
+	
+	public function redirectToProvider($provider)
+	{
+	   return Socialite::driver($provider)->redirect();
+	}
+	
+	public function handleProviderCallback($provider)
+	{
+		if($provider == twitter){
+	   $user = Socialite::driver($provider)->user();	// [never use here stateless().. its applicable only google and facebook]		
+		}
+		else{
+	   $user = Socialite::driver($provider)->stateless()->user(); [for facebook and google]
+		}
+	   $authUser = $this->findOrCreateUser($user,$provider);
+	   Auth::login($authUser,true);
+		return redirect($this->redirectTo); 
+	}
+
+	public function findOrCreateUser($user,$provider)
+	{
+	     $authUser= User::where('provider_id',$user_id)->first();
+		if($authUser)
+		{
+		    return $authUser;
+		}
+		return User::create([
+				'name'  =>$user->name,
+				'email'  =>$user->email,
+				'provider' => $provider,
+				'provider_id' => $user_id
+				]);
+	}
+
+	
+	step: 3
+	=======
+		some changes in the database-> migrations: table data Schema;
+		
+		$table->increments('id');
+		$table->string('name');
+		$table->string('email')->nullable();
+		$table->string('password',100)->nullable();
+		$table->string('provider')->nullable();
+		$table->string('provider_id')->nullable();
+		$table->rememberToken();
+		$table->timestamps();
+
+	step:3
+	======
+		php artisan migrate
+
+	step:3
+	====== in the User Model
+	
+	protected $fillable = [
+			'name','email','password','provider','provider_id'
+				];
+
+
+
+
+
+===========================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

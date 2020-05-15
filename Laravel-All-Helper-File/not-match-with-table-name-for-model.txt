@@ -1,0 +1,33 @@
+
+	
+	
+	[by default Model name User, and Table name users this type found by laravel]
+
+		if our model name and table name is not equel, then we can set table name and primary key and other in the Model like...
+
+	<?php
+
+	namespace App\Model\User;
+
+	use Illuminate\Notifications\Notifiable;
+	use Illuminate\Foundation\Auth\User as Authenticatable;
+
+	class User extends Authenticatable
+	{
+   		 use Notifiable;
+		
+		protected $table = 'users';
+		protected $primaryKey = 'user_id'; //[if its different, not id, then we can set this way] [if laravel default convension is not match]
+	}
+
+		[match assaining.]
+
+	-------------------- in this Model--- here is protected $fillable = from where we can set , which field can be filled .. 
+
+	and ----- protected $guarded = []; this is alternative of $fillabe ... which field we cantnot fill , that's fields list  have to set in this $guarded
+		
+		// $hidden = which field we don't want to show the users site .. that fields we set here [when select table for get data from table]
+	 protected $hidden = [
+        'password', 'remember_token',
+    			];
+	------------------------

@@ -1,0 +1,125 @@
+	
+	{{ \App\Classes\CommonClasses::projectName($item->projectid) }}
+	---------------------------------------------------------------------
+	
+	NO join table.. get data from other table without forgin key
+	----------------------------------------------------------------
+
+	view(){
+	 $data['company'] = DB::table('customers')
+        //->where('customers.status','=',1)
+        ->select('customers.*', DB::raw('(select sum(addproducts.stock) from addproducts where addproducts.customerid = customers.id) as totalStock'))->groupBy('customers.id')
+        ->paginate(30);
+        return view('admincontrol.customers.all-customers', $data);
+	
+	
+		$data['product'] = DB::table('products')
+            ->join('addproducts', 'addproducts.productid', '=', 'products.id')
+            ->join('customers', 'addproducts.customerid', '=', 'customers.id')
+            ->join('units', 'products.unitid', '=', 'units.id')
+            ->select('products.*', 'customers.company_name', 'units.name', 
+				DB::raw('(select sum(addproducts.stock) from addproducts where 
+				addproducts.productid = products.id) as totalStock'))->groupBy('products.id')
+            ->paginate(10);
+
+    //echo "<pre>";
+    //print_r($data['product']);
+    //die();
+	
+	}
+	----------------------------------------------------------------
+	
+        $data['product'] = DB::table('products')
+        ->join('addproducts', 'addproducts.productid', '=', 'products.id')
+        ->join('customers', 'addproducts.customerid', '=', 'customers.id')
+        ->join('units', 'products.unitid', '=', 'units.id')
+        ->select('products.*', 'customers.company_name', 'units.name',
+		DB::raw('(select sum(addproducts.stock) from addproducts where 
+		addproducts.productid = products.id) as totalStock'))->groupBy('products.id')
+        ->paginate(10);
+		
+		
+----------------- View by id ---------------------------
+  public function viewdetails(Request $request, $id)
+    {
+        
+        $data['company'] = DB::table('addproducts')
+        ->join('customers', 'addproducts.customerid', '=', 'customers.id')
+        ->join('products', 'addproducts.productid', '=', 'products.id')   
+        ->where("customers.id",'=', $id)
+        ->select('customers.id', DB::raw('(select sum(addproducts.amount) from 
+					addproducts where addproducts.customerid = customers.id) as totalAmount'))
+        ->select("addproducts.id","addproducts.amount as adproPurchamount", "products.title as pname", "addproducts.created_at as adpDate",'customers.company_name as cusName','customers.contact_person as custName')
+        ->paginate(100);
+        echo "<pre>";
+        print_r($data);
+        die();
+	}
+	----------------------------------------------------------------		
+		
+		blade a sdate and edate a form a method ="GET" dewa ase.. r kisu na
+		
+		public function sellerReport(Request $request, $id){
+			$sdate = $request->get("sdate");
+			$edate = $request->get("edate");
+
+
+        $query = DB::table('addproducts')
+                ->join('customers', 'addproducts.customerid', '=', 'customers.id')
+                ->join('products', 'addproducts.productid', '=', 'products.id')
+                //->join('banks', 'addproducts.bank_id', '=', 'banks.id')     
+                ->where("products.id", $id)
+                //->select('addproducts.*', 'products.title as pname', 'customers.company_name' , 'products.title')
+                ->select("addproducts.id", "customers.company_name as custoname", "products.title as pname", "addproducts.created_at", "addproducts.stock")
+                ->orderBy("products.title", "asc")
+                ->orderBy("addproducts.created_at", "desc");
+                if($sdate && $edate) {
+                    $query->where("addproducts.created_at", ">=",$sdate);          
+                    $query->where("addproducts.created_at", "<=", $edate);          
+                }    
+                else if($sdate){
+                    $query->where("addproducts.created_at", $sdate);      
+                }  
+                else if($edate){
+                    $query->where("addproducts.created_at", $date);      
+                }  
+        
+                /*
+                echo "<pre>";
+                print_r($data['newproduct']);
+                die();
+            */
+            $data['newproduct'] = $query->paginate(100);
+            return view('admincontrol.products.seller-report', $data);
+      }
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		

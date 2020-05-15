@@ -1,0 +1,37 @@
+
+	
+
+
+===================================== ORM Relationship =============================================================
+
+
+		Laravel: Foreign Key Constraints	[search from laravel.com]
+	====================================================
+
+	users table: id,name,email,mobile
+	posts table: user_id, post
+	
+	
+	in the controller
+	--------->====>
+	
+	//$data['post'] = Post::where('user_id',auth()->user()-id)->get();
+	$data['post'] = Post::with('user')->where('user_id',auth()->user()-id)->get();  [Eager Loading.. its depends on foreign key Relationship belognsTo]
+	$data['post'] = Post::with('user')->select('user_id','body','created_at')->get();  //saving loading times for select 	
+		----------------------------
+	
+		[posts tables relation with users table]
+	
+	in the Post Model have to create relation..
+
+		Post.php [Post model]
+
+		public function user()
+			{
+				//return $this->belongsTo(withWhichModelasTable::class,'aganistOfWhichFieldsAsForeignKey');	[its return total object, so when we use it, should $user->name]
+				return $this->belongsTo(User::class);
+			}
+	in the blade file: have to use {{ $post->user->name }}
+
+
+

@@ -1,0 +1,4 @@
+
+	 let chackedValue = $(".exinc-type:checked").val();
+	 let chackedValue = $("#type:checked").val();
+	 alert($("#mobile_banking_type option:selected").val());

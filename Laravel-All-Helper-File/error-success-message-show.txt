@@ -1,0 +1,64 @@
+
+
+
+
+if($insert){
+            return redirect()->route('tag')->with('msg','Tag is Inserted Successfully!');
+        }
+        return redirect()->back()->with('error','Tag is not Inserted!');
+    
+
+
+==================================================
+this error can be show in the blade page .. {{ $errors->first("title") }} 
+	 	or
+
+		@if ($errors->has('name'))
+                      <span class="invalid-feedback" role="alert">
+                      <strong style="color:red;">{{ $errors->first('name') }}</strong>
+                      </span>
+                   @endif
+
+
+----------------------------------------------------------------------
+
+		success or error message in the top of the page
+
+ 		@if (session('status'))
+                    <div class="alert alert-success" role="alert">
+                        {{ session('status') }}
+                    </div>
+                    @endif
+                    @if (session('error'))
+                    <div class="alert alert-success" role="alert">
+                        {{ session('error') }}
+                    </div>
+                    @endif
+                    @if (session('msg'))
+                    <div class="alert alert-success" role="alert">
+                        {{ session('msg') }}
+                    </div>
+                    @endif
+	for this-->> 
+		it will be applied in the controller
+	if($insert){
+            return redirect()->route('tag')->with('msg','Tag is Inserted Successfully!');
+        }
+        return redirect()->back()->with('error','Tag is not Inserted!');
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

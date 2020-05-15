@@ -1,0 +1,30 @@
+	
+	Modal
+	<button type="button" class="btn btn-danger btn-xs" data-toggle="modal" data-target="#delete-{{ $item->id }}"><i
+                          class="fa fa-trash-o"></i> Delete
+                      </button>
+	<!---------Model for Delete----------------------->
+	@foreach ($all as $item)
+	<div id="delete-{{ $item->id }}" class="modal fade" role="dialog">
+	    <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">{{ $item->name }}</h4>
+            </div>
+            <div class="modal-body">
+                <p>Do you want to Delete this?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+                <a href="{{ route('tagdelete',$item->id) }}" class="btn btn-danger"><i class="fa fa-trash-o"></i>
+                    Delete </a>
+                </div>
+        	</div>
+    	</div>
+	</div>
+  <!-- /.modal -->
+	  @endforeach
+

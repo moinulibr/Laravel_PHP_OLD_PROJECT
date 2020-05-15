@@ -1,0 +1,81 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	<script>
+    $(document).ready(function () {
+        $("body").on("change", ".slaryStatement", function () {
+            //$('.slaryStatement').change(function () {
+            var id = parseInt($(this).attr("id").substr(4));
+            var salary = parseFloat($("#salary_" + id).text());
+            var bonus = parseFloat($("#bon_" + id).val());
+            var penalty = parseFloat($("#pen_" + id).val());
+
+            var total_salary = salary + bonus - penalty;
+
+
+            $("#total_" + id).text(total_salary);
+
+        });
+    });
+
+	</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

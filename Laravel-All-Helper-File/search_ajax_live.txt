@@ -1,0 +1,209 @@
+
+#=====================================================================================
+ <input type="text" name="" id="sample_search" class="form-control">
+#=====================================================================================
+ ## if need.. if feel any problem, then it use in the head section
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
+  				<!-----for Ajax handeling----->
+                            <script type="text/javascript">
+                               $.ajaxSetup({
+                                            headers: {
+                                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                                            }
+                                        }); 
+                            </script>
+#=====================================================================================   
+   <div id="click_id" data-url="{{ route('getInforBy') }}"></div>
+    <div id="getData" data-url="{{ route('getInforBy') }}"></div>
+#=====================================================================================
+
+
+#===================================================================================
+#===================================================================================
+<script>
+        $('#sample_search').on('keyup',function () 
+            { 
+                    var searchValue = $(this).val();
+                    setTimeout(function(){
+                        if(searchValue == $('#sample_search').val() && searchValue != null && searchValue != "")
+                        {  
+                            var url = $('#getData').data('url');
+                                //logic to fetch data based on searchValue
+                                //alert(searchValue.length); 
+                            var totallenght = searchValue.length;
+                            if(totallenght > 0)
+                            { 
+                                $.ajax({
+                                    url:url,
+                                    type:'GET',
+                                    data: {searchValue:searchValue}, //if more then data have to send then..{details:searchValue},
+                                    datatype:'json',
+                                    beforeSend:function(){
+                                       // $('.loading').fadeIn();
+                                    },
+                                    success:function(result){
+                                        console.log(result);
+                                       // return getinformation();
+                                       $('#idShow').html(result);
+                                    },
+                                    complete:function(){
+                                    /// $('.loading').fadeOut();
+                                    },
+                                });   
+                            }
+                            else
+                            {
+                                return ;
+                            }
+                        }
+                        else if(searchValue == '')
+                        {
+                            // logic to load all the data
+                            var url = $('#getData').data('url');
+                            $.ajax({
+                                    url: url,
+                                    type: "get",
+                                    datatype: "html",
+                                    success: function(response)
+                                    {   $('#idShow').html(response);
+                                    },
+                                });
+                        }
+                    },500);
+                });
+
+
+                function getinformation()
+                {
+                    var url = $('#getData').data('url');
+                    $.ajax({
+                            url: url,
+                            type: "get",
+                            datatype: "html",
+                            success: function(response)
+                            {   $('#idShow').html(response);
+                            },
+                        }); 
+                }
+                //end function
+        //====================================
+    </script>
+
+#===========================================================================
+#===========================================================================
+
+
+ <script>
+         //working good
+         $(document).ready(function(){
+           $('#click').on('click',function(e){
+                e.preventDefault();
+                var url = $('#click_id').data('url');
+                //var d = "kkk";
+                $.ajax({
+				url: url,
+				type: "get",
+				datatype: "html",
+				success: function(response)
+                {
+                    $('#idShow').hide();
+                   // alert(response);
+					$('#showAllDataFromOtherPageByJson').html(response);
+				},
+		        });
+                /*$.ajax({
+                    url:url,
+                    type:"GET",
+                    datatype:"HTML",
+                    data:{
+
+                    },
+                    beforeSend:function(){
+
+                    },
+                    success:function(res){
+                        alert('ld');
+                    },
+                    complete:function(){
+
+                    },
+                });*/
+           });
+        });
+    </script>
+
+#===========================================================================
+#===========================================================================
+
+
+#===========================================================================
+      <div class="row">
+                           <div class="col-md-2"></div>
+                           <div class="col-md-8">
+                            <table id="idShow" class="table table-striped table-hover">
+                                <thead>
+                                    <th>Sl</th>
+                                    <th>Father's Name</th>
+                                    <th>Mother's Name</th>
+                                    <th>Son's Name</th>
+                                    <th>Action</th>
+                                </thead>
+                                <tbody>
+                                    @foreach($infor as $info)
+                                        <tr>
+                                            <td>{{ $loop->index +1 }}</td>
+                                            <td> {{ $info->father_name }} </td>
+                                            <td> {{ $info->mother_name }} </td>
+                                            <td> {{ $info->son_name }} </td>
+                                            <td>
+                                                <a id="view" href="{{ url('view/info') }}" data-id="{{ $info->id }}" class="btn btn-info">View</a>
+                                                <a id="edit" href="{{ url('edit/info') }}" data-id="{{ $info->id }}"class="btn btn-primary">Edit</a>
+                                                <a onclick="return confirm('Are Your Sure Want to delete this?');" id="delete" href="{{ url('delete/info') }}" data-id="{{ $info->id }}" class="btn btn-danger">Delete</a>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                           </div>
+                           <div class="col-md-2"></div>
+                        </div>
+
+                        <div id="showAllDataFromOtherPageByJson"></div>
+#======================================================================================
+
+
+#======================================================================================
+  public function index()
+    {
+        $data['infor'] = Information::get();
+        return view('information.information',$data);
+    }
+    public function getInforBy(Request $request)
+    {  
+        if($request->ajax())
+        {
+            $datar =  $request->get('searchValue'); 
+            if($datar != "")
+            {
+                //$datar =  $request->searchValue;
+                    $data['infor'] =  Information::where('father_name','like','%'.$datar.'%')
+                                        ->orWhere('mother_name','like','%'.$datar.'%')
+                                        ->orWhere('son_name','like','%'.$datar.'%')
+                                        ->get();
+            }else{
+                $data['infor'] =  Information::get();
+            }
+        }
+        else{
+            $data['infor'] =  Information::get();
+        }
+    
+        return view('information.result',$data);
+    }
+#==========================================================================================
+
+
+#==========================================================================================
+Route::get('/information', 'InformationController@index')->name('infomation');
+Route::get('/information/by', 'InformationController@getInforBy')->name('getInforBy');
+#==========================================================================================

@@ -1,0 +1,2377 @@
+	
+	
+	in the web.php
+	==================
+
+	
+        /* Expense Purpose*/
+        Route::resource('expense/purpose', 'ExpensePurpose\ExpensepurposeController');
+
+        /* Bank*/
+        Route::resource('bank', 'Bank\BankController');
+        /* Bank*/
+        Route::resource('bank/diposit', 'Bankdiposit\BankdipositController');
+
+        /* Cheque*/
+        Route::resource('cheque', 'Cheque\ChequeController');
+
+        /* Advance Salary*/
+        Route::resource('salary/advance', 'Salaryadvance\SalaryadvanceController');
+
+        /*Salary*/
+        Route::resource('salary', 'Salary\SalaryController');
+
+--------------------------------------------------------------------------------------
+
+	in the Salary Controller.....
+	===================================
+
+	 public function index(Request $request)
+    {
+        $data['salaryStatus'] = Salary::where('status',0)->get();
+
+        if($request->startDate == "" && $request->endDate == "" && $request->input("year") == "" && $request->input("month") == "")
+        {
+            $EndDate =  date('Y-m-d');
+            $start = date('Y-m-d');
+            $end = date("Y-m-d",strtotime($EndDate."+1 day"));
+            $data['salary'] = $data['salaryStatus']->whereBetween('created_at',[$start,$end]);
+            $data['totalAmout'] = $data['salary']->sum('amount');
+           return view('all-folder.admin.salary.show',$data);
+        }
+        elseif($request->startDate != "" && $request->endDate != "" && $request->input("year") == "" && $request->input("month") == "")
+        {
+            $startDate = $request->startDate;
+            $endDate = $request->endDate;
+            $data['startDate'] = $startDate;
+            $data['EndDate'] =  $endDate;
+
+            $EndDate =  $request->endDate;
+            $start = date("Y-m-d",strtotime($request->input('startDate')));
+            $end = date("Y-m-d",strtotime($EndDate."+1 day"));
+            $data['salary'] = $data['salaryStatus']->whereBetween('created_at',[$start,$end]);
+            $data['totalAmout'] = $data['salary']->sum('amount');
+           return view('all-folder.admin.salary.show',$data);
+        }
+        //------------------------------------------------
+        if($request->startDate == "" && $request->endDate == "" && $request->input("year") != "" && $request->input("month") != "")
+        {
+            $year = $request->input("year");
+            $month = $request->input("month");
+            $thismonths =  $year."-".$month;
+            $thismonth = date('Y-m',strtotime($thismonths));
+            $data['yearData'] = $year;
+            $data['monthDataFull'] = date('F',strtotime($thismonths));
+            $data['monthData'] = $month;
+            Session::put('yearmonth',$thismonth);
+
+            $data['monthYearSearch'] = 1;
+
+            $data['salaryStatus'] = Salary::where('status',0)->get();
+
+            $data['salary'] =   Salary::where('date','like',"$thismonth%")->get();
+            $data['totalAmout'] = $data['salary']->sum('amount');
+         return view('all-folder.admin.salary.show',$data);    
+        }  
+
+    }
+
+
+
+
+	 public function create(Request $request)
+    {
+            
+        if($request->get("month") == "" && $request->get("year") == "")
+        {
+            $monthCurrent = date('Y-m');
+
+            $SearchSalaryCount =  Salary::where('date','like',"$monthCurrent%")->count();
+            if($SearchSalaryCount > 0)
+            {
+                $SearchSalary =  Salary::where('date','like',"$monthCurrent%")->get();
+        
+                foreach( $SearchSalary as $searchId)
+		{
+                    $designation_id[] = $searchId->designation_id; 
+                }
+                $data['employee'] = Designation::where('role_id','!=', 11)
+                                    ->WhereNotIn('id',$designation_id)
+                                    ->get();
+            }
+            else{
+                $data['employee'] = Designation::where('role_id','!=', 11)
+                                    ->get();
+            }
+
+            $thismonth = null;
+            Session::put('yearmonth', $thismonth);
+                
+            $data['advancedSalaryOfThisMonth'] = Salary_advance::where('date','like',"$monthCurrent%")->get();
+            return view('all-folder.admin.salary.add',$data);    
+        }
+        else{
+            $year = $request->input("year");
+            $month = $request->input("month");
+            $thismonths =  $year."-".$month;
+            
+            $thismonth = date('Y-m',strtotime($thismonths));
+            $data['yearData'] = $year;
+            $data['monthDataFull'] = date('F',strtotime($thismonths));
+            $data['monthData'] = $month;
+            Session::put('yearmonth',$thismonth);
+
+            $searchSalaryCount = Salary::select('designation_id')->where('date','like',"$thismonth%")->count();
+            if($searchSalaryCount > 0)
+            {
+                $SearchSalary =  Salary::where('date','like',"$thismonth%")->get();
+    
+                foreach( $SearchSalary as $searchId)
+                {
+                    $designation_id[] = $searchId->designation_id; 
+                }
+                $data['employee'] = Designation::where('role_id','!=', 11)
+                                    ->WhereNotIn('id',$designation_id)
+                                    ->get();
+                $data['advancedSalaryOfThisMonth'] = Salary_advance::where('date','like',"$thismonth%")->get();
+                return view('all-folder.admin.salary.add',$data);
+            }
+            $data['employee'] = Designation::where('role_id','!=',11)->get();
+            $data['advancedSalaryOfThisMonth'] = Salary_advance::where('date','like',"$thismonth%")->get();
+            return view('all-folder.admin.salary.add',$data);
+        }
+    }
+
+
+
+
+ public function store(Request $request)
+    {
+        if($request->yearmonth == "")
+        {
+            $notification = array(
+                'messege' => 'Please Select Month & Year First!',
+                'alert-type' => 'error'
+            );
+            return redirect()->back()->with($notification);
+        }
+
+
+        $validator =  $this->validate($request, [
+            'amount' => 'required|min:1|max:10',
+            'bonus' => 'required|min:1|max:10',
+            'penalty' => 'required|min:1|max:10',
+            'designation_id' => 'required',
+            'description' =>'nullable|max:150'
+                ], 
+                [
+            'amount.required' => 'Amount field is required',
+            'amount.min' => 'You may use Minimum 1 character',
+            'amount.max' => 'You may use Maximum 10 character',
+
+            'bonus.required' => 'Bonus field is required',
+            'bonus.min' => 'You may use Minimum 1 character',
+            'bonus.max' => 'You may use Maximum 10 character',
+
+            'penalty.required' => 'Penalty field is required',
+            'penalty.min' => 'You may use Minimum 1 character',
+            'penalty.max' => 'You may use Maximum 10 character',
+
+            'designation_id.required' => 'Employee Name field is required',
+
+            'description.max' => 'You may use Maximum 150 character',
+          
+             ]   
+            );
+
+             $salary = new Salary(); 
+             $salary->user_id = Auth::user()->id;
+             $salary->designation_id = $request->designation_id;
+             $salary->salary_advance_id = $request->salary_advance_id;
+             $salary->date = $request->yearmonth."-01";
+             $salary->amount = $request->amount;
+             $salary->bonus = $request->bonus;
+             $salary->penalty = $request->penalty;
+            $save =  $salary->save();
+
+            $thismonth = null;
+            Session::put('yearmonth', $thismonth);
+
+       if($save){
+            $notification = array(
+                'messege' => 'Salary is Paid  Successfully!',
+                'alert-type' => 'success'
+            );
+            return redirect()->back()->with($notification);
+        }else{
+            $notification = array(
+                'messege' => 'Salary is Not Paid!',
+                'alert-type' => 'error'
+            );
+            return redirect()->back()->with($notification);
+        }
+    }
+
+
+=================================================================================
+=================================================================================
+	in the Salary Blade file...
+	==========================
+
+	  
+                            <!---------->
+                              <!-- Form-validation -->
+                        <div class="row" style="margin-left:2%;">
+                            <div class="col-sm-12">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading"><h3 class="panel-title">Add  Salary  
+                                            @if (isset($monthData))<strong style="color:blue;margin-left:1%;"> Salary Of The Month Of 
+                                                     <strong style="color:brown;"> {{  $monthDataFull  }} - {{ $yearData }} </strong>
+                                                </strong>
+                                                @else
+                                                <strong style="color:blue;margin-left:1%;"> Pending Salary Of The Month Of 
+                                                    <strong style="color:brown;">    {{  date('F')  }} - {{ date('Y') }}  </strong>
+                                                </strong>  
+                                            @endif
+                                         <!-------------------->
+                                            <form action="{{ route('admin.salary.create') }}" method="GET" class="form-inline pull-right">
+                                                    <div class="form-group">
+                                                        <label for="ex3">Year</label>
+                                                        <select name="year" id="year" class="form-control year">
+                                                            <option value="0"> Select One</option>
+                                                            @php
+                                                            $year = date('Y');
+                                                            $year2 = 2017;
+                                                            @endphp
+                                                            @for ($i = 1; $year2 <= $year; $year--)
+                                                            <option value="{{ $year }}" @if (isset($yearData)) {{ $yearData == $year ? 'selected' : '' }} 
+                                                            @else {{ date('Y') == $year ? 'selected' : '' }}  @endif> {{ $year }} </option>
+                                                            @endfor
+                                                        </select>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="">Month</label>
+                                                        <select name="month" id="month" class="form-control month">
+                                                            <option value="0">Select One</option>
+                                                            @php
+                                                            $month = 12;
+                                                            @endphp
+                                                            @for ($i = 1; $i<=$month; $month--)
+                                                            <option value="{{ $month }}" @if (isset($monthData)) {{ $monthData == $month ? 'selected' : '' }}
+                                                                @else {{ date('m') == $month ? 'selected' : '' }}  @endif> {{ $month }} </option>
+                                                            @endfor
+                                                        </select>
+                                                    </div>
+                                                    <button type="submit" class="btn btn-primary"><span class="fa fa-search"></span> Search</button>
+                                                </form>
+                                                <!--------------------->                       
+                                    </h3>
+                                    </div>
+                                    <div class="panel-body">            
+                                        <div class=" form">                                                                         <!--id="signupForm" novalidate="novalidate"--->          
+                                            {{-- --
+                                                <form method="POST" action="{{ route('admin.salary.store') }}"  class="cmxform form-horizontal tasi-form" >
+                                                @csrf
+                                                --}}
+                                                <!-------------------------------------------->
+                                               
+                                                <table class="table table-striped projects">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Sl.</th>
+                                                            <th style="width: 22%">Employee Name</th>
+                                                            <th style="width: 15%">Designation</th>
+                                                            <th style="width: 12%">Salary</th>
+                                                            <th style="width: 11%">Advance</th>
+                                                            <th style="width: 11%">Payable</th>
+                                                            <th style="width: 10%">Bonus</th>
+                                                            <th style="width: 10%">Penalty</th>
+                                                            <th style="width: 15%">Total Pay</th>
+                                                            <th>Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                   
+                                                    @php $sl = 1; @endphp
+                                                    @foreach ($employee as $item)
+                                                    <tbody id="tbody">
+                                                        <form method="POST" action="{{ route('admin.salary.store') }}"  class="cmxform form-horizontal tasi-form" >
+                                                            @csrf
+                                                            <tr>
+                                                                <td>{{ $sl ++ }}</td>
+                                                                {{-- --
+                                                                    <td>
+                                                                        <input type="checkbox" name="status[]" value="{{  $item->user->id }}"  checked  />
+                                                                    </td>
+                                                                    --}}
+                                                                <td>
+                                                                    {{ $item->user->name }} 
+                                                                </td>
+                                                                <input type="hidden" name="id" value="{{ $item->user->id }}">
+                                                                <input type="hidden" name="designation_id" value="{{ $item->id }}">
+                                                                <td>
+                                                                    {{ $item->name }}
+                                                                </td>
+                                                                <td id="fixed_salary_{{ $item->id  }}">
+                                                                    {{ $item->salary }} Tk 
+                                                                </td>
+
+                                                                <td id="advance_{{ $item->id  }}">
+                                                                    @if (isset($advancedSalaryOfThisMonth))
+                                                                        @foreach ($advancedSalaryOfThisMonth as $advancedSalaryToken)
+                                                                            @if ($advancedSalaryToken->designation->user->id == $item->user->id)
+                                                                            {{ $advancedSalaryToken->amount }} Tk 
+                                                                            <input type="hidden" id="{{ $advancedSalaryToken->id  }}" name="salary_advance_id" value="{{ $advancedSalaryToken->id }}">
+                                                                            @endif
+                                                                            @continue
+                                                                        @endforeach
+                                                                    @endif
+                                                                </td>
+
+                                                                <input type="hidden" id="salary_value_{{ $item->id  }}" name="amount" value="">
+                                                                <td id="salary_{{ $item->id  }}">
+                                                                    <span class="sal label bg-primary" id="sal_{{ $item->id  }}" style="cursor: pointer;">Amount</span>
+                                                                
+                                                                    @if ($errors->has('amount'))
+                                                                    <span class="invalid-feedback" role="alert">
+                                                                        <strong style="color:red;">{{ $errors->first('amount') }}</strong>
+                                                                    </span>
+                                                                    @endif
+                                                                </td>
+
+                                                                <td>
+                                                                    <input value="0" type="text" id="bon_{{ $item->id }}" name="bonus"
+                                                                        required="required" class="form-control col-md-7 col-xs-12 slaryStatement"/>
+                                                                    
+                                                                    @if ($errors->has('bonus'))
+                                                                    <span class="invalid-feedback" role="alert">
+                                                                        <strong style="color:red;">{{ $errors->first('bonus') }}</strong>
+                                                                    </span>
+                                                                    @endif
+                                                                </td>
+                                                                <td>
+                                                                    <input value="0" type="text" id="pen_{{ $item->id }}" name="penalty"
+                                                                        required="required" class="form-control col-md-7 col-xs-12 slaryStatement"/>
+                                                                    @if ($errors->has('penalty'))
+                                                                    <span class="invalid-feedback" role="alert">
+                                                                        <strong style="color:red;">{{ $errors->first('penalty') }}</strong>
+                                                                    </span>
+                                                                    @endif
+                                                                </td>
+                                                                <td>
+                                                                    <b class="TotalSalery" id="total_{{ $item->id  }}">{{-- $item->empsalery --}} </b> Tk
+                                                                </td>
+                                                                <td  style="width:3%;">
+                                                                    <input id="yearmonth" name="yearmonth" class="yearmonth" type="hidden" value="@if (Session::get('yearmonth')){{ Session::get('yearmonth')}} @else {{ date('Y-m') }} @endif">
+                                                                    <input class="btn btn-success btn-xs" type="submit" value="Submit"/>
+                                                                </td>
+                                                            </tr>
+                                                        </form>
+                                                    </tbody>
+
+                                                    @endforeach
+                                                    @isset($employee)  @endisset
+                                                </table>
+                                                <!-------------------------------------------->
+                                                {{-- --                                               
+                                                 <div class="form-group" style="margin-right:0%;">
+                                                    <div class="col-lg-offset-10 col-lg-10">
+                                                        <a  class="btn btn-default waves-effect" href="{{ route('admin.salary.index') }}">Cancel</a>
+                                                        <input class="btn btn-success " type="submit" value="Submit"/>
+                                                    </div>
+                                                    </div>
+                                                    </form>
+                                             --}}
+                                        </div> <!-- .form -->
+
+                                    </div> <!-- panel-body -->
+                                </div> <!-- panel -->
+                            </div> <!-- col -->
+                        </div> <!-- End row -->
+
+                            <!---------->
+
+
+
+@push('js')   
+      
+      <script>
+        $(document).ready(function () {
+          
+             $(".sal").click(function () {
+                var id = parseInt($(this).attr("id").substr(4));
+
+                var fix_salary = parseFloat($("#fixed_salary_" + id).text());
+                var advance = parseFloat($("#advance_" + id).text());
+                var payable = fix_salary - advance;
+               if(isNaN(advance)){
+                    $("#salary_" + id).text(fix_salary  + ' Tk.')
+                    $("#salary_value_" + id).val(fix_salary)
+                    $("#total_" + id).text(fix_salary);
+                }else{
+                    $("#salary_" + id).text(payable + ' TK.') 
+                    $("#salary_value_" + id).val(payable) 
+                    $("#total_" + id).text(payable);
+                }
+            });
+            //--------------------------------------------
+            $("body").on("change", ".slaryStatement", function () {
+                //$('.slaryStatement').change(function () {
+                var id = parseInt($(this).attr("id").substr(4));
+               
+                var salary = parseFloat($("#salary_" + id).text());
+              
+                var bonus = parseFloat($("#bon_" + id).val());
+               
+                var penalty = parseFloat($("#pen_" + id).val());
+    
+                var total_salary = salary + bonus - penalty;
+
+                $("#total_" + id).text(total_salary);
+    
+            });
+        });
+    
+    </script>
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+	salary show Blade file
+	======================
+	<!---------->
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <h4 class="pull-left page-title">All Salay 
+                                        @if(isset($monthYearSearch))
+                                            <span style="margin-left: 2%;margin-right:1%;color:blue;">Of The Month Of : <strong style="color:brown;">{{ $monthDataFull }} - {{ $yearData }}</strong> &nbsp;</span>
+                                        @endif
+                                    </h4>
+                                    <ol class="breadcrumb pull-right">
+                                        <li><a href="#"> Total Amount @isset( $totalAmout) {{ $totalAmout }} @endisset</a></li>
+                                        <li><a href="#">Moltran</a></li>
+                                        <li><a href="#">Tables</a></li>
+                                        <li class="active">Data Table</li>
+                                    </ol>
+                                </div>
+                            </div>
+    
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading">
+                                            <h3 class="panel-title">
+                                                    <form action="{{ route('admin.salary.index') }}" method="GET" class="form-inline pull-left">
+                                                            <div class="form-group">
+                                                                <label for="ex3">Year</label>
+                                                                <select name="year" id="year" class="form-control year">
+                                                                    <option value="0"> Select One</option>
+                                                                    @php
+                                                                    $year = date('Y');
+                                                                    $year2 = 2017;
+                                                                    @endphp
+                                                                    @for ($i = 1; $year2 <= $year; $year--)
+                                                                        @if(!isset($startDate))
+                                                                            <option value="{{ $year }}"
+                                                                                @if (isset($yearData)) {{ $yearData == $year ? 'selected' : '' }} 
+                                                                                    @else {{ date('Y') == $year ? 'selected' : '' }} 
+                                                                                @endif> {{ $year }}
+                                                                            </option>
+                                                                            @else
+                                                                                <option value="{{ $year }}"> {{ $year }}
+                                                                                </option>
+                                                                        @endif
+                                                                    @endfor
+                                                                </select>
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <label for="">Month</label>
+                                                                <select name="month" id="month" class="form-control month">
+                                                                    <option value="0">Select One</option>
+                                                                    @php
+                                                                    $month = 12;
+                                                                    @endphp
+                                                                    @for ($i = 1; $i<=$month; $month--)
+                                                                        @if(!isset($startDate))
+                                                                            <option value="{{ $month }}"
+                                                                            @if (isset($monthData)) {{ $monthData == $month ? 'selected' : '' }}
+                                                                                @else {{ date('m') == $month ? 'selected' : '' }} 
+                                                                            @endif> {{ $month }} </option>
+                                                                            @else
+                                                                                <option value="{{ $month }}"> {{ $month }}
+                                                                                </option>
+                                                                        @endif
+                                                                    @endfor
+                                                                </select>
+                                                            </div>
+                                                            <button type="submit" class="btn btn-primary"><span class="fa fa-search"></span> Search</button>
+                                                        </form>
+
+                                                      <span style="margin-left:5%;">Created At</span>
+
+
+
+                                                <form action="{{ route('admin.salary.index') }}" method="GET" class="form-inline pull-right" style="color:red;margin-bottom:0%;">
+                                                        <input type="text" name="startDate" value="@if(isset($monthYearSearch)) @else {{ isset($startDate) ? $startDate : date('Y-m-d') }} @endif">
+                                                        <input type="text" name="endDate" value="@if(isset($monthYearSearch))  @else {{ isset($EndDate) ? $EndDate : date('Y-m-d')  }} @endif">
+                                                        <input type="submit" name="submit" id="" value="Search">
+                                                </form>
+                                            </h3>
+                                        </div>
+                                        <div class="panel-body">
+                                            <div class="row">
+                                                <div class="col-md-12 col-sm-12 col-xs-12">
+                                                    <table id="datatable" class="table table-striped table-bordered">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Employee Name</th>
+                                                                <th>Advanced</th>
+                                                                <th>Bonus</th>
+                                                                <th>Penalty</th>
+                                                                <th>Amount</th>
+                                                                <th>Created At</th>
+                                                                <th>Month - Year</th>
+                                                                <th>Action</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody style="font-size:12px;color:black;">
+                                                            @foreach ($salary as $item)
+                                                                <tr>
+                                                                    <td>{{ $item->designation->user->name }}</td>                                            
+                                                                    <td>
+                                                                        @if ($item->salary_advance_id == null)
+                                                                            0
+                                                                            @else
+                                                                            {{ $item->salaryAdvance->amount }}
+                                                                        @endif
+                                                                    </td>                                            
+                                                                    <td>{{ $item->bonus }}</td>                                            
+                                                                    <td>{{ $item->penalty }}</td>                                            
+                                                                    <td>{{ $item->amount }}</td>                                            
+                                                                    <td>{{ date('d-m-Y  -  h:i:s a',strtotime($item->created_at)) }}</td>                                            
+                                                                    <td>
+                                                                            {{ date('F-Y',strtotime($item->date)) }}
+                                                                    </td>
+                                                                    <td>
+                                                                        <a href="{{ route('admin.salary.edit',$item->id) }}" class="btn btn-xs btn-primary"> <i class="fa fa-edit"></i></a>
+                                                                        <a href="{{ route('admin.salary.destroy',$item->id) }}" class="btn btn-xs btn-danger" id="delete"> <i class="fa fa-trash"></i></a>
+                                                                        <a href="" class="btn btn-xs btn-info"> <i class="fa fa-eye"></i></a>
+                                                                    </td>
+                                                                </tr>
+                                                            @endforeach
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                        @if(isset($monthYearSearch) || isset($startDate))
+                                                <a href="{{ route('admin.salary.index') }}" style="margin-top:0%;" class="btn btn-danger pull-right"> Back </a> 
+                                        @endif  
+                                </div>
+                                
+                            </div> <!-- End Row -->
+    
+                            <!---------->
+-----------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------
+	Another add Blade file.. which have checkbox and press submit to all payment
+	----------------------------------------------------------------------------
+	 <!---------->
+                              <!-- Form-validation -->
+                        <div class="row" style="margin-left:2%;">
+                            <div class="col-sm-12">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading"><h3 class="panel-title">Add  Salary</h3></div>
+                                    <div class="panel-body">            
+                                        <div class=" form">                                                                         <!--id="signupForm" novalidate="novalidate"--->          
+                                            {{-- --
+                                                <form method="POST" action="{{ route('admin.salary.store') }}"  class="cmxform form-horizontal tasi-form" >
+                                                @csrf
+                                                --}}
+                                                <!-------------------------------------------->
+                                      
+                                                <br>
+                                                <table class="table table-striped projects">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Sl.</th>
+                                                            <th style="width: 22%">Employee Name</th>
+                                                            <th style="width: 15%">Designation</th>
+                                                            <th style="width: 12%">Salary</th>
+                                                            <th style="width: 11%">Advance</th>
+                                                            <th style="width: 11%">Payable</th>
+                                                            <th style="width: 10%">Bonus</th>
+                                                            <th style="width: 10%">Penalty</th>
+                                                            <th style="width: 15%">Total Pay</th>
+                                                            <th>Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    @isset($employee)
+                                                    @php $sl = 1; @endphp
+                                                    @foreach ($employee as $item)
+                                                    <tbody id="tbody">
+                                                        <form method="POST" action="{{ route('admin.salary.store') }}"  class="cmxform form-horizontal tasi-form" >
+                                                            @csrf
+                                                            <tr>
+                                                                <td>{{ $sl ++ }}</td>
+                                                                {{-- --
+                                                                    <td>
+                                                                        <input type="checkbox" name="status[]" value="{{  $item->user->id }}"  checked  />
+                                                                    </td>
+                                                                    --}}
+                                                                <td>
+                                                                    {{ $item->user->name }} 
+                                                                </td>
+                                                                <td>
+                                                                    {{ $item->name }}
+                                                                </td>
+                                                                <td id="fixed_salary_{{ $item->id  }}">
+                                                                    {{ $item->salary }} Tk 
+                                                                </td>
+
+                                                                <td id="advance_{{ $item->id  }}">
+                                                                    @if (isset($advancedSalaryOfThisMonth))
+                                                                        @foreach ($advancedSalaryOfThisMonth as $advancedSalaryToken)
+                                                                            @if ($advancedSalaryToken->designation->user->id == $item->user->id)
+                                                                            {{ $advancedSalaryToken->amount }} Tk 
+                                                                            @endif
+                                                                            @continue
+                                                                        @endforeach
+                                                                    @endif
+                                                                </td>
+
+                                                                <input type="hidden" id="salary_value_{{ $item->id  }}" name="amount_{{ $item->id }}" value="">
+                                                                <td id="salary_{{ $item->id  }}">
+                                                                    <span class="sal label bg-primary" id="sal_{{ $item->id  }}" style="cursor: pointer;">Amount</span>
+                                                                </td>
+
+                                                                <td>
+                                                                    <input value="0" type="text" id="bon_{{ $item->id }}" name="bonus_{{ $item->id }}"
+                                                                        required="required" class="form-control col-md-7 col-xs-12 slaryStatement"/>
+                                                                    
+                                                                        @if ($errors->has('bonus'))
+                                                                    <span class="invalid-feedback" role="alert">
+                                                                        <strong>{{ $errors->first('bonus') }}</strong>
+                                                                    </span>
+                                                                    @endif
+                                                                </td>
+                                                                <td>
+                                                                    <input value="0" type="text" id="pen_{{ $item->id }}" name="penalty_{{ $item->id }}"
+                                                                        required="required" class="form-control col-md-7 col-xs-12 slaryStatement"/>
+                                                                    @if ($errors->has('penalty'))
+                                                                    <span class="invalid-feedback" role="alert">
+                                                                        <strong>{{ $errors->first('penalty') }}</strong>
+                                                                    </span>
+                                                                    @endif
+                                                                </td>
+                                                                <td>
+                                                                    <b class="TotalSalery" id="total_{{ $item->id  }}">{{-- $item->empsalery --}} </b> Tk
+                                                                </td>
+                                                                <td  style="width:3%;">
+                                                                    <input id="yearmonth" name="yearmonth" class="yearmonth" type="hidden" value="{{ Session::get('yearmonth')}}">
+                                                                    <input class="btn btn-success btn-xs" type="submit" value="Submit"/>
+                                                                </td>
+                                                            </tr>
+                                                        </form>
+                                                    </tbody>
+
+                                                    @endforeach
+                                                    @endisset
+                                                </table>
+                                                <!-------------------------------------------->
+                                                {{-- --                                               
+                                                 <div class="form-group" style="margin-right:0%;">
+                                                    <div class="col-lg-offset-10 col-lg-10">
+                                                        <a  class="btn btn-default waves-effect" href="{{ route('admin.salary.index') }}">Cancel</a>
+                                                        <input class="btn btn-success " type="submit" value="Submit"/>
+                                                    </div>
+                                                    </div>
+                                                    </form>
+                                             --}}
+                                        </div> <!-- .form -->
+
+                                    </div> <!-- panel-body -->
+                                </div> <!-- panel -->
+                            </div> <!-- col -->
+                        </div> <!-- End row -->
+
+                            <!---------->
+
+
+@push('js')
+   
+      <script>
+        $(document).ready(function () {
+          
+             $(".sal").click(function () {
+                var id = parseInt($(this).attr("id").substr(4));
+
+                var fix_salary = parseFloat($("#fixed_salary_" + id).text());
+                var advance = parseFloat($("#advance_" + id).text());
+                var payable = fix_salary - advance;
+               if(isNaN(advance)){
+                    $("#salary_" + id).text(fix_salary  + ' Tk.')
+                    $("#salary_value_" + id).val(fix_salary)
+                    $("#total_" + id).text(fix_salary);
+                }else{
+                    $("#salary_" + id).text(payable + ' TK.') 
+                    $("#salary_value_" + id).val(payable) 
+                    $("#total_" + id).text(payable);
+                }
+            });
+            //--------------------------------------------
+            $("body").on("change", ".slaryStatement", function () {
+                //$('.slaryStatement').change(function () {
+                var id = parseInt($(this).attr("id").substr(4));
+               
+                var salary = parseFloat($("#salary_" + id).text());
+              
+                var bonus = parseFloat($("#bon_" + id).val());
+               
+                var penalty = parseFloat($("#pen_" + id).val());
+    
+                var total_salary = salary + bonus - penalty;
+
+                $("#total_" + id).text(total_salary);
+    
+            });
+        });
+    
+    </script>
+
+@endpush
+-----------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------
+============================================================================================
+	Advance Salary
+	============= controller file
+	
+  public function index()
+    {
+        $date          = date('Y-m-d');
+        $data['employee'] = Designation::where('role_id','!=',11)->get(); 
+        $data['salaryAdvance'] = Salary_advance::where('created_at','like',"$date%")->get(); 
+        return view('all-folder.admin.salaryAdvance.show',$data);
+    }
+
+ public function create()
+    {
+        $data['employee'] = Designation::where('role_id','!=',11)->get(); 
+        return view('all-folder.admin.salaryAdvance.add',$data);
+    }
+
+
+ public function store(Request $request)
+    {
+        $validator =  $this->validate($request, [
+            'amount' => 'required|min:1|max:10',
+            'employee_id' => 'required',
+            'description' =>'nullable|max:150'
+                ], 
+                [
+            'amount.required' => 'Amount field is required',
+            'amount.min' => 'You may use Minimum 1 character',
+            'amount.max' => 'You may use Maximum 10 character',
+
+            'employee_id.required' => 'Employee Name field is required',
+
+            'description.max' => 'You may use Maximum 150 character',
+          
+             ]   
+            );
+
+            $month          = date('Y-m');
+            $amount         =  $request->amount;
+            $employee_id    =  $request->employee_id;
+            $description    =  $request->description;
+
+        $isAdvancedPaied        =  Salary_advance::where('designation_id',$request->employee_id)->where('date','like',"$month%");
+        $isAdvancedPaiedCount   =  $isAdvancedPaied->count();
+        if($isAdvancedPaiedCount > 0)
+        {
+            $notification = array(
+                'messege' => 'You have already taken of this month !',
+                'alert-type' => 'error'
+            );
+            return redirect()->back()->with($notification);
+        }
+        else{
+            $salaryAdvance = new Salary_advance();
+            $salaryAdvance->user_id = Auth::user()->id;
+            $salaryAdvance->designation_id = $request->employee_id;
+            $salaryAdvance->date = date('Y-m-d');
+            $salaryAdvance->amount = $request->amount;
+            $salaryAdvance->description = $request->description;
+           $save =  $salaryAdvance->save();
+           if($save){
+            $notification = array(
+                'messege' => 'Salary Advanced is Paied Successfully!',
+                'alert-type' => 'success'
+            );
+            return redirect()->route('admin.advance.index')->with($notification);
+            }else{
+                $notification = array(
+                    'messege' => 'Salary Advanced is Not Paied!',
+                    'alert-type' => 'error'
+                );
+                return redirect()->back()->with($notification);
+            }
+        }
+    }
+	--------------------------------------------------------------
+	in the Blade File..................... add.blade.php
+	---------------
+	<!-- Page-Title -->
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <h4 class="pull-left page-title">Add Advance Salary</h4>
+                                    <ol class="breadcrumb pull-right">
+                                        <li><a href="#">Moltran</a></li>
+                                        <li class="active">Dashboard</li>
+                                    </ol>
+                                </div>
+                            </div>
+                            
+                            <!---------->
+                              <!-- Form-validation -->
+                        <div class="row">
+                        
+                            <div class="col-sm-1"></div>
+                            <div class="col-sm-10">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading"><h3 class="panel-title">Add Advance Salary</h3></div>
+                                    <div class="panel-body">            
+                                        <div class=" form">                                                                         <!--id="signupForm" novalidate="novalidate"--->          
+                                            <form method="POST" action="{{ route('admin.advance.store') }}"  class="cmxform form-horizontal tasi-form" novalidate="novalidate">
+                                                @csrf
+                                                <div class="form-group ">
+                                                    <label for="amount" class="control-label col-lg-3">Amount *</label>
+                                                    <div class="col-lg-8">
+                                                        <input value="{{ old('amount') }}"  class=" form-control" id="amount" name="amount" type="text" required>
+                                                    
+                                                        @if ($errors->has('amount'))
+                                                            <span class="invalid-feedback" role="alert">
+                                                                <strong class="red">{{ $errors->first('amount') }}</strong>
+                                                            </span>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                                <div class="form-group ">
+                                                    <label for="firstname" class="control-label col-lg-3">Employee Name *</label>
+                                                    <div class="col-lg-8">
+                                                        <select name="employee_id" id="employee_id"  class=" form-control">
+                                                            @foreach ($employee as $item)
+                                                               <option value="{{ $item->id }}">{{ $item->user->name }}</option> 
+                                                            @endforeach
+                                                        </select>
+
+                                                        @if ($errors->has('employee_id'))
+                                                            <span class="invalid-feedback" role="alert">
+                                                                <strong class="red">{{ $errors->first('employee_id') }}</strong>
+                                                            </span>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                                {{-- --
+                                                    <div class="form-group ">
+                                                    <label for="firstname" class="control-label col-lg-3">Month *</label>
+                                                    <div class="col-lg-8">
+                                                        <input value="{{ old('date') }}"  class=" form-control" id="date" name="date" type="text" required>
+                                                    
+                                                        @if ($errors->has('date'))
+                                                            <span class="invalid-feedback" role="alert">
+                                                                <strong class="red">{{ $errors->first('date') }}</strong>
+                                                            </span>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                                    --}}
+                                                <div class="form-group ">
+                                                    <label for="description" class="control-label col-lg-3">Description <small>(optional)</small></label>
+                                                    <div class="col-lg-8">
+                                                        <input value="{{ old('description') }}"  class=" form-control" id="description" name="description" type="text" >
+                                                    
+                                                        @if ($errors->has('description'))
+                                                            <span class="invalid-feedback" role="alert">
+                                                                <strong class="red">{{ $errors->first('description') }}</strong>
+                                                            </span>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                               
+                                                <div class="form-group">
+                                                    <div class="col-lg-offset-3 col-lg-10">
+                                                        <input class="btn btn-success " type="submit" value="Submit"/>
+                                                        <a  class="btn btn-default waves-effect" href="{{ route('admin.advance.index') }}">Cancel</a>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div> <!-- .form -->
+
+                                    </div> <!-- panel-body -->
+                                </div> <!-- panel -->
+                            </div> <!-- col -->
+                            <div class="col-sm-1"></div>
+                        </div> <!-- End row -->
+
+                            <!---------->
+
+
+	in the show blade file
+	---------------------
+	 <!---------->
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <h4 class="pull-left page-title">All Advance Salary Paid</h4>
+                                    <ol class="breadcrumb pull-right">
+                                        <li><a href="#">Moltran</a></li>
+                                        <li><a href="#">Tables</a></li>
+                                        <li class="active">Data Table</li>
+                                    </ol>
+                                </div>
+                            </div>
+    
+    
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading">
+                                            <h3 class="panel-title">Datatable</h3>
+                                        </div>
+                                        <div class="panel-body">
+                                            <div class="row">
+                                                <div class="col-md-12 col-sm-12 col-xs-12">
+                                                    <table id="datatable" class="table table-striped table-bordered">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Employee Name</th>
+                                                                <th>Amount</th>
+                                                                <th>Month</th>
+                                                                <th>Description</th>
+                                                                <th>Created</th>
+                                                                <th>Status</th>
+                                                                <th>Action</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody style="font-size:12px;color:black;">
+                                                            @foreach ($salaryAdvance as $item)
+                                                                <tr>
+                                                                    <td>{{ $item->designation->user->name }}</td>                                                                                   
+                                                                    <td>{{ $item->amount }} TK.</td>   
+                                                                    <td>{{ date('F-Y',strtotime($item->created_at)) }}</td>                                                                                     
+                                                                    <td>{{ $item->description }}</td>                                            
+                                                                    <td>{{ date('d-m-Y  -  h:i:s a',strtotime($item->created_at)) }}</td>                                            
+                                                                    <td>
+                                                                            {{ $item->status == 1?'':'' }}
+                                                                    </td>
+                                                                    <td>
+                                                                        <a href="{{ route('admin.cheque.edit',$item->id) }}" class="btn btn-xs btn-primary"> <i class="fa fa-edit"></i></a>
+                                                                        <a href="{{ route('admin.cheque.destroy',$item->id) }}" class="btn btn-xs btn-danger" id="delete"> <i class="fa fa-trash"></i></a>
+                                                                        <a href="" class="btn btn-xs btn-info"> <i class="fa fa-eye"></i></a>
+                                                                    </td>
+                                                                </tr>
+                                                            @endforeach
+                                                        </tbody>
+                                                    </table>
+    
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                            </div> <!-- End Row -->
+    
+                            <!---------->
+	
+============================================================================================
+============================================================================================
+		Expense Purpose
+		===================in the controller
+
+	 public function index()
+    {
+        $data['expensePurpose'] = Expense_purpose::all();
+        return view('all-folder.admin.expensePurpose.show',$data);
+    }
+
+	 public function create()
+    {
+        return view('all-folder.admin.expensePurpose.add');
+    }
+
+
+  public function store(Request $request)
+    {
+        $validator =  $this->validate($request, [
+            'name' => 'required|max:50|min:2|unique:expense_purposes,name',
+            'description' =>'nullable|max:150'
+                ], 
+                [
+            'name.required' => 'Name field is required',
+            'name.min' => 'You may use Minimum 2 character',
+            'name.max' => 'You may use Maximum 50 characte',
+
+            'description.max' => 'You may use Maximum 150 character',
+             ]   
+            );
+
+            $expensePurpose = new Expense_purpose();
+            $expensePurpose->user_id = Auth::user()->id;
+            $expensePurpose->name = $request->name;
+            $expensePurpose->description = $request->description;
+            $save = $expensePurpose->save();
+
+            if($save){
+                $notification = array(
+                    'messege' => 'New Expense Purpose is Added Successfully!',
+                    'alert-type' => 'success'
+                );
+                return redirect()->route('admin.purpose.index')->with($notification);
+            }else{
+                $notification = array(
+                    'messege' => 'New Expense Purpose is Not Added!',
+                    'alert-type' => 'error'
+                );
+                return redirect()->back()->with($notification);
+            }
+    }
+
+
+  public function edit($id)
+    {
+        $data['expensePurpose'] = Expense_purpose::findOrFail($id);
+        return view('all-folder.admin.expensePurpose.edit',$data);
+    }
+
+
+
+  public function update(Request $request, $id)
+    {
+        $validator =  $this->validate($request, [
+            'name' => 'required|max:50|min:2|unique:expense_purposes,name,'.$id,
+            'description' =>'nullable|max:150'
+                ], 
+                [
+            'name.required' => 'Name field is required',
+            'name.min' => 'You may use Minimum 2 character',
+            'name.max' => 'You may use Maximum 50 characte',
+
+            'description.max' => 'You may use Maximum 150 character',
+             ]   
+            );
+
+            $expensePurpose =  Expense_purpose::findOrFail($id);
+            $expensePurpose->user_id = Auth::user()->id;
+            $expensePurpose->name = $request->name;
+            $expensePurpose->description = $request->description;
+            $save = $expensePurpose->save();
+
+            if($save){
+                $notification = array(
+                    'messege' => ' Expense Purpose is Updated Successfully!',
+                    'alert-type' => 'success'
+                );
+                return redirect()->route('admin.purpose.index')->with($notification);
+            }else{
+                $notification = array(
+                    'messege' => ' Expense Purpose is Not Updated!',
+                    'alert-type' => 'error'
+                );
+                return redirect()->back()->with($notification);
+            }
+    }
+	
+	in the add blade file
+	====================
+	 <!-- Page-Title -->
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <h4 class="pull-left page-title">Add Expense Purpose</h4>
+                                    <ol class="breadcrumb pull-right">
+                                        <li><a href="#">Moltran</a></li>
+                                        <li class="active">Dashboard</li>
+                                    </ol>
+                                </div>
+                            </div>
+                            
+                            <!---------->
+                              <!-- Form-validation -->
+                        <div class="row">
+                        
+                            <div class="col-sm-1"></div>
+                            <div class="col-sm-10">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading"><h3 class="panel-title">Add Expense Purpose</h3></div>
+                                    <div class="panel-body">            
+                                        <div class=" form">                                                                         <!--id="signupForm" novalidate="novalidate"--->          
+                                            <form method="POST" action="{{ route('admin.purpose.store') }}"  class="cmxform form-horizontal tasi-form" novalidate="novalidate">
+                                                @csrf
+                                                <div class="form-group ">
+                                                    <label for="firstname" class="control-label col-lg-3">Expense Purpose *</label>
+                                                    <div class="col-lg-8">
+                                                        <input value="{{ old('name') }}"  class=" form-control" id="firstname" name="name" type="text" required>
+                                                    
+                                                        @if ($errors->has('name'))
+                                                            <span class="invalid-feedback" role="alert">
+                                                                <strong class="red">{{ $errors->first('name') }}</strong>
+                                                            </span>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                                <div class="form-group ">
+                                                    <label for="description" class="control-label col-lg-3">Description <small>(optional)</small></label>
+                                                    <div class="col-lg-8">
+                                                        <input value="{{ old('description') }}"  class=" form-control" id="description" name="description" type="text" >
+                                                    
+                                                        @if ($errors->has('description'))
+                                                            <span class="invalid-feedback" role="alert">
+                                                                <strong class="red">{{ $errors->first('description') }}</strong>
+                                                            </span>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                               
+
+                                                <div class="form-group">
+                                                    <div class="col-lg-offset-3 col-lg-10">
+                                                        <input class="btn btn-success " type="submit" value="Submit"/>
+                                                        <a  class="btn btn-default waves-effect" href="{{ route('admin.role.index') }}">Cancel</a>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div> <!-- .form -->
+
+                                    </div> <!-- panel-body -->
+                                </div> <!-- panel -->
+                            </div> <!-- col -->
+                            <div class="col-sm-1"></div>
+                        </div> <!-- End row -->
+
+                            <!---------->
+	------------------------------------Show blade file--------------------
+	 <!---------->
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <h4 class="pull-left page-title">All Expense Purpose</h4>
+                                    <ol class="breadcrumb pull-right">
+                                        <li><a href="#">Moltran</a></li>
+                                        <li><a href="#">Tables</a></li>
+                                        <li class="active">Data Table</li>
+                                    </ol>
+                                </div>
+                            </div>
+    
+    
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading">
+                                            <h3 class="panel-title">Datatable</h3>
+                                        </div>
+                                        <div class="panel-body">
+                                            <div class="row">
+                                                <div class="col-md-12 col-sm-12 col-xs-12">
+                                                    <table id="datatable" class="table table-striped table-bordered">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Name</th>
+                                                                <th>Description</th>
+                                                                <th>Created_at</th>
+                                                                <th>Status</th>
+                                                                <th>Action</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody style="font-size:12px;color:black;">
+                                                            @foreach ($expensePurpose as $item)
+                                                                <tr>
+                                                                    <td>{{ $item->name }}</td>                                            
+                                                                    <td>{{ $item->description }}</td>                                            
+                                                                    <td>{{ date('d-m-Y  -  h:i:s',strtotime($item->created_at)) }}</td>                                            
+                                                                    <td>
+                                                                            {{ $item->status == 1?'Jobin':'Jobout' }}
+                                                                    </td>
+                                                                    <td>
+                                                                        <a href="{{ route('admin.purpose.edit',$item->id) }}" class="btn btn-xs btn-primary"> <i class="fa fa-edit"></i></a>
+                                                                        <a href="{{ route('admin.purpose.destroy',$item->id) }}" class="btn btn-xs btn-danger" id="delete"> <i class="fa fa-trash"></i></a>
+                                                                        <a href="" class="btn btn-xs btn-info"> <i class="fa fa-eye"></i></a>
+                                                                    </td>
+                                                                </tr>
+                                                            @endforeach
+                                                        </tbody>
+                                                    </table>
+    
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                            </div> <!-- End Row -->
+    
+                            <!---------->
+
+		in the Edit blade php	
+		====================
+	<div class="row">
+                        
+                            <div class="col-sm-1"></div>
+                            <div class="col-sm-10">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading"><h3 class="panel-title">Update Expense Purpose</h3></div>
+                                    <div class="panel-body">            
+                                        <div class=" form">                                                                         <!--id="signupForm" novalidate="novalidate"--->          
+                                            <form method="POST" action="{{ route('admin.purpose.update',$expensePurpose->id) }}"  class="cmxform form-horizontal tasi-form" novalidate="novalidate">
+                                                @csrf
+                                                @method('PUT')
+                                                <div class="form-group ">
+                                                    <label for="firstname" class="control-label col-lg-3">Name *</label>
+                                                    <div class="col-lg-8">
+                                                        <input value="{{ $expensePurpose->name ?? old('name') }}"  class=" form-control" id="firstname" name="name" type="text" required>
+                                                    
+                                                        @if ($errors->has('name'))
+                                                            <span class="invalid-feedback" role="alert">
+                                                                <strong class="red">{{ $errors->first('name') }}</strong>
+                                                            </span>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                                <div class="form-group ">
+                                                    <label for="description" class="control-label col-lg-3">Description <small>(optional)</small></label>
+                                                    <div class="col-lg-8">
+                                                        <input value="{{ $expensePurpose->description ??  old('description') }}"  class=" form-control" id="description" name="description" type="text" >
+                                                    
+                                                        @if ($errors->has('description'))
+                                                            <span class="invalid-feedback" role="alert">
+                                                                <strong class="red">{{ $errors->first('description') }}</strong>
+                                                            </span>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                               
+                                                
+
+                                                <div class="form-group">
+                                                    <div class="col-lg-offset-3 col-lg-10">
+                                                        <input class="btn btn-success " type="submit" value="Submit"/>
+                                                        <a  class="btn btn-default waves-effect" href="{{ route('admin.purpose.index') }}">Cancel</a>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div> <!-- .form -->
+
+                                    </div> <!-- panel-body -->
+                                </div> <!-- panel -->
+                            </div> <!-- col -->
+                            <div class="col-sm-1"></div>
+                        </div> <!-- End row -->
+============================================================================================
+=============================================================================================
+	Daily Expense
+	============= Controller
+
+	 public function index()
+    {
+        $data['expenses'] = Daily_expense::all();
+        return view('all-folder.admin.dailyExpense.show',$data);
+    }
+
+ public function create()
+    {
+        $date = date('Y-m-d');
+        $data['banks'] = Bank::all();
+        $data['cheques'] = Cheque::where('used',null)->get();
+        $data['expensePurposes'] = Expense_purpose::all();
+        $data['todaysCost'] = Daily_expense::where('created_at','like',"$date%")->get();
+        $data['todaysExpense'] = $data['todaysCost']->sum('amount');
+
+        return view('all-folder.admin.dailyExpense.add',$data);
+    }
+
+  public function chequeNoByBankId(Request $request)
+    {
+        $bank_id =  $request->bank_id;
+        $cheques = Cheque::where('bank_id',$bank_id)->where('used',null)->get();
+        $option = "";
+        foreach($cheques as $cheque){
+            $option .= '<option value="'.$cheque->id.'">'. $cheque->cheque_no .'</option>';
+        }
+        return $option;
+    }
+
+ public function store(Request $request)
+    {
+        
+        $validator =  $this->validate($request, [
+            'expense_purpose_id' => 'required',
+            'title' => 'required|max:50|min:2',
+            'amount' => 'required|max:10|min:1',
+            'payment_method' => 'required',
+            'description' =>'nullable|max:150'
+                ], 
+                [
+            'expense_purpose_id.required' => 'Daily Expense field is required',
+            'payment_method.required' => 'Payment Method field is required',
+            'title.required' => 'Title field is required',
+            'title.min' => 'You may use Minimum 2 character',
+            'title.max' => 'You may use Maximum 50 characte',
+
+            'amount.required' => 'Amount field is required',
+            'amount.min' => 'You may use Minimum 1 character',
+            'amount.max' => 'You may use Maximum 10 characte',
+
+            'description.max' => 'You may use Maximum 150 character',
+             ]   
+            );
+                
+            $dailyExpense = new Daily_expense();
+            $dailyExpense->user_id = Auth::user()->id;
+            $dailyExpense->expense_purpose_id = $request->expense_purpose_id;
+            $dailyExpense->title = $request->title;
+            $dailyExpense->amount = $request->amount;
+            $dailyExpense->payment_method = $request->payment_method;
+
+            if($request->payment_method  == 1){
+                $dailyExpense->cash_amount = $request->amount;
+                $dailyExpense->bank_id = null;
+                $dailyExpense->cheque_amount = 0;
+                $dailyExpense->cheque_id = null;
+            }
+            elseif($request->payment_method  == 2){
+                $dailyExpense->cheque_amount = $request->amount;
+                $dailyExpense->cash_amount = 0;
+                $dailyExpense->bank_id = $request->bank_id;
+                $dailyExpense->cheque_id = $request->cheque_id;
+            }
+            elseif($request->payment_method  == 3){
+                $dailyExpense->cash_amount = $request->cash_amount;
+                $dailyExpense->bank_id = $request->bank_id;
+                $dailyExpense->cheque_amount = $request->cheque_amount;
+                $dailyExpense->cheque_id = $request->cheque_id;
+            }
+           
+            $dailyExpense->description = $request->description;
+            $save = $dailyExpense->save();
+
+               $dailyChequeBankId = Daily_expense::Where('id',$dailyExpense->id)->first();
+               if($dailyChequeBankId->cheque_id != null)
+               {
+                    $cheque_used =  Cheque::where('id',$dailyChequeBankId->cheque_id)->where('bank_id',$dailyChequeBankId->bank_id)->first();
+                    $cheque_used->used = 1;
+                    $cheque_used->save();
+                }
+
+            if($save){
+                $notification = array(
+                    'messege' => 'New Expense is Added Successfully!',
+                    'alert-type' => 'success'
+                );
+                return redirect()->route('admin.expense.index')->with($notification);
+            }else{
+                $notification = array(
+                    'messege' => 'New Expense is Not Added!',
+                    'alert-type' => 'error'
+                );
+                return redirect()->back()->with($notification);
+            }
+    }
+
+	in the blade file.. add.blade. php
+	================================
+	
+	 <!-- Page-Title -->
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <h4 class="pull-left page-title">Add Daily Expense</h4>
+                                    <ol class="breadcrumb pull-right">
+                                        <li><a href="#">Moltran</a></li>
+                                        <li class="active">Dashboard</li>
+                                    </ol>
+                                </div>
+                            </div>
+                            
+                            <!---------->
+                              <!-- Form-validation -->
+                        <div class="row">
+                        
+                            <div class="col-sm-1"></div>
+                            <div class="col-sm-10">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading"><h3 class="panel-title">Add Daily Expense 
+                                        <span class="pull-right">Total Today's Expense : <strong style="color:blue;"> @if(isset($todaysExpense)){{  $todaysExpense }} @endif</strong> Tk.</span></h3></div>
+                                    <div class="panel-body">            
+                                        <div class=" form">                                                                         <!--id="signupForm" novalidate="novalidate"--->          
+                                            <form method="POST" action="{{ route('admin.expense.store') }}"  class="cmxform form-horizontal tasi-form" novalidate="novalidate">
+                                                @csrf
+                                                    <!---------------------------------------------------------------------------->   
+                                                    <div class="item form-group">
+                                                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="expense_purpose_id">Expense Purpose <span
+                                                                class="required"> *</span>
+                                                        </label>
+                                                        <div class="col-md-8 col-sm-8 col-xs-12">
+                                                            <select  style="font-size:11px;" id="expense_purpose_id" name="expense_purpose_id" class="form-control col-md-7 col-xs-12">
+                                                                @foreach ($expensePurposes as $expensePurpose)
+                                                                    <option value="{{ $expensePurpose->id }}" style="font-size:12px;font-weight:700;"> {{ $expensePurpose->name }}</option>
+                                                                @endforeach
+                                                            </select>
+
+                                                            @if ($errors->has('expense_purpose_id'))
+                                                            <span class="invalid-feedback" role="alert">
+                                                                <strong class="red">{{ $errors->first('expense_purpose_id') }}</strong>
+                                                            </span>
+                                                        @endif
+                                                        </div>
+                                                    </div>
+                                                    <div class="item form-group">
+                                                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="title">Title <span class="required">*</span>
+                                                        </label>
+                                                        <div class="col-md-8 col-sm-8 col-xs-12">
+                                                            <input style="font-size:11px;" value="{{ old('title') }}" type="text" id="title" name="title"  class="form-control col-md-7 col-xs-12">
+                                                           
+                                                            @if ($errors->has('title'))
+                                                            <span class="invalid-feedback" role="alert">
+                                                                <strong class="red">{{ $errors->first('title') }}</strong>
+                                                            </span>
+                                                            @endif
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group ">
+                                                        <label for="description" class="control-label col-lg-3">Description <small>(optional)</small></label>
+                                                        <div class="col-lg-8">
+                                                            <input value="{{ old('description') }}"  class=" form-control" id="description" name="description" type="text" >
+                                                        
+                                                            @if ($errors->has('description'))
+                                                                <span class="invalid-feedback" role="alert">
+                                                                    <strong class="red">{{ $errors->first('description') }}</strong>
+                                                                </span>
+                                                            @endif
+                                                        </div>
+                                                    </div>
+                                                    <div class="item form-group">
+                                                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="amount">Amount <span class="required">*</span>
+                                                        </label>
+                                                        <div class="col-md-8 col-sm-8 col-xs-12">
+                                                            <input style="font-size:11px;" value="{{ old('amount') }}" type="text" id="amount" name="amount" required="required" class="form-control col-md-7 col-xs-12 amount">
+                                                            
+                                                            @if ($errors->has('amount'))
+                                                            <span class="invalid-feedback" role="alert">
+                                                                <strong class="red">{{ $errors->first('amount') }}</strong>
+                                                            </span>
+                                                            @endif
+
+                                                            <span class="text-danger" role="alert">
+                                                            <strong id="err_amount"></strong>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="item form-group">
+                                                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="payment_method">Payment
+                                                            Method<span class="required">*</span>
+                                                        </label>
+                                                        <div class="col-md-8 col-sm-8 col-xs-12">
+                                                            <select style="font-size:11px;" id="payment_method" name="payment_method" required="required" class="form-control col-md-7 col-xs-12 paymethod">
+                                                                <option  value="1">Cash</option>
+                                                                <option  value="2">Cheque</option>
+                                                                <option value="3">Both</option>
+                                                            </select>
+
+                                                            @if ($errors->has('payment_method'))
+                                                            <span class="invalid-feedback" role="alert">
+                                                                <strong class="red">{{ $errors->first('payment_method') }}</strong>
+                                                            </span>
+                                                            @endif
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div class="item form-group payment_method_3_div_class_cash_amount" style="display:none">
+                                                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="cash_amount">Cash Amount
+                                                            <span class="required">*</span>
+                                                        </label>
+                                                        <div class="col-md-8 col-sm-8 col-xs-12">
+                                                            <input style="font-size:11px;"  value="{{ old('cash_amount') }}" type="text" id="cash_amount" name="cash_amount" class="form-control col-md-7 col-xs-12 both_amount">
+                                                        
+                                                            <span class="text-danger" role="alert">
+                                                            <strong id="err_cash_amount"></strong>
+                                                            </span>
+                                                            @if ($errors->has('cash_amount'))
+                                                            <span class="invalid-feedback" role="alert">
+                                                                <strong class="red">{{ $errors->first('cash_amount') }}</strong>
+                                                            </span>
+                                                            @endif
+                                                        </div>
+                                                    </div>
+
+                                                  
+                                                    <div id="" class="payment_method_both_div_class_bank_name" style="display:none;">
+                                                        <div class="item form-group">
+                                                            <label class="control-label col-md-3 col-sm-3 col-xs-12" for="bank_id">
+                                                                Bank Name<span class="required">*</span>
+                                                            </label>
+                                                            <div class="col-md-8 col-sm-8 col-xs-12">
+                                                                <select style="font-size:11px;" id="only_cheque_bank_name" name="bank_id" class="only_cheque_bank_name form-control col-md-7 col-xs-12">
+                                                                    @foreach ($banks as $bank)
+                                                                        <option value="{{ $bank->id }}">{{ $bank->name }}</option>
+                                                                    @endforeach
+                                                                </select>
+
+                                                                @if ($errors->has('bank_id'))
+                                                                <span class="invalid-feedback" role="alert">
+                                                                    <strong class="red">{{ $errors->first('bank_id') }}</strong>
+                                                                </span>
+                                                                @endif
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="item form-group payment_method_3_div_class_cheque_amount" style="display:none">
+                                                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="cheque_amount">
+                                                            Cheque Amount
+                                                            <span class="required">*</span>
+                                                        </label>
+                                                        <div class="col-md-8 col-sm-8 col-xs-12">
+                                                            <input style="font-size:11px;" type="text" id="both_cheque_amount" name="cheque_amount" class="form-control col-md-7 col-xs-12 both_amount">
+                                                        
+                                                        <span class="text-danger" role="alert">
+                                                            <strong id="err_both_cheque_amount"></strong>
+                                                        </span>
+
+                                                        @if ($errors->has('cheque_amount'))
+                                                        <span class="invalid-feedback" role="alert">
+                                                            <strong class="red">{{ $errors->first('cheque_amount') }}</strong>
+                                                        </span>
+                                                        @endif
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="item form-group   For_all_cheque_no" id="for_all_method_id_cheque_no"  style="display:none;">
+                                                        <label class="control-label col-md-3 col-sm-3 col-xs-12" for="Cheque_id">
+                                                            Cheque No<span class="required">*</span>
+                                                        </label>
+                                                        <div class="col-md-8 col-sm-8 col-xs-12">
+                                                            <select style="font-size:11px;" id="only_bank_cheque_no" name="cheque_id" class="form-control col-md-7 col-xs-12">
+                                                                <option value="1">Bank Name Select First</option>
+                                                            </select>
+
+                                                            <span class="text-danger" role="alert">
+                                                                <strong id="err_only_bank_cheque_no"></strong>
+                                                            </span>
+
+                                                            @if ($errors->has('Cheque_id'))
+                                                            <span class="invalid-feedback" role="alert">
+                                                                <strong class="red">{{ $errors->first('Cheque_id') }}</strong>
+                                                            </span>
+                                                            @endif
+                                                        </div>
+                                                    </div>
+                                                   
+                                                <div class="form-group">
+                                                    <div class="col-lg-offset-3 col-lg-10">
+                                                        <input class="btn btn-success " type="submit" value="Submit"/>
+                                                        <a  class="btn btn-default waves-effect" href="{{ route('admin.expense.index') }}">Cancel</a>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div> <!-- .form -->
+
+                                    </div> <!-- panel-body -->
+                                </div> <!-- panel -->
+                            </div> <!-- col -->
+                            <div class="col-sm-1"></div>
+                        </div> <!-- End row -->
+
+                            <!---------->
+		----------------in the Show blade file------
+			=================================
+	
+	 <div class="row">
+                                <div class="col-sm-12">
+                                    <h4 class="pull-left page-title">Today's All Cost</h4>
+                                    <ol class="breadcrumb pull-right">
+                                        <li><a href="#">Moltran</a></li>
+                                        <li><a href="#">Tables</a></li>
+                                        <li class="active">Data Table</li>
+                                    </ol>
+                                </div>
+                            </div>
+    
+    
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading">
+                                            <h3 class="panel-title">Datatable</h3>
+                                        </div>
+                                        <div class="panel-body">
+                                            <div class="row">
+                                                <div class="col-md-12 col-sm-12 col-xs-12">
+                                                    <table id="datatable" class="table table-striped table-bordered">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Expense Purpose</th>
+                                                                <th style="width:4%;text-align:center;"><small>Amount</small></th>
+                                                                <th>Title</th>
+                                                                <th><small>Paymet Method</small></th>
+                                                                <th>Cash Amount</th>
+                                                                <th>Cheque Amount</th>
+                                                                <th><small>Description</small></th>
+                                                                <th>Created </th>
+                                                                <th>Status</th>
+                                                                <th style="width:10%;text-align:center;">Action</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody style="font-size:12px;color:black;">
+                                                            @foreach ($expenses as $item)
+                                                                <tr>
+                                                                    <td>{{ $item->expense_purpose_id == null ? 'No' : str_limit($item->expense_purpose->name, 20) }}</td>                                            
+                                                                    <td style="text-align:center;">{{ $item->amount }} Tk.</td>                                            
+                                                                    <td>{{ str_limit($item->title, 20) }}</td>                                            
+                                                                    <td>
+                                                                        @if ($item->payment_method == 1)
+                                                                            Cash
+                                                                            @elseif ($item->payment_method == 2)
+                                                                            Cheque
+                                                                            @elseif ($item->payment_method == 3)
+                                                                                Both  <small>(Cash & Cheque)</small>
+                                                                        @endif
+                                                                    </td>                                            
+                                                                        {{-- ----
+                                                                            <td>{{ $item->cheque_id == null ? 'No' : $item->cheque->cheque_no }}</td>                                            
+                                                                            <td>{{ $item->bank_id ==null ? 'No' : $item->bank->name }}</td>
+                                                                        --}} 
+                                                                    <td>{{ $item->cash_amount }} Tk.</td>                                           
+                                                                    <td>{{ $item->cheque_amount }} Tk.</td>                                           
+                                                                    <td>{{ str_limit($item->description, 20) }}</td>                                            
+                                                                    <td>{{ date('d-m-Y  -  h:i:s',strtotime($item->created_at)) }}</td>                                            
+                                                                    <td>
+                                                                            {{ $item->status == 1?'Jobin':'Jobout' }}
+                                                                    </td>
+                                                                    <td>
+                                                                        <a href="{{ route('admin.expense.edit',$item->id) }}" class="btn btn-xs btn-primary"> <i class="fa fa-edit"></i></a>
+                                                                        <a href="{{ route('admin.expense.destroy',$item->id) }}" class="btn btn-xs btn-danger" id="delete"> <i class="fa fa-trash"></i></a>
+                                                                        <a href="" class="btn btn-xs btn-info"> <i class="fa fa-eye"></i></a>
+                                                                    </td>
+                                                                </tr>
+                                                            @endforeach
+                                                        </tbody>
+                                                    </table>
+    
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                            </div> <!-- End Row -->
+    
+                            <!---------->
+
+============================================================================================
+============================================================================================
+
+	Bank Controller
+	=====
+
+	 public function index()
+    {
+        $data['bank'] = Bank::all();
+        return view('all-folder.admin.bank.show',$data);
+    }
+
+  public function create()
+    {
+        return view('all-folder.admin.bank.add');
+    }
+
+
+  public function store(Request $request)
+    {
+        $validator =  $this->validate($request, [
+            'name' => 'required|max:50|min:2|unique:banks,name',
+            'description' =>'nullable|max:150'
+                ], 
+                [
+            'name.required' => 'Name field is required',
+            'name.min' => 'You may use Minimum 2 character',
+            'name.max' => 'You may use Maximum 50 characte',
+
+            'description.max' => 'You may use Maximum 150 character',
+             ]   
+            );
+
+            $bank = new Bank();
+            $bank->user_id = Auth::user()->id;
+            $bank->name = $request->name;
+            $bank->description = $request->description;
+            $save = $bank->save();
+
+            if($save){
+                $notification = array(
+                    'messege' => 'Bank is Added Successfully!',
+                    'alert-type' => 'success'
+                );
+                return redirect()->route('admin.bank.index')->with($notification);
+            }else{
+                $notification = array(
+                    'messege' => 'Bank is Not Added!',
+                    'alert-type' => 'error'
+                );
+                return redirect()->back()->with($notification);
+            }
+    }
+
+  public function edit($id)
+    {
+        $data['bank'] = Bank::findOrFail($id);
+        return view('all-folder.admin.expensePurpose.edit',$data);
+    }
+
+
+
+  public function update(Request $request, $id)
+    {
+        $validator =  $this->validate($request, [
+            'name' => 'required|max:50|min:2|unique:banks,name,'.$id,
+            'description' =>'nullable|max:150'
+                ], 
+                [
+            'name.required' => 'Name field is required',
+            'name.min' => 'You may use Minimum 2 character',
+            'name.max' => 'You may use Maximum 50 characte',
+
+            'description.max' => 'You may use Maximum 150 character',
+             ]   
+            );
+
+            $expensePurpose =  Bank::findOrFail($id);
+            $expensePurpose->user_id = Auth::user()->id;
+            $expensePurpose->name = $request->name;
+            $expensePurpose->description = $request->description;
+            $save = $expensePurpose->save();
+
+            if($save){
+                $notification = array(
+                    'messege' => ' Bank is Updated Successfully!',
+                    'alert-type' => 'success'
+                );
+                return redirect()->route('admin.bank.index')->with($notification);
+            }else{
+                $notification = array(
+                    'messege' => ' Bank is Not Updated!',
+                    'alert-type' => 'error'
+                );
+                return redirect()->back()->with($notification);
+            }
+    }
+	
+	in the Blade add file
+	-------------------
+	      <!---------->
+                              <!-- Form-validation -->
+                        <div class="row">
+                        
+                            <div class="col-sm-1"></div>
+                            <div class="col-sm-10">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading"><h3 class="panel-title">Add Name</h3></div>
+                                    <div class="panel-body">            
+                                        <div class=" form">                                                                         <!--id="signupForm" novalidate="novalidate"--->          
+                                            <form method="POST" action="{{ route('admin.bank.store') }}"  class="cmxform form-horizontal tasi-form" novalidate="novalidate">
+                                                @csrf
+                                                <div class="form-group ">
+                                                    <label for="firstname" class="control-label col-lg-3">Bank Name *</label>
+                                                    <div class="col-lg-8">
+                                                        <input value="{{ old('name') }}"  class=" form-control" id="firstname" name="name" type="text" required>
+                                                    
+                                                        @if ($errors->has('name'))
+                                                            <span class="invalid-feedback" role="alert">
+                                                                <strong class="red">{{ $errors->first('name') }}</strong>
+                                                            </span>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                                <div class="form-group ">
+                                                    <label for="description" class="control-label col-lg-3">Description <small>(optional)</small></label>
+                                                    <div class="col-lg-8">
+                                                        <input value="{{ old('description') }}"  class=" form-control" id="description" name="description" type="text" >
+                                                    
+                                                        @if ($errors->has('description'))
+                                                            <span class="invalid-feedback" role="alert">
+                                                                <strong class="red">{{ $errors->first('description') }}</strong>
+                                                            </span>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                               
+                                                <!--
+                                                <div class="form-group ">
+                                                    <label for="lastname" class="control-label col-lg-3">Lastname  *</label>
+                                                    <div class="col-lg-8">
+                                                        <input class=" form-control" id="lastname" name="lastname" type="text">
+                                                    </div>
+                                                </div>
+                                                <div class="form-group ">
+                                                    <label for="username" class="control-label col-lg-3">Username *</label>
+                                                    <div class="col-lg-8">
+                                                        <input class="form-control " id="username" name="username" type="text">
+                                                    </div>
+                                                </div>
+                                                <div class="form-group ">
+                                                    <label for="password" class="control-label col-lg-3">Password *</label>
+                                                    <div class="col-lg-8">
+                                                        <input class="form-control " id="password" name="password" type="password">
+                                                    </div>
+                                                </div>
+                                                <div class="form-group ">
+                                                    <label for="confirm_password" class="control-label col-lg-3">Confirm Password *</label>
+                                                    <div class="col-lg-8">
+                                                        <input class="form-control " id="confirm_password" name="confirm_password" type="password">
+                                                    </div>
+                                                </div>
+                                            <div class="form-group ">
+                                                <label for="agree" class="control-label col-lg-3 col-sm-4">Agree to Our Policy *</label>
+                                                <div class="col-lg-8 col-sm-9">
+                                                    <input type="checkbox" style="width: 16px" class="checkbox form-control" id="agree" name="agree">
+                                                </div>
+                                            </div>
+                                            <div class="form-group ">
+                                                <label for="newsletter" class="control-label col-lg-3 col-sm-4">Receive the Newsletter</label>
+                                                <div class="col-lg-8 col-sm-9">
+                                                    <input type="checkbox" style="width: 16px" class="checkbox form-control" id="newsletter" name="newsletter">
+                                                </div>
+                                            </div>-->
+                                                {{-- -
+                                                        <div class="form-group ">
+                                                        <label for="firstname" class="control-label col-lg-3">NID No *</label>
+                                                        <div class="col-lg-8">
+                                                            <input value="{{ old('nid_no') }}"  class=" form-control" id="nid_no" name="nid_no" type="text" required>
+                                                        
+                                                            @if ($errors->has('nid_no'))
+                                                            <span class="invalid-feedback" role="alert">
+                                                                <strong class="red">{{ $errors->first('nid_no') }}</strong>
+                                                            </span>
+                                                            @endif
+                                                        </div>
+                                                        </div>
+
+                                                        <div class="form-group ">
+                                                        <label for="firstname" class="control-label col-lg-3">Address *</label>
+                                                        <div class="col-lg-8">
+                                                            <input value="{{ old('address') }}" class=" form-control" id="address" name="address" required type="text">
+                                                        
+                                                            @if ($errors->has('address'))
+                                                            <span class="invalid-feedback" role="alert">
+                                                                <strong class="red">{{ $errors->first('address') }}</strong>
+                                                            </span>
+                                                            @endif
+                                                        </div>
+                                                    </div>
+
+                                                
+                                                        <div class="form-group ">
+                                                            <label for="firstname" class="control-label col-lg-3">Experience *</label>
+                                                            <div class="col-lg-8">
+                                                                <input value="{{ old('experience') }}"  class=" form-control" id="experience" name="experience" required type="text">
+                                                            
+                                                                @if ($errors->has('experience'))
+                                                                <span class="invalid-feedback" role="alert">
+                                                                    <strong class="red">{{ $errors->first('experience') }}</strong>
+                                                                </span>
+                                                                @endif
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group ">
+                                                            <label for="firstname" class="control-label col-lg-3">Salary *</label>
+                                                            <div class="col-lg-8">
+                                                                <input value="{{ old('salary') }}"  class=" form-control" id="salary" name="salary" required type="text">
+                                                            
+                                                                @if ($errors->has('salary'))
+                                                                <span class="invalid-feedback" role="alert">
+                                                                    <strong class="red">{{ $errors->first('salary') }}</strong>
+                                                                </span>
+                                                                @endif
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group ">
+                                                            <label for="firstname" class="control-label col-lg-3">Vacation *</label>
+                                                            <div class="col-lg-8">
+                                                                <input value="{{ old('vacation') }}" class=" form-control" id="vacation" name="vacation" required type="text">
+                                                            
+                                                                @if ($errors->has('vacation'))
+                                                                <span class="invalid-feedback" role="alert">
+                                                                    <strong class="red">{{ $errors->first('vacation') }}</strong>
+                                                                </span>
+                                                            @endif
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group ">
+                                                            <label for="firstname" class="control-label col-lg-3">City *</label>
+                                                            <div class="col-lg-8">
+                                                                <input value="{{ old('city') }}"  class=" form-control" id="city" name="city" required type="text">
+                                                            
+                                                                @if ($errors->has('city'))
+                                                                <span class="invalid-feedback" role="alert">
+                                                                    <strong class="red">{{ $errors->first('city') }}</strong>
+                                                                </span>
+                                                                @endif
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group ">
+                                                            <label for="firstname" class="control-label col-lg-3">Designation <small>(optional)</small></label>
+                                                            <div class="col-lg-8">
+                                                                <select  class=" form-control" id="user_roll" name="user_roll">
+                                                                    <option value="1">Select One</option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                --}}
+
+                                                <div class="form-group">
+                                                    <div class="col-lg-offset-3 col-lg-10">
+                                                        <input class="btn btn-success " type="submit" value="Submit"/>
+                                                        <a  class="btn btn-default waves-effect" href="{{ route('admin.role.index') }}">Cancel</a>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div> <!-- .form -->
+
+                                    </div> <!-- panel-body -->
+                                </div> <!-- panel -->
+                            </div> <!-- col -->
+                            <div class="col-sm-1"></div>
+                        </div> <!-- End row -->
+
+                            <!---------->
+	-----show blade file-----
+	=====================
+	 <div class="row">
+                                <div class="col-md-12">
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading">
+                                            <h3 class="panel-title">Datatable</h3>
+                                        </div>
+                                        <div class="panel-body">
+                                            <div class="row">
+                                                <div class="col-md-12 col-sm-12 col-xs-12">
+                                                    <table id="datatable" class="table table-striped table-bordered">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Name</th>
+                                                                <th>Description</th>
+                                                                <th>Created_at</th>
+                                                                <th>Status</th>
+                                                                <th>Action</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody style="font-size:12px;color:black;">
+                                                            @foreach ($bank as $item)
+                                                                <tr>
+                                                                    <td>{{ $item->name }}</td>                                            
+                                                                    <td>{{ $item->description }}</td>                                            
+                                                                    <td>{{ date('d-m-Y  -  h:i:s',strtotime($item->created_at)) }}</td>                                            
+                                                                    <td>
+                                                                            {{ $item->status == 1?'Jobin':'Jobout' }}
+                                                                    </td>
+                                                                    <td>
+                                                                        <a href="{{ route('admin.bank.edit',$item->id) }}" class="btn btn-xs btn-primary"> <i class="fa fa-edit"></i></a>
+                                                                        <a href="{{ route('admin.bank.destroy',$item->id) }}" class="btn btn-xs btn-danger" id="delete"> <i class="fa fa-trash"></i></a>
+                                                                        <a href="" class="btn btn-xs btn-info"> <i class="fa fa-eye"></i></a>
+                                                                    </td>
+                                                                </tr>
+                                                            @endforeach
+                                                        </tbody>
+                                                    </table>
+    
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                            </div> <!-- End Row -->
+    
+                            <!---------->
+============================================================================================
+============================================================================================
+		Bank Deposit 
+		============= BankdipositController
+	
+	
+============================================================================================
+
+============================================================================================
+============================================================================================
+		Bank Cheque
+		============= ChequeController.php
+
+	 public function index()
+    {
+        $data['bank'] = Cheque::all();
+        return view('all-folder.admin.cheque.show',$data);
+    }
+
+ public function create()
+    {
+        $data['banks'] = Bank::all(); 
+        return view('all-folder.admin.cheque.add',$data);
+    }
+
+ public function store(Request $request)
+    {
+        $validator =  $this->validate($request, [
+            'cheque_no' => 'required|max:50|min:2',
+            'bank_id' => 'required',
+            'description' =>'nullable|max:150'
+                ], 
+                [
+            'cheque_no.required' => 'Cheque No field is required',
+            'cheque_no.min' => 'You may use Minimum 2 character',
+            'cheque_no.max' => 'You may use Maximum 50 characte',
+
+            'bank_id.required' => 'Bank field is required',
+
+            'description.max' => 'You may use Maximum 150 character',
+             ]   
+            );
+
+            $cheque = new Cheque();
+            $cheque->user_id = Auth::user()->id;
+            $cheque->cheque_no = $request->cheque_no;
+            $cheque->bank_id = $request->bank_id;
+            $cheque->description = $request->description;
+            $save = $cheque->save();
+
+            if($save){
+                $notification = array(
+                    'messege' => 'Cheque is Added Successfully!',
+                    'alert-type' => 'success'
+                );
+                return redirect()->route('admin.cheque.index')->with($notification);
+            }else{
+                $notification = array(
+                    'messege' => 'Cheque is Not Added!',
+                    'alert-type' => 'error'
+                );
+                return redirect()->back()->with($notification);
+            }
+    }
+
+
+  public function edit($id)
+    {
+        $data['bank'] = Bank::all();
+        $data['cheque'] = Cheque::findOrFail($id);
+        return view('all-folder.admin.cheque.edit',$data);
+    }
+
+
+ public function update(Request $request, $id)
+    {
+        $validator =  $this->validate($request, [
+            'cheque_no' => 'required|max:50|min:2',
+            'bank_id' => 'required',
+            'description' =>'nullable|max:150'
+                ], 
+                [
+            'cheque_no.required' => 'Cheque No field is required',
+            'cheque_no.min' => 'You may use Minimum 2 character',
+            'cheque_no.max' => 'You may use Maximum 50 characte',
+
+            'bank_id.required' => 'Bank field is required',
+
+            'description.max' => 'You may use Maximum 150 character',
+             ]   
+            );
+
+            $cheque = Cheque::findOrFail($id);
+            $cheque->user_id = Auth::user()->id;
+            $cheque->cheque_no = $request->cheque_no;
+            $cheque->bank_id = $request->bank_id;
+            $cheque->description = $request->description;
+            $save = $cheque->save();
+
+            if($save){
+                $notification = array(
+                    'messege' => 'Cheque is Updated Successfully!',
+                    'alert-type' => 'success'
+                );
+                return redirect()->route('admin.cheque.index')->with($notification);
+            }else{
+                $notification = array(
+                    'messege' => 'Cheque is Not Updated!',
+                    'alert-type' => 'error'
+                );
+                return redirect()->back()->with($notification);
+            }
+    }
+	
+
+
+	in the add.blade.php file
+	------------------------
+
+	     <!---------->
+                              <!-- Form-validation -->
+                        <div class="row">
+                        
+                            <div class="col-sm-1"></div>
+                            <div class="col-sm-10">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading"><h3 class="panel-title">Add Cheque</h3></div>
+                                    <div class="panel-body">            
+                                        <div class=" form">                                                                         <!--id="signupForm" novalidate="novalidate"--->          
+                                            <form method="POST" action="{{ route('admin.cheque.store') }}"  class="cmxform form-horizontal tasi-form" novalidate="novalidate">
+                                                @csrf
+                                                <div class="form-group ">
+                                                    <label for="firstname" class="control-label col-lg-3">Cheque No *</label>
+                                                    <div class="col-lg-8">
+                                                        <input value="{{ old('cheque_no') }}"  class=" form-control" id="cheque_no" name="cheque_no" type="text" required>
+                                                    
+                                                        @if ($errors->has('cheque_no'))
+                                                            <span class="invalid-feedback" role="alert">
+                                                                <strong class="red">{{ $errors->first('cheque_no') }}</strong>
+                                                            </span>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                                <div class="form-group ">
+                                                    <label for="firstname" class="control-label col-lg-3">Bank Name *</label>
+                                                    <div class="col-lg-8">
+                                                        <select name="bank_id" id="bank_id"  class=" form-control">
+                                                            @foreach ($banks as $item)
+                                                               <option value="{{ $item->id }}">{{ $item->name }}</option> 
+                                                            @endforeach
+                                                        </select>
+
+                                                        @if ($errors->has('bank_id'))
+                                                            <span class="invalid-feedback" role="alert">
+                                                                <strong class="red">{{ $errors->first('bank_id') }}</strong>
+                                                            </span>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                                <div class="form-group ">
+                                                    <label for="description" class="control-label col-lg-3">Description <small>(optional)</small></label>
+                                                    <div class="col-lg-8">
+                                                        <input value="{{ old('description') }}"  class=" form-control" id="description" name="description" type="text" >
+                                                    
+                                                        @if ($errors->has('description'))
+                                                            <span class="invalid-feedback" role="alert">
+                                                                <strong class="red">{{ $errors->first('description') }}</strong>
+                                                            </span>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                               
+                                               
+
+                                                <div class="form-group">
+                                                    <div class="col-lg-offset-3 col-lg-10">
+                                                        <input class="btn btn-success " type="submit" value="Submit"/>
+                                                        <a  class="btn btn-default waves-effect" href="{{ route('admin.cheque.index') }}">Cancel</a>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div> <!-- .form -->
+
+                                    </div> <!-- panel-body -->
+                                </div> <!-- panel -->
+                            </div> <!-- col -->
+                            <div class="col-sm-1"></div>
+                        </div> <!-- End row -->
+
+                            <!---------->
+
+
+	in the  show.blade.php file
+	-----------------------
+
+	<!---------->
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <h4 class="pull-left page-title">All Banks Cheque</h4>
+                                    <ol class="breadcrumb pull-right">
+                                        <li><a href="#">Moltran</a></li>
+                                        <li><a href="#">Tables</a></li>
+                                        <li class="active">Data Table</li>
+                                    </ol>
+                                </div>
+                            </div>
+    
+    
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading">
+                                            <h3 class="panel-title">Datatable</h3>
+                                        </div>
+                                        <div class="panel-body">
+                                            <div class="row">
+                                                <div class="col-md-12 col-sm-12 col-xs-12">
+                                                    <table id="datatable" class="table table-striped table-bordered">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Cheque No</th>
+                                                                <th>Bank Name</th>
+                                                                <th>Description</th>
+                                                                <th>Created_at</th>
+                                                                <th>Status</th>
+                                                                <th>Action</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody style="font-size:12px;color:black;">
+                                                            @foreach ($bank as $item)
+                                                                <tr>
+                                                                    <td>{{ $item->cheque_no }}</td>                                            
+                                                                    <td>{{ $item->bank->name }}</td>                                            
+                                                                    <td>{{ $item->description }}</td>                                            
+                                                                    <td>{{ date('d-m-Y  -  h:i:s',strtotime($item->created_at)) }}</td>                                            
+                                                                    <td>
+                                                                            {{ $item->status == 1?'Jobin':'Jobout' }}
+                                                                    </td>
+                                                                    <td>
+                                                                        <a href="{{ route('admin.cheque.edit',$item->id) }}" class="btn btn-xs btn-primary"> <i class="fa fa-edit"></i></a>
+                                                                        <a href="{{ route('admin.cheque.destroy',$item->id) }}" class="btn btn-xs btn-danger" id="delete"> <i class="fa fa-trash"></i></a>
+                                                                        <a href="" class="btn btn-xs btn-info"> <i class="fa fa-eye"></i></a>
+                                                                    </td>
+                                                                </tr>
+                                                            @endforeach
+                                                        </tbody>
+                                                    </table>
+    
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                            </div> <!-- End Row -->
+    
+                            <!---------->
+		in the edit.blade.php
+		-------------------
+
+		       <!-- Form-validation -->
+                        <div class="row">
+                        
+                            <div class="col-sm-1"></div>
+                            <div class="col-sm-10">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading"><h3 class="panel-title">Update Cheque No</h3></div>
+                                    <div class="panel-body">            
+                                        <div class=" form">                                                                         <!--id="signupForm" novalidate="novalidate"--->          
+                                            <form method="POST" action="{{ route('admin.cheque.update',$cheque->id) }}"  class="cmxform form-horizontal tasi-form" novalidate="novalidate">
+                                                @csrf
+                                                @method('PUT')
+                                                <div class="form-group ">
+                                                    <label for="cheque_no" class="control-label col-lg-3">Cheque No *</label>
+                                                    <div class="col-lg-8">
+                                                        <input value="{{ $cheque->cheque_no ?? old('cheque_no') }}"  class=" form-control" id="firstname" name="cheque_no" type="text" required>
+                                                    
+                                                        @if ($errors->has('cheque_no'))
+                                                            <span class="invalid-feedback" role="alert">
+                                                                <strong class="red">{{ $errors->first('cheque_no') }}</strong>
+                                                            </span>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                                <div class="form-group ">
+                                                    <label for="firstname" class="control-label col-lg-3">Bank Name *</label>
+                                                    <div class="col-lg-8">
+                                                        <select name="bank_id" id="bank_id"  class=" form-control">
+                                                            @foreach ($bank as $item)
+                                                               <option {{ $cheque->bank_id ==  $item->id ? 'selected' : ''}} value="{{ $item->id }}">{{ $item->name }}</option> 
+                                                            @endforeach
+                                                        </select>
+
+                                                        @if ($errors->has('bank_id'))
+                                                            <span class="invalid-feedback" role="alert">
+                                                                <strong class="red">{{ $errors->first('bank_id') }}</strong>
+                                                            </span>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                                <div class="form-group ">
+                                                    <label for="description" class="control-label col-lg-3">Description <small>(optional)</small></label>
+                                                    <div class="col-lg-8">
+                                                        <input value="{{ $cheque->description ??  old('description') }}"  class=" form-control" id="description" name="description" type="text" >
+                                                    
+                                                        @if ($errors->has('description'))
+                                                            <span class="invalid-feedback" role="alert">
+                                                                <strong class="red">{{ $errors->first('description') }}</strong>
+                                                            </span>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                               
+
+                                                <div class="form-group">
+                                                    <div class="col-lg-offset-3 col-lg-10">
+                                                        <input class="btn btn-success " type="submit" value="Submit"/>
+                                                        <a  class="btn btn-default waves-effect" href="{{ route('admin.cheque.index') }}">Cancel</a>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div> <!-- .form -->
+
+                                    </div> <!-- panel-body -->
+                                </div> <!-- panel -->
+                            </div> <!-- col -->
+                            <div class="col-sm-1"></div>
+                        </div> <!-- End row -->
+
+                            <!---------->
+============================================================================================
+============================================================================================
+
+============================================================================================
+============================================================================================
+
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

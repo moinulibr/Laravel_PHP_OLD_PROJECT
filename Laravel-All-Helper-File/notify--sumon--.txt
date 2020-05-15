@@ -1,0 +1,491 @@
+ sumon vai ar project/class no 08 . first 25 minute is enough
+	video no:08 : notification for email, sms, database
+laravel-notification-channels.com
+
+php queues ? ??  [ rabbitmq server?? not php ] ?? what is socket server??
+
+have to laravel.com/docs is best
+
+	php artisan make:notification VerifyEmail
+
+-----
+	in the controller.... userController.php file
+	use App\VerifyEmail;
+
+	$user = User::create(['email'=>strtolower(trim($request->email)),'password'=>bcrypt($request->password),'email_cerification_token'=>str_random(32)]);
+	
+	$user->notify(new VerifyEmail($user));
+  //created_user->notify_method(Notification_class_VerifyEmail(created_user_insted));	
+
+-----------------------------------------------------------------------------------------------------------------------------------------
+
+		Notifications
+	==============================
+	
+		Notification Mail:  [User email verify by laravel notification]
+	     =======================> its provide a beautyfull mail template..
+		config/mail.php
+		-------------
+	    'driver' => env('MAIL_DRIVER', 'smtp'),
+
+	    'host' => env('MAIL_HOST', 'smtp.gmail.com'),
+
+	    'port' => env('MAIL_PORT', 587),
+
+	  'from' => [
+        	'address' => env('MAIL_FROM_ADDRESS', 'moinul3516@gmail.com'),
+       	 	'name' => env('MAIL_FROM_NAME', 'Email Verification'),
+  	  	],
+
+		.env file.....
+		==============
+		MAIL_DRIVER=smtp
+		MAIL_HOST=smtp.gmail.com
+		MAIL_PORT=587
+		MAIL_USERNAME=moinul35@gmail.com
+		MAIL_PASSWORD=like123456...
+		MAIL_ENCRYPTION=tls
+	---------------------------------------------
+
+	step:1: in cmd 
+	=====
+	php artisan make:notification EmailVerification
+
+		now we can see App/Notifications/EmailVerification.php file
+
+	step:2:
+	======
+	<?php
+	namespace App\Notifications;
+
+	use Illuminate\Bus\Queueable;
+	use Illuminate\Notifications\Notification;
+	use Illuminate\Contracts\Queue\ShouldQueue;
+	use Illuminate\Notifications\Messages\MailMessage;
+
+	class EmailNotification extends Notification
+	{
+  	  use Queueable;
+
+    	public function __construct()
+    	{
+        	// from here we can receive data , which want to send by email.....
+    	}
+
+  
+    	public function via($notifiable)
+    	{
+        	return ['mail'];	//[by which channel , send notification to users .. here mentioned channel name.., if we use mail channel, then have to must use toMail method]
+    	}
+			//[this is message body content / template]
+    	public function toMail($notifiable)
+    	{
+        	  return (new MailMessage)
+                    ->line('The introduction to the notification.')  //[this create a line]
+                    ->action('Notification Action', url('/'))		//[this create a button a tag..like... <a href>Click</>]
+                    ->line('Thank you for using our application!');
+    	}
+
+
+    	public function toArray($notifiable)
+    	{
+        	return [
+           	 	//[except mail, here mention data only , when we use another channel, like sms, or others,.... Sending emailing time, here will be empty array]
+        	];
+    	}
+     }
+	______________--------------------------______________________
+
+	step:2 ei::
+	======
+	======
+	<?php
+	namespace App\Notifications;
+
+	use Illuminate\Bus\Queueable;
+	use Illuminate\Notifications\Notification;
+	use Illuminate\Contracts\Queue\ShouldQueue;
+	use Illuminate\Notifications\Messages\MailMessage;
+
+	class EmailNotification extends Notification  implements ShouldQueue 	//[if we want to use queue .just, implements ShouldQueue , have to use here.. meain.. Trate will be implements with this Notification class]
+	{
+  	  use Queueable;
+
+	public $user;
+    	public function __construct(User $user)
+    	{
+        	$this->user = $user;	// from here we can receive data , which want to send by email.....
+    	}
+
+  
+    	public function via($notifiable)
+    	{
+        	return ['mail'];	//[by which channel , send notification to users .. here mentioned channel name.., if we use mail channel, then have to must use toMail method]
+    	}
+
+    	public function toMail($notifiable)
+    	{
+        	  return (new MailMessage)
+                    ->line('Dear'. $this->user->username)  //[this create a line]
+                    ->line('Your account has been created successfully!, please verify your account to login') 
+                    ->action('Click to Verify Your Account', route('verify'$this->user->email_verification_token))		//[this create a button a tag..like... <a href>Click</>]
+                    ->line('Thank you for using our application!');
+    	}
+
+
+    	public function toArray($notifiable)
+    	{
+        	return [
+           	 	//[except mail, here mention data only , when we use another channel.... Sending emailing time, here will be empty array]
+        	];
+    	}
+     }
+	______________--------------------------______________________
+
+	in the Model.... if we want to Notification, we have to use Notifiable in the class... like .. use Notifiable; [though its a trate.. by default its applied in the Model]
+	----------------------------------------------------------------------------------------
+	step:3:
+	=========> notification created upon Model instents
+
+	in the controller.... UserController.php file
+	use App\EmailVerification;
+
+	$user = User::create(['email'=>strtolower(trim($request->email)),'password'=>bcrypt($request->password),'email_cerification_token'=>str_random(32)]);
+	
+	//Notification::send($users, new InvoicePaid($invoice)); 	//[if we want to send to maney user at a time, then it use,,, but have to array type.. have to study more]
+		
+		//$when = now()->addMinutes(10);
+		//$user->notify(new EmailNotification($user))->delay($when));;	//[if we want to send this notification after a certain time]
+	$user->notify(new EmailNotification($user));
+
+
+	
+	then............ php artisan queue:work
+
+	
+	________________________-------------------------------------------------------------------________________________________________	
+	...................................if we don't use 'email' field in database... then................................................
+	__________________________________-------------------------------------------------------__________________________________________	
+	---------------------------------------
+	When sending notifications via the mail channel, the notification system will automatically look for an email property on your notifiable entity. You may customize which email address is used to deliver the notification by defining a routeNotificationForMail method on the entity:
+	------====--------
+	in the Model... have to create routeNotificationForMail() method
+	<?php
+	namespace App;
+	use Illuminate\Notifications\Notifiable;
+	use Illuminate\Foundation\Auth\User as Authenticatable;
+
+	class User extends Authenticatable
+	{
+    		use Notifiable;
+
+	 	public function routeNotificationForMail($notification)	 	//[if we not use database filed name 'email' for send mailing.. then its not working. coz , laravel notification by default looking 'email' field.. if we use not use 'email' field,,,, then, have to routeNotificationForMail() this method in the Model......
+]
+    		{
+       			return $this->email_address;	//[we not used 'email' field in the database , used 'email_address' fields.]
+    		}
+	}
+	------=====-------
+_________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________
+				Database Channel
+				=================
+			
+	spet:01: create a table in database...
+	=======
+		php artisan notifications:table		//[ now we can see a file in database folder]
+		
+		php artisan migrate
+	
+	step:02: create a notification class.. 
+	========
+
+	php artisan make:notification NotifyToAdmin
+
+	----------
+
+	step:03  in the Notification class
+	=======> by default its always in any notification class 
+	<?php
+
+	namespace App\Notifications;
+
+	use Illuminate\Bus\Queueable;
+	use Illuminate\Notifications\Notification;
+	use Illuminate\Contracts\Queue\ShouldQueue;
+	use Illuminate\Notifications\Messages\MailMessage;
+
+	class NotifyToAdmin extends Notification
+	{
+    		use Queueable;
+    	public function __construct()
+    	{
+        	//
+    	}
+    	public function via($notifiable)
+    	{
+        	return ['mail'];
+    	}
+    	public function toMail($notifiable)
+    	{
+        	return (new MailMessage)
+                    ->line('The introduction to the notification.')
+                    ->action('Notification Action', url('/'))
+                    ->line('Thank you for using our application!');
+    	}
+    	public function toArray($notifiable)
+    	{
+        	return [
+            //
+        ];
+    	}
+     }
+	======_______========
+	
+		<?php
+
+	namespace App\Notifications;
+
+	use Illuminate\Bus\Queueable;
+	use Illuminate\Notifications\Notification;
+	use Illuminate\Contracts\Queue\ShouldQueue;
+	use Illuminate\Notifications\Messages\MailMessage;
+	use App\Model\User;
+
+	class NotifyToAdmin extends Notification implements ShouldQueue
+	{
+    		use Queueable;
+	     public $user;
+    	public function __construct(User $user)
+    	{
+        	$this->user = $user;
+    	}
+    	public function via($notifiable)
+    	{
+        	return ['database'];
+    	}
+		//[though Mail is not needed, so deleted from here]
+    	public function toArray($notifiable)
+    	{
+        	return [
+            		'username' => $this->user->username;
+        		];
+    	}
+     }
+	
+	step:04: in the controller
+	========
+		UserController.php
+		-----------------
+		use App\Model\User;
+
+	$user = User::create(['email'=>strtolower(trim($request->email)),'password'=>bcrypt($request->password),'email_cerification_token'=>str_random(32)]);
+	
+	$admin = User::find(1);	//[ user id = 1]
+	
+	$admin->notify(new NotifyToAdmin($user));
+	
+
+	step:05: in the blade file
+	=======
+	
+	@if($user->id == 1)
+		<ul>
+		@foreach($user->notifications as $notification)
+		     <li> {{ $notification->data['username'] }} just request for blood</li>  //[data from database table fields]
+    			@php $notification->markAsRead(); @endphp
+		@endforeach 
+		</ul>
+	@endif
+
+
+		//If you want to retrieve only the "unread" notifications, you may use the unreadNotifications relationship. Again, these notifications will be sorted by the created_at timestamp:
+	foreach ($user->unreadNotifications as $notification) {
+    		echo $notification->type;
+		}
+	
+	//Typically, you will want to mark a notification as "read" when a user views it. The  Illuminate\Notifications\Notifiable trait provides a markAsRead method, which updates the  read_at column on the notification's database record:
+	foreach ($user->unreadNotifications as $notification) {
+    		@php $notification->markAsRead(); @endphp
+		}
+	//However, instead of looping through each notification, you may use the markAsRead method directly on a collection of notifications:
+	@php $user->unreadNotifications->markAsRead(); @endphp
+	
+	//You may also use a mass-update query to mark all of the notifications as read without retrieving them from the database:
+	@php $user->unreadNotifications()->update(['read_at' => now()]);@endphp
+
+	//You may delete the notifications to remove them from the table entirely:
+	@php $user->notifications()->delete(); @endphp
+
+https://laravel.com/docs/5.8/notifications#database-notifications
+_________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________
+				Use Nixmo.. mobile SMS notification...  Prerequisites
+				=====================================
+
+	step:00: have to instoll nixmo 
+	======	
+			composer require nexmo/client
+
+
+	step:01: config -> services.php
+	=======
+	
+	'nexmo' => [
+    		'key' => env('NEXMO_KEY',''),
+    		'secret' => env('NEXMO_SECRET',''),
+    		'sms_from' => '15556666666',
+		],
+
+	step:02: .env file
+	======
+
+		have to add this in the .env	file
+		
+		NEXMO_KEY=
+		NEXMO_SECRET=   
+
+		 		[its value take from nexmo.com -> getting started , and 
+				  Start testing now with your $2 free credit and API credentials..
+					key=...... Secret=......
+					]
+
+
+	
+	step:03:
+	=======
+
+	<?php
+	namespace App\Notifications;
+
+	use Illuminate\Bus\Queueable;
+	use Illuminate\Notifications\Notification;
+	use Illuminate\Contracts\Queue\ShouldQueue;
+	use Illuminate\Notifications\Messages\MailMessage;
+
+
+    class EmailNotification extends Notification  implements ShouldQueue 	//[if we want to use queue .just, implements ShouldQueue , have to use here.. meain.. Trate will be implements with this Notification class]
+     {
+  	       use Queueable;
+
+		public $user;
+    	  public function __construct(User $user)
+    	   {
+        	$this->user = $user;	// from here we can receive data , which want to send by email.....
+    	   }
+
+  
+    	public function via($notifiable)
+    	{
+        	return ['mail','nixmo'];	//[Nixmo for sms service ]//[by which channel , send notification to users .. here mentioned channel name.., if we use mail channel, then have to must use toMail method]
+    	}
+			//[this is message body content / template]
+    	public function toMail($notifiable)
+    	{
+        	  return (new MailMessage)
+                    ->line('The introduction to the notification.')     //[this create a line]
+                    ->action('Notification Action', url('/'))		//[this create a button a tag..like... <a href>Click</>]
+                    ->line('Thank you for using our application!');
+    	}
+
+
+    	public function toArray($notifiable)
+    	{
+        	return [
+           	 	//[except mail, here mention data only , when we use another channel, .... Sending emailing time, here will be empty array]
+        	];
+    	}
+     
+	/**
+	 * Get the Nexmo / SMS representation of the notification.
+	 *
+ 	* @param  mixed  $notifiable
+ 	* @return NexmoMessage
+ 	*/			///////////////[by default its finding 'phone_number' in database.... if we not define 'phone_number' in database, then have use]
+	public function toNexmo($notifiable)
+	{
+    		return (new NexmoMessage)
+                	->content('Dear'. $user->user->username. '. Your Account is register.');
+	}
+
+
+	}	
+
+
+	
+		==============-----Alternative----=================>
+		==========[by default its finding 'phone_number' in database.... if we not define 'phone_number' in database, then have use in User Model]=========== 
+		Routing SMS Notifications
+	When sending notifications via the nexmo channel, the notification system will automatically look for a phone_number attribute on the notifiable entity. If you would like to customize the phone number the notification is delivered to, define a routeNotificationForNexmo method on the entity:
+
+	<?php
+	namespace App;
+	use Illuminate\Notifications\Notifiable;
+	use Illuminate\Foundation\Auth\User as Authenticatable;
+
+	class User extends Authenticatable
+	{
+    		use Notifiable;
+
+    	public function routeNotificationForNexmo($notification)
+    	{
+        	return $this->phone;
+    	}
+   	}
+		======================--------========================
+
+
+
+	php artisan queue:work 	//[if we use queue, then first of all have to instoll redis.... rabbitmq???]
+
+_________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________
+
+	Facebook bot???
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	

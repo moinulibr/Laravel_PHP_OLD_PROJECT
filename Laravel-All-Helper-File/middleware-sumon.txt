@@ -1,0 +1,129 @@
+
+
+
+		For login manaully..
+		====================
+	use in the controller .. use Validator;
+		public function login(Request $request)
+		{	
+				$input = $request->except('_token');
+
+				$validator = Validator::make($input,[
+				'email' = 'required|email',
+				'password' = 'required|min:6'
+				]);
+		
+			if($validator->fails()){
+			   return redirect()->back()->withErrors($validator)->withInput();
+			}
+
+			//if(Auth::attemp(['email'=>$request->email,'password'=>$request->password])){}
+			//if(Auth::guard('admin')->attemp()){}	[by default guard = user.. its from config->auth.php]
+
+			if(Auth::attemp($input)){
+				session()->flash('msg','Login Successfully!');
+				return redirect()->route();
+			}
+				session()->flash('error','Wrong Credentials');
+			return redirect()->back();
+		}
+
+
+	[ after login by default auth,, user all data is setted in the session.. when we have to get users data, just call auth()->user(); for details. dd(auth()->user());]
+		---------------------------------------------------------
+		You have been loged in as {{ optional($user)->name }}  [optional() from 5.6]
+
+	-------------------------------------------------------------------
+		after Login its redirect to dashboard controller..
+
+		public function afterLogin(){
+			$data = [];	
+			$data['user'] = auth()->user();
+			redirect view('dashboard',$data);
+		}
+	
+		pbulic function logout(){
+			Auth::logout();
+			return redirect()->route();
+		}
+	----------------------------------------------------------------------------	
+	after logout we cant not use dashboard and others page.. its make by middleware..
+		 	php artisan make:middleware AuthMiddleware
+			then we get a AuthMiddleware.php file.. in this file
+			
+			public function handle($request, Closure $next)
+			{
+				//if(auth->check()){}  //[if auth found after check]
+				if(auth()->guest()){
+					return redirect()->route(home);
+				}
+				
+			     return $next($request);	
+			}
+		
+		Then have to go to kernel.php
+		--------------------
+			protected $routeMiddleware = [
+				'auth'=> AuthMiddleware::class,
+			];
+
+	now have to use this in the Route::grout(['middleware'=>'auth'],function(){}); or Route()->middleware('auth'); //[if many middleware have, then use..]
+										Route()->middleware('first','second');
+
+	Or we can use in the controller
+		top of the controller
+		
+	public function __construct()
+	{
+		$this->middleware('auth');  // $this->middleware('auth')->only('mehtod Name'); Or ->except('method Names');
+	}
+	
+---------------------------------------------------------------------------------------
+
+		config  -> auth.php
+		==================
+
+	
+
+
+--------------------------------------------------------------------------------------------
+		For Updating....
+		===============
+
+	in the blade file ... <form method="POST"/>
+			{!! csrf_field() !!}
+			{!! method_field('PUT') !!} Or    @method('PUT')
+
+
+		in the Controller.....
+
+	$user = User::find($id);  // User::find(auth()->user()id); [its applied only login User..]
+
+	$user->update(['field'=>'value']);
+
+	======================================================================
+	select , insert/create , update , delete , just Roles have to watch
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	

@@ -1,0 +1,16 @@
+	
+	set_time_limit(0);
+	$users = App\User::all();
+
+
+
+	public function __construct()
+	{
+    		set_time_limit(8000000);
+	}
+
+
+
+it's a pure PHP setting. The alternative is to increase the execution time limit only for specific php scripts, by inserting on top of that php file, the following:
+
+ini_set('max_execution_time', 180); //3 minutes

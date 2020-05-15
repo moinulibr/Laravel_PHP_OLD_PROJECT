@@ -1,0 +1,91 @@
+
+
+	
+	/*
+	| Google Console for google drive credentials
+	*/
+	https://console.developers.google.com/
+
+	/*
+	| Creating Provider for Google Drive Service
+	*/
+		php artisan make:provider GoogleDriveServiceProvider
+
+	Now we can get it . App/Provider/GoogleDriveServiceProvider.php
+
+	/*
+	| Register in the config/app.php file
+	*/
+		        /*
+         		* Application Service Providers...
+         		*/
+		App\Providers\GoogleDriveServiceProvider::class,
+
+
+
+	
+	/*
+	|  File System Adapter for Google Drive
+	|
+	| Installing Google Api Service via Composer
+	*/	
+	 	composer require google/apiclient 
+	
+		composer require nao-pon/flysystem-google-drive:~1.1
+
+	/*
+	| In The Config/filesystem.php file [add this]
+	*/
+		add This
+		=======
+	's3' => [] after this
+	'google' => [
+            'driver' => 'google',
+            'clientId' => env("GOOGLE_CLIENT_ID"),
+            'clientSecret' => env("GOOGLE_CLIENT_SECRET"),
+            'refreshToken' => env("GOOGLE_REFRESH_TOKEN"),
+            'folderId' => env("GOOGLE_DRIVE_FOLDER_ID"),
+        ],
+	
+
+	Now Go To =>
+	/*
+	| We Will Now Create Google App and use its creadentials to link it with our Laravel App
+	*/
+	https://console.developers.google.com
+		THEN
+		====
+	https://console.developers.google.com/projectselector2/apis/dashboard?pli=1&supportedpurview=project
+
+		To view this page, select a project  => in the right side we get a (create project) link
+			
+		* Project Name  => then Create
+
+		project created Completed => then open a window created project : projectnane
+			then click here => 
+		# menu sign  from left side APis & Service =>then * click => Dashboard => 
+
+			# +ENABLE APIS AND SERVICEs  (click here)
+			=> then search google Drive Api
+
+			** Then => Click ENABLE BUTTON From buttom of the  Google Drive API
+
+			=> click Credentials Menu  from the left side menu bar
+		
+			** CONFIGURE CONSENT SCREEN click from right site
+
+			=> OAuth consent screen section , User Type checked External => create
+				=> fillup the field like http://dotcoom.com; then save
+		
+
+
+
+
+
+
+
+
+
+
+
+

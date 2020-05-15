@@ -1,0 +1,137 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+====================Change Password=================
+	in the controller...
+	use Illuminate\Support\Facades\Hash;
+	use App\User;
+	use Illuminate\Support\Facades\Auth;
+
+	$hashedpassword = Auth::user()->password;
+	
+	if(Hash::check($request->oldpassword,$hashedpassword))
+	{	
+		$user = User::findOrFail(Auth::id());  //[Auth::user()->id]
+		$user->password = Hash::make($request->password); //[new password]
+		$user->save();
+		Auth::logout();
+		return redirect()->route('login')->with('successMess','Your Password is Changed Successfully!');
+	}else{
+		return redirect()->back()->with('errorMess','Your Current Password is Invalid!');
+	}
+
+---------------now in the blade file for message showing----------
+
+	@if(session('errorMess'))
+		{{ session('errorMess') }}
+	@endif
+
+	in the login page.....
+	@if(session('successMess'))
+		{{ session('successMess') }}
+	@endif
+	___________________________
+	if(Hash::check($request->oldpassword,$hashedpassword))
+	{
+
+	}
+	its required 2 paramitter, 1.. oldpassword, 2.. new password 
+
+
+
+
+
+		its check with hashed....
+============== Logout=====================
+
+	AuthenticatesUsers.php file
+	____________________________
+
+	public funciton function logout(Request $request)
+	{
+		$this->guard()->logout();
+		$request->session()->invalidate();
+		
+		return redirect()->back();
+	}
+
+
+
+
+
+
+=========================================================================================
+=========================================================================================
+=========================================================================================
+=========================================================================================
+
+	==========default login================
+		(AuthenticatesUsers.php)file a
+	----------------------------------------
+
+   protected function sendLoginResponse(Request $request)
+    {
+        $request->session()->regenerate();
+
+        $this->clearLoginAttempts($request);
+      
+        return $this->authenticated($request, $this->guard()->user())
+                ?: redirect()->intended($this->redirectPath());
+      
+    }
+====================================================================================
+	
+
+========================================================================================
+===================Custom Login for implement some role=================================
+
+ protected function sendLoginResponse(Request $request)
+    {
+        $request->session()->regenerate();
+
+        $this->clearLoginAttempts($request);
+
+	//here i implement some role
+       if(Auth::user()->email == 'moinulibr@gmail.com')
+       {
+            return $this->authenticated($request, $this->guard()->user())
+            ?: redirect()->intended($this->redirectPath());
+       }
+       elseif(Auth::user()->status == 0 && Auth::user()->verified == 0 && Auth::user()->deleted != null)
+       {
+            $this->guard()->logout();
+            $request->session()->invalidate();
+            return $this->loggedOut($request) ?: redirect('/'); 
+       }
+
+        elseif(Auth::user()->status == 0 && Auth::user()->verified == 0)
+        {
+            $this->guard()->logout();
+            $request->session()->invalidate();
+            return $this->loggedOut($request) ?: redirect('/'); 
+        }
+	//here i implement some role
+        else{
+		//----default .. it will be always-------
+        	return $this->authenticated($request, $this->guard()->user())
+                ?: redirect()->intended($this->redirectPath());
+		//----default .. it will be always-------
+        }
+
+    }
+==============================================================================================
+===============================================================================================
+
+
+
+

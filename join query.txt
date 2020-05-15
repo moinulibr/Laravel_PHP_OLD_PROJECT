@@ -1,0 +1,99 @@
+
+
+	 public function gettingMappingId(HttpRequest $request)
+        {
+            $ids = $request->product_id;
+            $drm_category_id = DB::table('drm_product_categories')
+                                ->whereIn('product_id', $ids)
+                                ->select('category_id')
+                                ->pluck('category_id');
+            $shop_details = DB::table('gambio_shop')->where('shopType', 4)->where('userid', CRUDBooster::myId())->first();
+            $category_mapping = DB::table('drm_category_mapping')
+                                ->where('shop_id',$shop_details->id)
+                                ->whereIn('drm_category_id', $drm_category_id)
+                                ->select('drm_category_id')
+                                ->pluck('drm_category_id')->toArray();
+            $count = 0;
+            foreach($category_mapping as $k)
+            {   
+                foreach($request->product_id as $id)
+                {
+                   $cat =  DB::table('drm_product_categories')
+                            ->where('product_id', $id)
+                            ->where('category_id', $k)
+                            ->first();
+                    if($k == $cat->category_id)
+                    {
+                        $count ++ ;
+                        continue;
+                    }
+                }
+            }
+
+            return $count;
+            #----------------------------
+
+		#======== Smart Query==========#
+
+            $ids = $request->product_id;
+
+            $shop_details = DB::table('gambio_shop')->where('shopType', 4)->where('userid', CRUDBooster::myId())->first();
+                $category = DB::table('drm_products')
+                                ->join('drm_product_categories', 'drm_product_categories.product_id', '=', 'drm_products.id')
+                                ->join('drm_category', 'drm_category.id', '=', 'drm_product_categories.category_id')
+                                ->join('drm_category_mapping','drm_category_mapping.drm_category_id','=','drm_category.id')
+                                ->select('drm_products.id')
+                                ->where('drm_category_mapping.shop_id',$shop_details->id)
+                                ;
+
+                $category_ebay_count = $category->whereIn('drm_products.id', $ids)->count();
+                $category_ebay_product_ids = $category->whereNotIn('drm_products.id', $ids)->get();
+
+               return $category_ebay_product_ids;
+        }
+
+
+
+
+
+
+
+
+
+
+
+ $ids = $request->product_id;
+            $shop_details = DB::table('gambio_shop')->where('shopType', 4)->where('userid', CRUDBooster::myId())->first();
+            $category = DB::table('drm_products')
+                                ->join('drm_product_categories', 'drm_product_categories.product_id', '=', 'drm_products.id')
+                                ->join('drm_category', 'drm_category.id', '=', 'drm_product_categories.category_id')
+                                ->join('drm_category_mapping','drm_category_mapping.drm_category_id','=','drm_category.id')
+                                ->select('drm_products.id')
+                                ->where('drm_category_mapping.shop_id',$shop_details->id);
+                $category_ebay = $category->whereIn('drm_products.id', $ids)->pluck('id');
+                $category_ebay_count = $category_ebay->count();
+
+                $a = [];
+                foreach($category_ebay as $k)
+                {
+                    $a[] = $k;
+                }
+                 $a;
+                 $result = array_diff($ids, $a);
+                $category_ebay_product_ids =  array_values($result);
+                return response()->json([
+                    'status' => 200,
+                    'category_ebay_count' => $category_ebay_count,
+                    'category_ebay_product_ids' => $category_ebay_product_ids
+                ]);
+
+
+
+
+
+
+
+
+
+
+

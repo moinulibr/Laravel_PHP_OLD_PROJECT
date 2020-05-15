@@ -1,0 +1,85 @@
+	
+	### The best link
+		##---- https://github.com/milon/barcode
+
+	/*	Installation
+	|--------------------------------------------------------------------
+	|	Just run following command to terminal-
+	|
+	|		composer require milon/barcode
+	|		
+	|		
+	|
+	|
+	*/	
+	
+	#------------------------------------
+	You can also edit your project's composer.json file to require milon/barcode.
+
+		"require": {
+    				...
+    				"milon/barcode": "^6.0"
+			}
+	
+	/*	
+	|--------------------------------------------------------------------
+	|	composer update
+	|
+	|	Open config/app.php, and add a new item to the providers array.
+	|
+	|	'providers' => [
+    	|			...
+    	|			Milon\Barcode\BarcodeServiceProvider::class,
+    	|				...
+	|			]	
+	|		
+	|		
+	|
+	|
+	*/	
+
+	#--------------------------------------------------------------
+	If you want to change Bar-code's settings (Store Path etc.), you need to publish its config file(s). For that you need to run in the terminal-
+
+	# Laravel 5.x
+	php artisan vendor:publish
+
+	# Laravel 4.x
+	php artisan config:publish milon/barcode
+	Make sure you have write permission to the storage path. By default it sets to /storage folder.
+
+	Now add the alias.
+	
+	/*	
+	|--------------------------------------------------------------------
+	|	'aliases' => [
+   	|		 ...
+    	|		'DNS1D' => Milon\Barcode\Facades\DNS1DFacade::class,
+    	|		'DNS2D' => Milon\Barcode\Facades\DNS2DFacade::class,
+	|		]	
+	|		
+	|		
+	|
+	|
+	*/	
+	
+	/*
+	|
+	|	<h3 style="text-align:center;">Bar Code</h3>
+        |                       <hr/>
+        |                   <div>
+        |             @php echo '<img src="data:image/png;base64,' . DNS1D::getBarcodePNG("2500", "C39+",2,53,array(1,1,1), true) . '" alt="barcode"   />'; @endphp
+        |                        </div>
+        |                        <br/>
+	|
+        |                        <div>
+        |                        @php echo DNS1D::getBarcodeHTML("4445645656", "C39",2,53); @endphp
+        |                       </div>
+        |                  
+        |                            <br/>
+	|
+        |         @php echo DNS2D::getBarcodeHTML("4445645656", "QRCODE"); @endphp
+	|
+	|
+	|----------------------------------------------------------------------------------------------------
+	*/

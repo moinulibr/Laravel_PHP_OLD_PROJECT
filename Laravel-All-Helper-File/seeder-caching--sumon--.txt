@@ -1,0 +1,300 @@
+
+	add a extra fields in database schema
+	=====================================
+	
+	php artisan make:migration add_paid_to_users    // php artisan make:migration add_NewFieldName_to_existingTableName
+
+	public function up()
+	{
+   	 Schema::table('users', function($table) {
+        	$table->integer('paid');
+    	});
+	}
+
+	and also change it
+	
+	public function down()
+	{
+    	Schema::table('users', function($table) {
+        	$table->dropColumn('paid');
+    	});
+	}
+		Then....
+	php artisan migrate
+
+	php artisan make:migration add_store_id_to_users_table --table=users   [from 5.6]
+	=================From Sumon vai================
+
+	php artisan make:migration add_verified_colum_to_users_table
+
+	public function up()
+	{
+   	     Schema::table('users', function($table) {
+        	$table->integer('paid');
+    	   });
+	}
+
+	and also change it
+	
+	public function down()
+	{
+    	   Schema::table('users', function($table) {
+        	$table->dropColumn('paid');
+    	   });
+	}
+		Then....
+	php artisan migrate
+
+======================================================================================
+	Seeder & factory
+=======================================================================================
+
+	php artisan make:seeder UsersTableSeeder
+	php artisan make:seeder AdminsTableSeeder
+	php artisan make:seeder PostsTableSeeder
+
+
+	its located in the.... Database->seeds Folder	--->> UsersTableSeeder.php
+				--------------------
+
+	public function run()
+	{
+		factory(App\Model\User\User::class,100)->create();	//[using factory.. just call ]
+	}
+	
+
+	--------------In----PostsTableSeeder.php file-------------
+	
+	public function run()
+	{
+		factory(App\Model\User\Admin::class,100)->create();	//[using factory.. just call ]
+	}
+
+	------------------------------------------------------------
+	factory
+	-------- --> UserFactory.php
+ <?php
+
+	use Faker\Generator as Faker;
+  $factory->define(App\Model\User\User::class, function (Faker $faker) {
+    return [
+        'name' => $faker->name,
+        'email' => $faker->unique()->safeEmail,
+        'password' => '$2y$10$TKh8H1.PfQx37YgCzwiKb.KjNyWgaHb9cbcoQgdIVFlYg7B77UdFm', // secret
+        'remember_token' => str_random(10),
+    ];
+ });
+	
+	------------------------------------
+	//Here we can use more Factories without creating another anotherFactory.php file..... like...
+
+ $factory->define(App\Model\User\Admin::class, function (Faker $faker) {
+    return [
+        'name' => $faker->name,
+        'email' => $faker->unique()->safeEmail,
+        'password' => '$2y$10$TKh8H1.PfQx37YgCzwiKb.KjNyWgaHb9cbcoQgdIVFlYg7B77UdFm', // secret
+        'remember_token' => str_random(10),
+    ];
+ });
+	------------------------------------
+	
+----------- Then--------------
+	php artisan db:seed    // all seeder processed at a time
+	
+	Or
+
+	php artisan db:seed --class=UsersTableSeeder      // its make only UsersTableSeeder [only this ]
+
+-------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+-----------------------------------------------------------------------------------
+	Cashing
+=====================================================================================
+
+	intermidiate storage system, where i can store my data // create, update, delete data 
+
+	
+
+	which driver want to use for cashing in the .env file, just have to define there 
+	
+	CACHE_DRIVER=file       //line:16
+		
+		[when we go to production base, then we use radis or mamcache]
+
+	test for redis is instolled ? just [in cmd.... redis-cli]
+	
+	We are using file as Cache driver....
+	------------------------------------
+
+	
+	
+		in the Post controller.php
+	========================================
+		use App\Model\User\User;
+		use App\Model\Post;
+		use Illuminate\Support\Facades\Cache;
+	public function showPost()
+	{
+		//check if cache has posts
+		// if have , then serve to the user from cache
+		//if cache has no data, Load from database.. & put this data in the cache
+
+		$posts = Cache::get('posts',[]);		//use Facade
+			//if no data in the cache, its return empty array
+		
+		if(empty($posts))
+		{
+			$posts = Post::with('user')->select('user_id','body','created_at')->get();
+			
+			//Cache::put('key','value', 1440[time,how long time its keep?]);
+			Cache::forever('posts',$posts);		//putting data in to the cache
+								//Cache::flush();  // when want to all cache delete..
+		}
+	
+		$data['posts'] = $posts;
+		
+	}
+	
+
+
+	----======-------==========------- Updating or deleting any post , then cache does not changes.. so have to some work for this..
+
+		we will create a Observers file...  on kinds of Events.... event is .after actioned with database, some activies will changes..likes..
+
+	first create a Observer Folder for looking well organization in the App Folder.. then in this folder , have to create a file,,, like......
+	
+	PostObservers.php
+
+	<?php
+
+	namespace App\Observer;
+
+	use Illuminate\Support\Facades\Cache;
+	class PostObserver
+	{
+	
+		public function created()
+		{
+			Cache::forget('posts');  // key = posts
+		}
+		public function updated()
+		{
+			Cache::forget('posts');  // key = posts
+		}
+		public function deleted()
+		{
+			Cache::forget('posts');  // key = posts
+		}
+		public function saved()
+		{
+			Cache::forget('posts');  // key = posts
+		}
+	
+	}
+
+	======then AppServiceProvider.php
+	
+	use App\Model\Post	
+
+	public function boot()
+	{
+		Post::observe(PostObserver::class);
+	}
+
+
+
+
+
+
+	======= Now use Redis==============
+
+	.env file.. have to change
+	CACHE_DRIVER=redis
+
+	then go to cmd and 
+	
+	composer require predis/predis
+
+	------------*----------------
+
+	[check : is data in redis: just type:-  redis cli  -then- keys*]
+		we can not use redis in shared hosting.....
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

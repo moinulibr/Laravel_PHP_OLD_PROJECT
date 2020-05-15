@@ -1,0 +1,278 @@
+
+	Jquery All event and method and selector
+
+------------------------------------------------------------------------
+	All Event 
+======================================
+
+	1. click event:
+	==============>  	
+
+	2. keyup event:
+	==============> 	
+
+	*#. blur event
+	==============> 	[input field theke cursor bahire nia click korle ata kaz kore]
+
+	3.scroll event :
+	==============>
+
+	4.change event :
+	=============>
+
+	5.focusin event
+	=============>
+
+	6.focusout event
+	===============>
+
+	7.mouseenter event,
+	=================>
+
+	8.mouseleave event
+	================>
+	
+	9.hover event
+	============>
+
+	8.select event
+	=============>
+
+	9.bind event
+	============>
+	$('a').bind('mouseenter mouseleave',function(){
+		$(this).toggleClass('');
+	});
+	
+	10. submit event
+	===============>
+
+=============================================================================================================
+
+
+
+
+	All Method
+==============================
+
+	1. toggle()
+	----------> $('').toggle();
+	
+
+	2. scrollTop()  
+	--------------> $("#").scrollTop();		[inner_textarea_Height: scrolling height from top]
+
+
+	3. innerHeight()
+	---------------> $(this).innerHeight()		[innerHeight : textarea height]
+	
+
+	4. scrollHeight;
+	---------------> $(this)[0].scrollHeight;   [ses a () hobe na] [scrollHeight full screen height maybe**]
+	
+
+	5. attr()
+	---------------> $().attr('attribute_Type','attribute_name');
+
+
+	6. removeAttr()
+	--------------> $().removeAtrr('attribute_name');
+
+
+	7. addClass().
+	------------>
+
+
+	8.removeClass()
+	--------------> $().removeClass('class_name');
+
+
+	9.toggleClass()
+	--------------> $().toggleClass('class_name');
+
+
+	10. val()
+	--------> $().val(); 	->get value..
+	
+
+	11. val('set somethings')
+	-------------------------> $().val('set some value'); -> set value
+
+
+	12. text()
+	--------->$().text();	->get text.
+	
+
+	13. text('set Somethings')
+	-------------------------->$().text('set some text'); ->set text
+
+
+	*#. html()
+	---------->
+
+
+	14. fadeIn
+	15. fadeOut
+
+
+	16. hide()
+	----------> $().hide();
+
+
+	17. show()
+	---------> $().show();
+
+
+	18. css().
+	---------> $().css('property','value').css('moreProperty','value');
+		   $().css({
+				'property':'value',
+				'color':'red'
+			  });
+
+
+	19. lenght;
+	---------1. lenght =  $('').val().lenght;
+	
+
+	============================================================
+	20. substr();
+	------------> $(this).attr("id").substr(5); // id='like-{9}'
+	============================================================
+	
+	*
+	21. parseInt()
+	-------------> parseInt($(this).attr("id").substr(5))
+	
+	22. slideToggle()
+	----------------> we can use parametter.. slideToggle(2000,'linear');
+
+
+
+	23. find()
+	---------->
+	How many tag used in html full page ..?
+	-----------------------------------
+	
+		var count = $('*').length;
+		alart(count); 
+	
+	How many tag used in a specified div or section ..?
+	--------------------------------------------------
+	like... <div id="tagFind"> More tag used in this div </div>
+	
+	var count = $('#tagFind').find('*').length;
+		alart(count);
+
+=========================================================================================================
+
+
+
+
+	All Selector
+	============
+
+	1. id selector		-> $('#idName').val();
+	2. class selector	-> $('.className').val();
+	3. tag selector  	-> $('p').val();   // <p></p>
+
+	==============================
+	#*# . $('input[type="submit"]')
+
+	#*#. $('*').length;   //* = all
+
+	#*# For table;
+		$('.table tr:odd').addClass('red');
+		$('.table tr:even').addClass('green');
+
+
+
+
+========================================================================================
+
+	Inline jquery function works
+	----------------------------
+	
+	<p onclick="$(this).hide()"> This will be hide by onclick</p>
+
+=======================================================================================	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+====== scrolling======
+
+
+<textarea cols="50" rows="20" id="k"> 
+			Pages you view in this window won’t appear in the browser history and they won’t leave other traces, like cookies, on the computer after you close all open Guest windows. Any files you download will be preserved, however.
+			Pages you view in this window won’t appear in the browser history and they won’t leave other traces, like cookies, on the computer after you close all open Guest windows. Any files you download will be preserved, however.
+			Pages you view in this window won’t appear in the browser history and they won’t leave other traces, like cookies, on the computer after you close all open Guest windows. Any files you download will be preserved, however.
+			Pages you view in this window won’t appear in the browser history and they won’t leave other traces, like cookies, on the computer after you close all open Guest windows. Any files you download will be preserved, however.
+			Pages you view in this window won’t appear in the browser history and they won’t leave other traces, like cookies, on the computer after you close all open Guest windows. Any files you download will be preserved, however.
+			PPages you view in this window won’t appear in the browser history and they won’t leave other traces, like cookies, on the computer after you close all open Guest windows. Any files you download will be preserved, however.
+			</textarea>
+		<p id="add"></p>
+		<input type="checkbox"  id="agree" /> <label> I agree</label>
+		<script type="text/javascript" src="jquery/jquery.js"></script>
+		<script>
+			$(document).ready(function(){
+				$('#agree').attr('disabled','disabled');
+				$('#k').scroll(function(){				
+					var Screen_height = $(this)[0].scrollHeight;					
+					var inner_textarea_Height = $(this).innerHeight();
+					var totalarea = parseInt(Screen_height - inner_textarea_Height);					
+					var current_scrollong_Height = parseInt($('#k').scrollTop());					
+					$('#add').html(totalarea);
+					if(totalarea <= current_scrollong_Height){
+						$('#agree').removeAttr('disabled');
+						$('#add').html(totalarea);
+					}
+				});
+			});
+		</script>
+
+
+
+
+
+
+

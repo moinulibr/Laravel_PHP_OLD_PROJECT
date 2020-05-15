@@ -1,0 +1,136 @@
+   
+	Sending Email by Laravel 
+	============================
+		@if(Session::has("success"))
+			<div class="alert alert-success"></div>
+		@endif
+		1. From <form  enctype="multipart/form-data">
+			<input type="" name="subject"/>
+			<input name="email" type="email"/>
+			<textare name="message" cols="" rows=""></textare>
+  		<div class="form-group">
+                  <label for="inputEmail3" class="col-sm-2 control-label">Attach File</label>
+                  <div class="col-sm-6">
+                    <input type="file" name="file" class="form-control">
+                  </div>
+                </div>
+			<input value="Send Mail"/>
+		</form>	
+
+
+
+-------------------------------------------------------------------------------------------
+
+	2...... env file
+		from 26 num line
+	MAIL_DRIVER=smtp
+	MAIL_HOST=smtp.mailtrap.io
+	MAIL_PORT=2525
+	MAIL_USERNAME=null
+	MAIL_PASSWORD=null
+	MAIL_ENCRYPTION=null
+
+		
+		-------
+	from 26 num line
+	MAIL_DRIVER=smtp
+	MAIL_HOST=smtp.gmail.com
+	MAIL_PORT=587
+	MAIL_USERNAME=moinulibr@gmail.com	
+	MAIL_PASSWORD=set the password of that's gmail .. moinulibr@gmail.com . password = ***** 
+	MAIL_ENCRYPTION=tls
+
+
+	this is the email authentication of gmail.com
+	----------------------------------------------
+	if we want to send email from our gmail account .. have to some customization in our gamil account..
+		Account -> Sign-in & security -> (to the bottom)  Allow less secure apps: OFF ... we have to on it
+			Allow less secure apps:ON
+
+			we may use  from this link.. https://myaccount.google.com/lesssecureapps
+------------------------------------------------------------------------------------------------------------------------
+
+	3.... config->mail.php
+		line no : 32
+		//'host' => env('MAIL_HOST', 'smtp.mailgun.org'),
+	change some things..
+	
+	'host' => env('MAIL_HOST', 'smtp.gmail.com'),
+				from line no: 58
+	 'from' => [
+        	'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
+			       'name' => env('MAIL_FROM_NAME', 'Example'),
+		 ],
+
+		
+	 'from' => [
+         	'address' => env('MAIL_FROM_ADDRESS', 'moinul35@gmail.com'),
+ 			// set any gmail account
+			       'name' => env('MAIL_FROM_NAME', 'Email Verification'),
+   			// set which shown as title like.. Email Verification
+		 ],
+
+	
+	after all have to php artisan serve    ......... coz changed somethings...
+
+
+
+======================================================================================================================================
+	
+	4.. php artisan make:mail SendEmail
+		
+		after this we get a Folder name: Mail into the App folder
+	no works in this App\Mail\SendMail.php file...
+		no need to change in the file.. (SendMail.php) we should no tuch just skip after creating this file
+------------------------------------------------------------------------------------------------------------------------
+	5... controller.php
+		use Mail;
+		use App\Mail\SendEmail;
+		use Session;
+	
+		if we want to validate...
+	
+	$this-validate(
+		"email" =>"required|email",
+		"subject" => '',
+		"message" => "",
+		"file" =>'mimes:jpeg,png,jpg,gif,svg,txt,pdf,ppt,docx,doc,xls'
+		);
+
+
+	$data = [
+            "email" =>$request->email,
+            "subject" =>$request->subject,
+            "mess" =>$request->message,
+            "file" =>$request->file
+        ];
+
+        Mail::send("admin.pages.mail.sendmail", $data, function($message) use ($data)
+            {
+                $message->to($data['email']);
+                $message->subject($data['subject']);
+                $message->from("mukteribr@gmail.com");
+
+                    if($data['file']){
+                $message->attach($data['file']->getRealPath(),array(
+					"as" => "file" . $data['file']->getClientOriginalExtension(),
+					"mime" => $data['file']->getMimeType())
+				);
+			}
+            }
+            );
+            return redirect()->back();
+
+
+
+---------------------------------------------------------------------------------------------
+	6... in the email template have to add
+		here is shown form data array.. like.. $email,$subject,$bodyMessage as blow
+	 <p>
+           {{ $bodyMessage }}
+        </p>
+	{{ $email }}
+
+
+
+

@@ -1,0 +1,325 @@
+/*
+
+
+		<!--------------------------------========================================------------------------------->
+		
+		$data['allPatient'] = Patienttest::join('billpaymentvdoctors','billpaymentvdoctors.patienttest_id','=','patienttests.id')
+                                                            ->select('patienttests.*','billpaymentvdoctors.status as billStatus','billpaymentvdoctors.verified as billVerified',
+                                                            'billpaymentvdoctors.vdoctor_id as billVdoctor')
+                                                            ->where('patienttests.vdoctor_id',$doctor_id)->where('patienttests.proceed',1)
+                                                            ->whereIn('patienttests.id',$id)
+                                                            ->orderBy('patienttests.created_at',"asc")
+                                                            ->get();
+															
+															
+		 $data['allPatient'] = Patienttest::where('vdoctor_id',$doctor_id)->where('proceed',1)
+                                                            ->whereIn('id',$id)
+                                                            ->orderBy('created_at',"asc")
+                                                            ->get();
+                                    
+						
+						
+		 $data['allPatient'] = DB::table('patienttests')
+                                            ->join('billpaymentvdoctors','billpaymentvdoctors.patienttest_id','=','patienttests.id')
+                                            ->select('patienttests.*','billpaymentvdoctors.status as billStatus','billpaymentvdoctors.verified as billVerified',
+                                            'billpaymentvdoctors.vdoctor_id as billVdoctor')
+                                            ->where('patienttests.vdoctor_id',$doctor_id)->where('patienttests.proceed',1)
+                                            ->whereIn('patienttests.id',$id)
+                                            ->orderBy('patienttests.created_at',"asc")
+                                            ->get();
+		<!------------------------------======================================--------------------------------->
+		
+		
+		
+
+/*
+
+
+
+
+public function posts()
+{
+    return $this->hasMany('App\Models\Post');
+}
+
+$user = User::withCount(['posts as post_views' => function($query) {
+    $query->select(DB::raw('sum(post_views)'));
+}])->find($id);
+// $user->post_views
+
+====================
+
+//Model
+public function ratingSum()
+{
+  return $this->hasMany('App\Rating')
+    ->selectRaw('SUM(score) as total')
+    ->groupBy('post_id');
+}
+//Query
+Post::with('ratingSum')->get();  
+	//but geting empty
+now..
+return $this->hasMany('App\Rating') ->selectRaw('ratingtablename.post_id,
+SUM(ratingtablenaem.score) as total')
+ ->groupBy('ratingtablename.post_id');
+		---------------
+Orm::withCount(['relation as relation_sum' =>function($query){
+    $query->select(DB::raw("sum(amount) as relationsum");
+}])
+
+select `a`.*, (select sum(amount) from `relation` 
+where `a`.`id` = `relation`.`aid`) as `relation_sum_count` from `a` ;
+============================================================================
+	
+
+	Sub Query
+<!--=====================================================================--->
+	if($request->input('from'))
+        {   
+            $from           = date("Y-m-d",strtotime($request->input('from')."+0 day"));  
+            $data['from']   = $request->input('from');
+        }
+        else{ 
+            $from =  date('Y-m-d',strtotime(date('Y-m-d')."+0 day")); 
+        }
+
+        if($request->input('to'))
+        {   
+            $to         = date("Y-m-d",strtotime($request->input('to')."+1 day"));  
+            $data['to'] = $request->input('to');
+        }
+        else{ 
+            $to =  date('Y-m-d',strtotime(date('Y-m-d')."+1 day")); 
+        }
+<!------------------------------------------------------------->
+		function ptest($from ,$to)
+                        {
+                            return Patienttest::where('proceed',1)
+                                    ->whereBetween('created_at',[$from,$to])
+                                    ->get();
+                        }
+                            //---for both doctor
+                            function bothTestAmount($from ,$to)
+                            {
+                                return Patienttest::where('proceed',1)
+                                        ->where('doctor_id','!=',0)
+                                        ->where('vdoctor_id','!=',0)
+                                        ->whereBetween('created_at',[$from,$to])
+                                        ->get();
+                            }
+                                //for mbbs
+                        function mbbsGroupBYptest($from ,$to)
+                        {
+                           //return  Patienttest::where('proceed',1)->where('doctor_id',2)->whereBetween('created_at',[$from,$to])->sum('total_amount');
+                            return  Patienttest::where('proceed',1)
+                                ->where('doctor_id','!=',0)
+                                ->where('vdoctor_id','!=',0)
+                                ->select('*',DB::raw("SUM(test_accepted_percent_amount_mbbs) as mbbsTotalAmount ,
+                                    SUM(total_test) as mbbsTotalTest ,SUM(total_amount) as mbbsSellTotalAmount 
+                                    ,SUM(total_amount - test_accepted_percent_amount_mbbs) as profit")
+                                    )
+                                ->orderBy("created_at")
+                                ->groupBy(DB::raw("doctor_id"))
+                                ->whereBetween('created_at',[$from,$to])
+                                ->get();
+                        }
+
+                            //for vdoc
+                        function vdocGroupBYptest($from ,$to)
+                        {
+                            return  Patienttest::where('proceed',1)
+                            ->where('doctor_id','!=',0)
+                            ->where('vdoctor_id','!=',0)
+                            ->select('*',DB::raw("SUM(test_accepted_percent_amount_vdoc) as vdocTotalAmount ,
+                                    SUM(total_test) as vdocTotalTest ,
+                                    SUM(total_amount) as vdocSellTotalAmount , 
+                                    SUM(total_amount - test_accepted_percent_amount_vdoc) as vdocprofit")
+                                )
+                            ->orderBy("created_at")
+                            ->groupBy(DB::raw("vdoctor_id"))
+                            ->whereBetween('created_at',[$from,$to])
+                            ->get();
+                        }
+                /*=====Total income from Patienttest table end ======= */
+
+
+                /*=====Cost from mbbsDoctorBillPaid table method====== */
+                        function mbbsCost($from ,$to)
+                        {
+                            return Billpayment::whereBetween('created_at',[$from,$to])->get();
+                        }
+                /*======Cost mbbsDoctorBillPaid table end ======= */
+
+
+                /*======Cost from villageDoctorBillPaid table method==== */
+                        function vdCost($from ,$to)
+                        {
+                            return Billpaymentvdoctor::whereBetween('created_at',[$from,$to])->get();
+                        }
+                /*======Cost villageDoctorBillPaid table end ====== */
+            
+
+                /*=======Cost from salary table method===== */
+                    function salaryCost($from ,$to)
+                    {
+                        return Salary::whereBetween('created_at',[$from,$to])->get();
+                    }
+                /*======Cost salary table end ======== */
+            
+
+                /*=======Cost from salary table method===== */
+                    function advanceSalaryCost($from ,$to)
+                    {
+                        return Salary_advance::whereBetween('created_at',[$from,$to])->get();
+                    }
+                /*======Cost salary table end ======== */
+            
+                
+                /*=====Cost from dailyExpense table method==== */
+                    function dExpense($from ,$to)
+                    {
+                        return Daily_expense::whereBetween('created_at',[$from,$to])->get();
+                    }
+                    function groupBydExpense($from ,$to)
+                    {
+                        return Daily_expense::select('*',DB::raw("SUM(amount) as purposeAmount"))
+                                            ->whereBetween('created_at',[$from,$to])
+                                            ->groupBy(DB::raw("expense_purpose_id"))
+                                            ->get();
+                    }
+                /*======Cost dailyExpense table end ======= */
+    /*=============================================================================================== */
+    /*=============================================================================================== */
+
+
+    /*-----------------------------------Method Call part---------------------------------------------*/
+            $data['patienttestSell']            = ptest($from ,$to);
+                    /*-------------*/
+            $data['mbbsGroupBYSummary']         = mbbsGroupBYptest($from ,$to);
+            $data['mbbsTotalSell']              =  $data['mbbsGroupBYSummary']->sum('mbbsSellTotalAmount');
+            $data['mbbsTotalProfit']            =  $data['mbbsGroupBYSummary']->sum('profit');
+                    /*--------------- */
+            $data['vdocGroupBYSummary']         = vdocGroupBYptest($from ,$to);
+            $data['vdocTotalSell']              =  $data['vdocGroupBYSummary']->sum('vdocSellTotalAmount');
+            $data['vdocTotalProfit']            =  $data['vdocGroupBYSummary']->sum('vdocprofit');
+                    /*--------------- */
+            $data['mbbsDoctorCost']             = mbbsCost($from ,$to);
+
+            $data['villageDoctorCost']          = vdCost($from ,$to);
+
+            $data['salaryCost']                 = salaryCost($from ,$to);
+
+            $data['advanceSalaryCost']          = advanceSalaryCost($from ,$to);
+
+            $data['dailyExpenseCost']           = dExpense($from ,$to);
+            $data['dailyExpenseGroupByCost']    = groupBydExpense($from ,$to);
+            $data['dailyExpenseGroupByTotalCost'] = $data['dailyExpenseGroupByCost']->sum('purposeAmount');
+    /*-----------------------------------Method Call part end---------------------------------------------*/
+
+
+
+            /* ============================Calculation Part================================= */
+                        /* Total Patienttest */
+            $data['patienttestSellTotalAmount']     =  $data['patienttestSell']->sum('total_amount');        
+            $data['patienttestSellTotalTest']       =  $data['patienttestSell']->sum('total_test');
+
+                    /* mbbs due amount */
+            $data['BothDoctorComission']            =   bothTestAmount($from ,$to);
+            $data['mbbsDoctorDueFromComission']     =   $data['BothDoctorComission']->sum('test_accepted_percent_amount_mbbs');
+            $data['totalTestmbbsDoctor']            =   $data['BothDoctorComission']->sum('total_test');
+                    /* vdoctor due amount */
+            $data['vDoctorDueFromComission']        =   $data['BothDoctorComission']->sum('test_accepted_percent_amount_vdoc');
+            $data['totalTestmbbsDoctor']            =   $data['BothDoctorComission']->sum('total_test');
+                                /* ______________________________________________*/
+
+                    /* MBBS Doctor Paid /cost*/
+            $data['mbbsDoctorTotalPaid']            =  $data['mbbsDoctorCost']->sum('amount');
+            //$data['mbbsDoctorTotalTest']            =  $data['mbbsDoctorCost']->sum('total_test');//not working
+                     /*-------for mbbs------------  */
+            $data['mbbsDueAmount']                  = $data['mbbsDoctorDueFromComission'] - $data['mbbsDoctorTotalPaid'] ;
+            $data['mbbsStatus1_Paid']               = $data['mbbsDoctorDueFromComission'] == $data['mbbsDoctorTotalPaid'] ? 1 : 0 ;
+                                /* ______________________________________________*/
+
+                    /* Village Doctor Paid /cost*/
+            $data['villageDoctorTotalPaid']         =  $data['villageDoctorCost']->sum('amount');
+           // $data['villageDoctorTotalTest']         =  $data['villageDoctorCost']->sum('total_test');//not working
+                    /*-------for village doctor------------  */
+            $data['vdoctorDueAmount']               = $data['vDoctorDueFromComission'] - $data['villageDoctorTotalPaid'] ;
+            $data['vdStatus1_Paid']                 = $data['vDoctorDueFromComission'] == $data['villageDoctorTotalPaid'] ? 1 : 0 ;
+                                /* ______________________________________________*/
+                    /*---------------comission Summary--------------- */
+            $data['totalComissionAmount']           = $data['mbbsDoctorDueFromComission'] + $data['vDoctorDueFromComission'];
+            $data['totalComissionPaidAmount']       = $data['mbbsDoctorTotalPaid'] + $data['villageDoctorTotalPaid'];
+            $data['totalComissionDueAmount']        = $data['totalComissionAmount']  - $data['totalComissionPaidAmount'];
+            $data['totalComissionAmountStatus1_paid'] = $data['totalComissionAmount']  == $data['totalComissionPaidAmount'] ? 1 : 0;
+                    /*---------------comission Summary--------------- */
+
+                    /* Employee Salart Paid /cost */
+            $data['totalSalaryPaid']                =  $data['salaryCost']->sum('amount');
+            $data['totalBonus']                     =  $data['salaryCost']->sum('bonus');
+            $data['totalPenalty']                   =  $data['salaryCost']->sum('penalty');
+            $data['totalSalaryWithBonus']           =   $data['totalSalaryPaid'] + $data['totalBonus']  -   $data['totalPenalty'] ;
+                                 /* ______________________________________________*/
+
+                    /* Employee Advance Salart Paid /cost*/
+            $data['totalAdvanceSalaryPaid']        =  $data['advanceSalaryCost']->sum('amount');
+                                 /* ______________________________________________*/
+
+                    /* Daily Expense Cost */
+            $data['dailyTotalExpense']        =  $data['dailyExpenseCost']->sum('amount');
+                                 /* ______________________________________________*/
+            /* ============================Calculation Part end============================ */
+
+           /* ==========Now In our hand======================== */
+           $data['nowInOurHand'] = $data['patienttestSellTotalAmount'] - ( $data['totalComissionPaidAmount']  + $data['totalSalaryWithBonus'] +  $data['totalAdvanceSalaryPaid'] + $data['dailyTotalExpense']);
+           /* ==========Now In our hand======================== */
+
+
+           /* ==========Net Profit======================= */
+           $data['netProfit'] = $data['patienttestSellTotalAmount'] - ( $data['totalComissionAmount']  + $data['totalSalaryWithBonus'] +  $data['totalAdvanceSalaryPaid'] + $data['dailyTotalExpense']);
+           /* ==========Net Profit======================== */
+
+<!--================================================================================-->
+
+
+
+<!--================================================================================-->
+<!--================================================================================-->
+	$data['company'] = DB::table('customers')
+        //->where('customers.status','=',1)
+        ->select('customers.*', DB::raw('(select sum(addproducts.stock) 
+		from addproducts where addproducts.customerid = customers.id)
+		 as totalStock'))->groupBy('customers.id')
+        ->paginate(30);
+<!--================================================================================-->
+<!--================================================================================-->
+	have to see 
+	==========
+$categories = \DB::table('dental_support_categories AS c')
+    ->select(\DB::raw('c.*, (SELECT COUNT(t.id) FROM dental_support_tickets t WHERE t.category_id=c.id AND t.status=0) AS num_tickets, (SELECT COUNT(a.id) FROM dental_support_category_admin a WHERE a.category_id=c.id) AS num_admins'))
+    ->where('c.status', 0)
+    ->orderBy('c.title')
+    ->get();
+
+
+<!--==============================================================================-->
+		single Sub query
+		===============
+  return $data = Patienttest::where('proceed',1)
+              ->select('*',DB::raw("SUM(test_accepted_percent_amount_mbbs) as mbbsTotalAmount"))
+              ->orderBy("created_at")
+              ->groupBy(DB::raw("doctor_id"))
+              ->whereBetween('created_at',[$from,$to])
+              ->get();
+    
+
+		Multipule Sub query
+		==================
+
+ return  Patienttest::where('proceed',1)
+               ->select('*',DB::raw("SUM(test_accepted_percent_amount_mbbs) as mbbsTotalAmount ,SUM(total_test) as mbbsTotalTest"))
+               ->orderBy("created_at")
+               ->groupBy(DB::raw("doctor_id"))
+               ->whereBetween('created_at',[$from,$to])
+               ->get();    

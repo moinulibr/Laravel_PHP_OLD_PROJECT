@@ -1,0 +1,79 @@
+	
+	if section details is little, then we can fill like below  
+
+	@section('title','Pofile')
+	---------------------------------------
+
+	@stack('')  //only for CSS and JS  //[its alternative of yeild ]
+	==========
+	@stack('css')
+	===============
+	@push('css')
+		<style>
+                            
+			.favorite_posts{
+
+				color: blue;
+
+		  		}
+
+  		</style>
+	@endpush
+	---------------------------------
+
+
+	@stack('js')
+	===============
+	@push('js')
+
+
+
+	@endpush
+___________________________________________________________________
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

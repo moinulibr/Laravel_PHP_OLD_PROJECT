@@ -1,0 +1,8 @@
+	 
+	.\mysql -u root -p
+	password
+	show databases; show databases;
+	use databaseName;   use restruent;
+	source newdatabase.sql;   source chalet9.sql;
+	
+	

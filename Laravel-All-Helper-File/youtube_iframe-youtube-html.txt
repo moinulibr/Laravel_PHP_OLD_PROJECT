@@ -1,0 +1,11 @@
+for auto play, when user visite your site, it automatically plaies
+___________________________________________________________________
+	?autoplay=1
+
+Value 0 (default): The video will not play automatically when the player loads.
+Value 1: The video will play automatically when the player loads.
+
+
+<iframe width="420" height="315"
+src="https://www.youtube.com/embed/tgbNymZ7vqY?autoplay=1">
+</iframe>

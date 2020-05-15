@@ -1,0 +1,9 @@
+	
+	intended
+	========>
+	       ->-> this redirect to the previous place 
+		like.. after login..where from we get a login
+		link and from this link we logedin .. after login
+		its redirect thats place 
+
+	return redirect()->intended();	

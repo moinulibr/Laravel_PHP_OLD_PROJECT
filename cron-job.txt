@@ -1,0 +1,59 @@
+
+
+	
+
+	/*
+	|-----------------------------------------------------------------------
+	| Database Backup By Cronjob From Live Server
+	|-----------------------------------------------------------------------
+	/*
+		Cron job setup
+		=============
+	
+		In The Comman Input Field
+		#---------------
+		/usr/local/bin/php /home/dotcaayc/digilab.dotcoom.com/cron.php
+		#---------------
+
+	/*
+	|-------------------------------------------------------------------------
+	| In the cron.php file, which is in the root folder in the laravel project
+	| its below or beside of .env file.. 
+	|-------------------------------------------------------------------------
+	/*		
+		cron.php
+		========
+	    #The URL that we want to GET.
+            $url = 'https://digilab.dotcoom.com/database-backup-run-cron';
+            #Use file_get_contents to GET the URL in question.
+            $contents = file_get_contents($url);
+	
+	Now in my laravel project ... 
+
+		web.php
+		======
+
+	Route::get('database-backup-run-cron','CronController@databaseBackRun')->name('databaseBackRundf');
+
+
+	Now all are the before process
+
+	CronController.php
+	databaseBackRun()
+	{
+	 	//Artisan::call('schedule:run'); its working
+      	 	#use Illuminate\Support\Facades\Artisan;
+        	Artisan::call('backup:run'); 
+	}
+
+
+
+
+
+
+
+	/usr/local/bin/php ./public_html/freescout/artisan schedule:run >> '/dev/null' 2>&1
+	wget https://drm.software/admin/drm-sync-all ##[full route]
+
+
+

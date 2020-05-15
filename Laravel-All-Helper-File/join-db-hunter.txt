@@ -1,0 +1,83 @@
+
+
+
+
+	DB::table('subcategories')
+		->join('categories','subcategories.category_id','categoies.id')
+		 ->select('subcategories.*','categories.name')
+		 ->get();
+
+		DB::table('subcategory')
+		->join('categories','subcategories.category_id','categoies.id')
+		 ->get();
+	we  get all data of categories tables.. but its not need to get all , coz time bashe lagbe..
+
+->join('join_table','From_which_table.join_table_id','join_table.primary_key_id')
+--------------------------------------------------------------------------------------
+
+	DB::table('posts')
+		->join('categories','posts.cat_id','categoies.id')
+		->join('subcategories','posts.sub_cat_id','subcategoies.id')
+		->select('posts.*','categories.name as cat_name','subcategories.name as sub_cat_name')
+		->get();	
+
+	in the blade file...
+	   after foreach
+		$post->title;
+		$post->cat_name;
+		$post->sub_cat_name;
+
+___________________________________________________________________________________
+
+
+	in the updating time
+	--------------------
+	DB::table('posts')
+		->join('categories','posts.cat_id','categoies.id')
+		->join('subcategories','posts.sub_cat_id','subcategoies.id')
+		->select('posts.*','categories.name as cat_name','subcategories.name as sub_cat_name')
+		->where('posts.id',$id)
+		->first();
+
+
+___________________________________________________________________________________
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

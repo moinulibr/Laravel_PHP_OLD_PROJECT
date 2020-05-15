@@ -1,0 +1,13 @@
+
+
+	<a href="javascript:Clickheretoprint()" data-id="{{ $product->id }}">
+	document.getElementsByClassName('myClassName')[0].id
+
+	$(this).data().value;
+	$("span#spanTest").data().value;	
+
+	$(this).data("id") // returns 123
+	$(this).attr("data-id", "321"); //change the attribute
+	$(this).data("id") // STILL returns 123!!!
+	$(this).data("id", "321")
+	$(this).data("id") // NOW we have 321

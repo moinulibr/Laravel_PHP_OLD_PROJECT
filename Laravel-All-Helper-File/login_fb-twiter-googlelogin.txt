@@ -1,0 +1,355 @@
+
+	https://github.com/laravel/socialite
+	
+	Facebook login
+	==============
+	search in google : facebook login in laravel 
+	Laravel Socail Authentication with Socialite -- Scotch
+	------------------------------------------------------
+
+	step:1
+	======> in composer
+	
+	//composer create-project laravel/laravel lara-socail [new project name]
+
+
+
+	step:2
+	======
+		some changes in the database-> migrations: table data Schema;
+		
+		$table->increments('id');
+		$table->string('name');
+		$table->string('email')->nullable();
+		$table->string('password',100)->nullable();
+		$table->string('provider')->nullable();
+		$table->string('provider_id')->nullable();
+		$table->rememberToken();
+		$table->timestamps();
+
+	step:3
+	======
+		php artisan migrate
+
+	step:4
+	====== in the User Model
+	
+	protected $fillable = [
+			'name','email','password','provider','provider_id'
+				];
+
+	step:5
+	======
+	php artisan make:auth
+
+	step:6
+	====== Add Socialite in composer
+
+	composer require laravel/socialite
+	
+
+	step:7
+	======
+		now have to add somethings in the config -> app.php file
+	
+	'providers' => [
+			Laravel\Socialite\SocialiteServiceProvider::class,
+			],
+	
+
+	and have to add in the aliases also
+
+	'aliases' => [
+		'Socialite' => Laravel\Socialite\Facades\Socialite::class,
+			],
+
+	
+	step:8
+	=======> config -> services.php [from facebook api]
+	
+		'facebook' => [
+			'client_id'	 => env('FACEBOOK_ID'),
+			'client_secret'  => env('FACEBOOK_SECRET'),
+			'redirect'	 => env(FACEBOOK_URL),
+				],
+		
+
+	step:9
+	====== in the .env file
+
+	FACEBOOK_ID=
+	FACEBOOK_SECRET=
+	FACEBOOK_URL=
+	
+	
+	step:10 from facebook: 
+	=======> https://developers.facebook.com/apps  
+		from My apps
+		    +Add a New App
+		create a new app id
+		
+		Display Name:  which want to shown like ...
+		contract Email: moinulibr@gmail.com	
+				create App ID
+
+	Dashboard
+	---------
+	setting
+	    basic          App Domains
+			   localhost
+
+				+Add Platform  -> Website
+			Site URL
+			localhost/myproject [copy from the localhost project url and here past]
+		
+							Save Changes
+	App Review
+		Make LearnSulotionLaravel public?
+			yes  -> choose category -> news or other have to select and confirm
+
+	Now Status :live on [it shown top and right side]
+
+	now again go to setting -> basic
+		App ID:
+		like6454545454545like.....
+		App Secret:
+		dfjkldjfdfkdf like
+		
+		and blow Website Site URL
+		Site URL : copy and past to the FACEBOOK_URL= 
+				
+	---------------------------
+	PRODUCT
+	Facebook login ->setting-> Valid OAuth redirect URIs
+					http://localhost:8000   -> now Save Changes >
+		Use Strict Mode for Redirect URIs now enable -> have make NO
+	---------------------------
+	
+	9. 
+	====
+	in the .env file
+
+	FACEBOOK_ID=App ID
+	FACEBOOK_SECRET=App Secret
+	FACEBOOK_URL=https://localhost:8000/auth/facebook/callback	[auth/facebook/callback   , this is extra.. and must add this]
+	
+
+	step:11
+	======= route
+	
+	//route::get('auth/{provider}','Auth\AuthController@redirectToProvider');
+	//route::get('auth/{provider}/callback','Auth\AuthController@handleProviderCallback');
+
+
+	route::get('auth/{provider}','Auth\LoginController@redirectToProvider');
+	route::get('auth/{provider}/callback','Auth\LoginController@handleProviderCallback');
+
+
+	step:12
+	======> in the login controller have to use
+		
+		use Auth;
+		use Socialite;
+		use App\User;
+	
+	public function redirectToProvider($provider)
+	{
+	   return Socialite::driver($provider)->redirect();
+	}
+	
+	public function handleProviderCallback($provider)
+	{
+	   $user = Socialite::driver($provider)->user();
+	   $authUser = $this->findOrCreateUser($user,$provider);
+	   Auth::login($authUser,true);
+		return redirect($this->redirectTo); 
+	}
+
+	public function findOrCreateUser($user,$provider)
+	{
+	     $authUser= User::where('provider_id',$user_id)->first();
+		if($authUser)
+		{
+		    return $authUser;
+		}
+		return User::create([
+				'name'  =>$user->name,
+				'email'  =>$user->email,
+				'provider' => $provider,
+				'provider_id' => $user_id
+				]);
+	}
+
+
+-------------------------------------------------------------------------------------------------------------------------
+	step:12
+	=======
+		in the blade file where want to show facebook login .. like..
+	
+	<a href="{{url('auth/facebook')}}" class="btn btn-facebook"><i class="fa fa-facebook"></i>Facebook login</a>
+-------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+============================================================================================================================
+
+	we can use some common code for facebook , google , twitter login..
+		only one time setup all of the item
+	2. same route
+	3. same controller. just like..
+	4. same database migration table like..
+	
+	--------------------------------------------------
+	step:1
+	======= > in composer
+	
+	 composer require laravel/socialite
+
+	step:2
+	======
+
+	now have to add somethings in the config -> app.php file
+	
+	'providers' => [
+			Laravel\Socialite\SocialiteServiceProvider::class,
+			],
+	
+
+	and have to add in the aliases also
+
+	'aliases' => [
+		'Socialite' => Laravel\Socialite\Facades\Socialite::class,
+			],
+
+	--------------------------------------------------
+
+
+
+	1.... for every api login.. no changes..  only this 2 route is enough for all
+	==============
+
+	route::get('auth/{provider}','Auth\LoginController@redirectToProvider');
+	route::get('auth/{provider}/callback','Auth\LoginController@handleProviderCallback');
+	
+
+	2.. in the controller
+	=========================
+	
+		use Auth;
+		use Socialite;
+		use App\User;
+	
+	public function redirectToProvider($provider)
+	{
+	   return Socialite::driver($provider)->redirect();
+	}
+	
+	public function handleProviderCallback($provider)
+	{
+		if($provider == twitter){
+	   $user = Socialite::driver($provider)->user();	// [never use here stateless().. its applicable only google and facebook]		
+		}
+		else{
+	   $user = Socialite::driver($provider)->stateless()->user(); [for facebook and google]
+		}
+	   $authUser = $this->findOrCreateUser($user,$provider);
+	   Auth::login($authUser,true);
+		return redirect($this->redirectTo); 
+	}
+
+	public function findOrCreateUser($user,$provider)
+	{
+	     $authUser= User::where('provider_id',$user_id)->first();
+		if($authUser)
+		{
+		    return $authUser;
+		}
+		return User::create([
+				'name'  =>$user->name,
+				'email'  =>$user->email,
+				'provider' => $provider,
+				'provider_id' => $user_id
+				]);
+	}
+
+	
+	step: 3
+	=======
+		some changes in the database-> migrations: table data Schema;
+		
+		$table->increments('id');
+		$table->string('name');
+		$table->string('email')->nullable();
+		$table->string('password',100)->nullable();
+		$table->string('provider')->nullable();
+		$table->string('provider_id')->nullable();
+		$table->rememberToken();
+		$table->timestamps();
+
+	step:3
+	======
+		php artisan migrate
+
+	step:3
+	====== in the User Model
+	
+	protected $fillable = [
+			'name','email','password','provider','provider_id'
+				];
+
+
+
+
+
+===========================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

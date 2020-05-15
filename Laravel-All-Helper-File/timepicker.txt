@@ -1,0 +1,122 @@
+ <label>Default Time Picker</label>
+                                <div class="input-group m-b-15">
+                                    
+                                    <div class="bootstrap-timepicker"><input id="timepicker" type="text" class="form-control"/></div>
+                                    <span class="input-group-addon"><i class="glyphicon glyphicon-time"></i></span>
+                                </div><!-- input-group -->
+                            
+                                <label>24 Hour Mode Time Picker</label>
+                                <div class="input-group m-b-15">
+                                    
+                                    <div class="bootstrap-timepicker"><input id="timepicker2" type="text" class="form-control"/></div>
+                                    <span class="input-group-addon"><i class="glyphicon glyphicon-time"></i></span>
+                                </div><!-- input-group -->
+                          
+                                <label>Specify a step for the minute field</label>
+                                <div class="input-group m-b-15">
+                                    
+                                    <div class="bootstrap-timepicker"><input id="timepicker3" type="text" class="form-control"/></div>
+                                    <span class="input-group-addon"><i class="glyphicon glyphicon-time"></i></span>
+                                </div><!-- input-group -->
+                            
+
+
+
+
+   <!-- Plugins css-->
+    <!---------for Date and Time picker--------------->
+    <link href="{{ asset('admin/links/assets/timepicker/bootstrap-timepicker.min.css') }}" rel="stylesheet" />
+    <link href="{{ asset('admin/links/assets/timepicker/bootstrap-datepicker.min.css') }}" rel="stylesheet" />
+    <!---------for Date and Time picker--------------->
+
+
+
+	autocomplete="off"
+
+
+
+        <!---------for Date and Time picker--------------->
+        <script src="{{ asset('admin/links/assets/timepicker/bootstrap-timepicker.min.js') }}"></script>
+        <script src="{{ asset('admin/links/assets/timepicker/bootstrap-datepicker.js') }}"></script>
+            <!---------for Date and Time picker--------------->
+       
+        <script>
+          // Time Picker
+                jQuery('#timepicker').timepicker({defaultTIme: false});
+                jQuery('#timepicker2').timepicker({showMeridian: false});
+                jQuery('#timepicker3').timepicker({minuteStep: 15});
+    
+                // Date Picker
+                jQuery('#datepicker').datepicker();
+                jQuery('#datepicker2').datepicker();
+                jQuery('#datepicker-inline').datepicker();
+                jQuery('#datepicker-multiple').datepicker({
+                    numberOfMonths: 3,
+                    showButtonPanel: true
+                });
+        </script>
+    <!---------for Date and Time picker--------------->
+
+
+
+
+
+
+
+
+
+===========================================================================================
+	last month from todays (month) //[like... this is february month]
+	 have to take january month...
+	============================
+
+	$month = date("F",strtotime('-1 months'));	// F == Full Month name, M == short like. Jan
+	echo $month;
+
+
+
+
+===============================================================================
+	Date to date different
+	======================
+
+	$searchStarTDay = "2020-02-20";
+        $searchEndTDay  = "2020-02-22";
+	
+	===============
+       return date_diff(
+            date_create($searchEndTDay),  
+            date_create($searchStarTDay)
+        )->format('%a');
+        ============
+
+	====or another way====
+        function daysBetween($dt1, $dt2) {
+            return date_diff(
+                date_create($dt2),  
+                date_create($dt1)
+            )->format('%a');
+        }
+        return daysBetween($searchStarTDay,$searchEndTDay);
+	====or another way====
+
+
+	==============================================
+        $days = (strtotime($searchEndTDay) - strtotime($searchStarTDay)) / (60 * 60 * 24);
+        return $days;
+===========================================================================
+	$start  = date_create('1988-08-10');
+$end    = date_create(); // Current time and date
+$diff   = date_diff( $start, $end );
+
+echo 'The difference is ';
+echo  $diff->y . ' years, ';
+echo  $diff->m . ' months, ';
+echo  $diff->d . ' days, ';
+echo  $diff->h . ' hours, ';
+echo  $diff->i . ' minutes, ';
+echo  $diff->s . ' seconds';
+// Output: The difference is 28 years, 5 months, 19 days, 20 hours, 34 minutes, 36 seconds
+
+echo 'The difference in days : ' . $diff->days;
+// Output: The difference in days : 10398

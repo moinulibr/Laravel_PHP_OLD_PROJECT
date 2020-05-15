@@ -1,0 +1,108 @@
+	
+	this is local scope...
+		it must be camelcase... like.. scopeStatus
+	when we create in the model then laravel understand by finding first socpe word 
+	of a function name .. like scopeActive .... but when we use it in the controller
+		then use only active() method .....
+
+	In the model have to define this...	
+	===============
+		model file name.. like.. Post.php [model]
+	
+    	public function scopeActive($query)
+    	{
+        	return $query->where('active', 1);
+    	}
+
+ 	public function scopeStatus($query)
+    	{
+        	return $query->where('status', 1);
+    	} 	
+
+	and use it in controller
+	========================
+
+	$post = Post::latest()->active()->status()->paginate(10); 
+		//[here we used active() and status() method for scope... and must be use small letter]
+------------------------------------------------------------------------------------
+
+	view composer
+	============
+		when want to show somethings in every page or most of the page...
+		its not need to apply from controller [coz same logic should have used in every controller. its like pain]
+
+	we can solve using view composer .. its logic emplement in the web.php file..
+
+	------------------- web.php
+	
+	View::composer('',function($view){		
+		// View::composer('*',function($view) 
+		if we use * .. then we can use it from any where in our project
+		
+	});
+	
+
+	if we want to use some specified page, then we can use like....
+		-----------------
+	View::composer('layout.fronted.partial.footer',function($view){
+		$categories = App\Category::all();
+		$view->with('categories',$categories);
+	});
+		//Now we can use excess $category from footer page....
+
+	layout/fronted/partial/footer.blade.php
+		-----------------------------
+	
+		@foreach ($categories as category)
+			
+		@endforeach
+
+	----------------------------
+	we can set it in the appServiceProvider.php file.. in the b
+			===================
+  public function boot()
+    {
+	view()->composer('*', function ($view){
+    $pub_type = Publication_type::all();
+    $sliders = Gallery::where('type', 2)->orWhere('type', 3)->get();
+    $view->with('pub_type', $pub_type)->with('sliders', $sliders);
+
+
+        Schema::defaultStringLength(191);   
+    }
+========================================================
+
+
+	{{ config('app.name') }}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

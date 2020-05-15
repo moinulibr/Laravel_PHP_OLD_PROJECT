@@ -1,0 +1,248 @@
+	
+	in the Providers/AppServiceProvider.php file...
+		use Illuminate\Support\Facades\Schema;
+		public function boot()
+    		{
+        		Schema::defaultStringLength(191);
+    		}
+
+	in the Config / database.php file...
+		'engine' => 'InnoDB ROW_FORMAT=DYNAMIC',
+	-----------------------
+	  $table->bigIncrements('id');
+            $table->string('name',50);
+            $table->string('email',120)->unique();
+            $table->timestamp('email_verified_at')->nullable();
+            $table->string('password',100);
+            $table->boolean('status',5)->default(0);
+            $table->boolean('verified',5)->default(0);
+
+==============================================================================================
+	
+		for unique field validation during update
+	-----------------------------------------
+	have to define that's id... like
+
+	'email' => 'required|email|unique:users,email|$id', 	[unique:tableName,uniqueFieldName|that's fields $id]
+------------------------------------------------------------------------------
+=============================================================================	
+
+
+
+	trim($request->email);  //[white space remove by using trim]
+
+	[by default Model name User, and Table name users this type found by laravel]
+
+		if our model name and table name is not equel, then we can set table name and primary key and other in the Model like...
+
+	<?php
+
+	namespace App\Model\User;
+
+	use Illuminate\Notifications\Notifiable;
+	use Illuminate\Foundation\Auth\User as Authenticatable;
+
+	class User extends Authenticatable
+	{
+   		 use Notifiable;
+		
+		protected $table = 'users';
+		protected $primaryKey = 'user_id'; //[if its different, not id, then we can set this way] [if laravel default convension is not match]
+	}
+
+		[match assaining.]
+
+	-------------------- in this Model--- here is protected $fillable = from where we can set , which field can be filled .. 
+
+	and ----- protected $guarded = []; this is alternative of $fillabe ... which field we cantnot fill , that's fields list  have to set in this $guarded
+		
+		// $hidden = which field we don't want to show the users site .. that fields we set here [when select table for get data from table]
+	 protected $hidden = [
+        'password', 'remember_token',
+    			];
+	------------------------
+	When we use ORM  -> we can not insert/create created/updated_at field. ORM automatically fill this
+
+	---------------------------------------------------------------------------------
+	
+	Get data from table.by ORM
+
+	$data = User::all();
+	$data = User::get(['username','password','name']);  //like..select() query
+	$data = User::where('username','hasan')->get(['username','password','name']); [take(20)->orderBy()->get();]
+
+		update
+	======================
+	
+	$data = User::find($id);
+	
+	in the blade file:::- <input name="name" type="text" value={{ old('name') ?? $data->name  }} [if old value has then its show, or new value form database]
+
+	
+	--------------------------- Method spoofing
+		@method('PUT') // from 5.6 
+
+	For delete
+	===========
+	in the controller
+	
+	$data = User::find($id);
+
+	$data->delete();
+
+
+
+
+========================================================================
+	add a extra fields in database schema
+	=====================================
+	
+	php artisan make:migration add_paid_to_users    // php artisan make:migration add_NewFieldName_to_existingTableName
+
+	public function up()
+	{
+   	 Schema::table('users', function($table) {
+        	$table->integer('paid');
+    	});
+	}
+
+	and also change it
+	
+	public function down()
+	{
+    	Schema::table('users', function($table) {
+        	$table->dropColumn('paid');
+    	});
+	}
+		Then....
+	php artisan migrate
+
+	php artisan make:migration add_store_id_to_users_table --table=users   [from 5.6]
+	=================From Sumon vai================
+
+	php artisan make:migration add_verified_colum_to_users_table
+
+	public function up()
+	{
+   	     Schema::table('users', function($table) {
+        	$table->integer('paid');
+    	   });
+	}
+
+	and also change it
+	
+	public function down()
+	{
+    	   Schema::table('users', function($table) {
+        	$table->dropColumn('paid');
+    	   });
+	}
+		Then....
+	php artisan migrate
+
+======================================================================================
+
+
+
+php artisan key:generate
+
+
+
+
+
+
+===================================== ORM Relationship =============================================================
+
+
+		Laravel: Foreign Key Constraints	[search from laravel.com]
+	====================================================
+
+	users table: id,name,email,mobile
+	posts table: user_id, post
+	
+	
+	in the controller
+	--------->====>
+	
+	//$data['post'] = Post::where('user_id',auth()->user()-id)->get();
+	$data['post'] = Post::with('user')->where('user_id',auth()->user()-id)->get();  [Eager Loading.. its depends on foreign key Relationship belognsTo]
+	$data['post'] = Post::with('user')->select('user_id','body','created_at')->get();  //saving loading times for select 	
+		----------------------------
+	
+		[posts tables relation with users table]
+	
+	in the Post Model have to create relation..
+
+		Post.php [Post model]
+
+		public function user()
+			{
+				//return $this->belongsTo(withWhichModelasTable::class,'aganistOfWhichFieldsAsForeignKey');	[its return total object, so when we use it, should $user->name]
+				return $this->belongsTo(User::class);
+			}
+	in the blade file: have to use {{ $post->user->name }}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

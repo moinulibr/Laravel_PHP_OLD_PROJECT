@@ -1,0 +1,57 @@
+
+	{{ Request::routeIs('index') ? 'active' : '' }}
+
+	// routeIs('Have to give here route name not url')
+
+	{{ Request::routeIs('index') ? 'active' : 
+		Request::routeIs('home') ? 'active' : ''
+	}}
+
+	// for one route but passing different route
+	{{ Request::routeIs('viewPublication') && Request::segment(3) != 1 ? 'active' : "" }}
+	{{ Request::routeIs('viewPublication') && Request::segment(3) == 1 ? 'active' : "" }}">
+
+
+
+
+
+
+	<li class="{{  ($_GET['lang'] == 'nl') ? 'active' : '' }}">
+  <li class="{{ request()->is('admin/drm_products*') ? 'active' : '' }}" style="display: {{ ($_GET['lang'] == 'en' || $_GET['lang'] == 'nl' || $_GET['lang'] == 'it' || $_GET['lang'] == 'fr' || $_GET['lang'] == 'es' || $_GET['lang'] == 'sv' || $_GET['lang'] == 'pl' || $_GET['lang'] == 'ru') ? 'none' : '' }}">
+
+ <li data-id="20" class="treeview {{ request()->is(['admin/drm_imports/import*','admin/categories*','admin/drm_products*','admin/drm_products?lang=*']) ? 'active' : '' }}">
+
+
+
+
+ <li class="{{ (($_GET['lang'] || isset($_COOKIE['languageShortcode'])) && (request()->is('admin/drm_products*'))) ? 'active' : '' }}">
+
+
+<ul style="margin-left: -15px;display:{{ (request()->is('admin/drm_products') || $_GET['lang'] == '*' || $_GET['id'] == '*' || request()->is('admin/drm_products/add') || request()->is('admin/drm_products/detail/*') || Request::fullUrl() === url('admin/shop_setting/add?id='.$_GET['id']) || Request::fullUrl() === url('admin/shop_setting?id='.$_GET['id']) || Request::fullUrl() === url('admin/shop_setting/*') ) ? 'list-item' : 'list-item' }}">
+
+    <li class="{{ (Request::fullUrl() === url('admin/shop_setting/add?id='.$_GET['id']) ) ? 'active' : '' }} stockChannel">
+
+
+https://stackoverflow.com/questions/43937494/laravel-active-menu-item-for-url-included-parameters
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,158 @@
+		Create A Notification
+		======================
+	php artisan make:notification Notification\NewAuthorPost		//[when a author create a new post]
+
+	
+	then in the controller....
+	--------------------------
+		Author\PostController.php
+		
+	use App\User;
+	use Illuminate\Support\Facades\Notification;
+	use App\Notifications\Notification\NewAuthorPost;
+
+	
+	$users = User::where('role_id',1)->get();	//[only admin.. notifiy to admin for approving the author new post]
+	
+	 Notification::send($users,new NewAuthorPost($post)); //[we can use it only for users table]
+
+
+
+	_________now in the Notication class_____________
+
+		have to get thats paramitter, which send in the new NewAuthorPost($post);
+		.........................
+	
+		public $post;
+	
+		public function __construct($post)
+    		{
+        		$this->post = $post;
+    		}
+
+
+
+	    	public function toMail($notifiable)
+    		{
+        	  return (new MailMessage)
+                    ->greeting('Hello, Admin')
+                    ->subject('New Post Approval Needed')
+                    ->line('New Post By'.$this->post->user->name . 'need to approved')
+                    ->line('To approve the post click view button')
+                    ->line('Post Title : ' . $this->post->title)
+                    ->action('View', url(route('admin.post.pending.show',$this->post->id)))
+                    ->line('Thank you for using our application!');
+    		}
+
+
+============================================================================================
+	use App\Notifications\Notification\Notification\AuthorPostApproved;
+
+	it works only for users table....
+
+	  $post->user->notify( new AuthorPostApproved($post));	//[single user only ]
+	
+
+============================================================================================
+
+
+	.env file
+	=========
+
+
+MAIL_DRIVER=smtp
+MAIL_HOST=smtp.mailtrap.io
+MAIL_PORT=2525
+MAIL_USERNAME=e9a4ff83d593b4
+MAIL_PASSWORD=e69cbcb0947310
+MAIL_ENCRYPTION=TLS
+
+
+
+
+================================================================================
+
+		Subscrbers Notification
+		=======================
+
+	php artisan make:notification Notification\Subscriber\NewPostNotify
+
+	in the controller..... PostController.php
+	_________________________________________
+	use Illuminate\Support\Facades\Notification;
+	use App\Model\Subscriber\Subscriber;
+	use App\Notifications\Notification\Subscriber\NewPostNotify;
+
+	  $subscribers = Subscriber::all();
+            foreach($subscribers as $subscriber){
+                Notification::route('mail',$subscriber->email)
+                        ->notify(new NewPostNotify($post));
+            }
+
+
+
+
+===============================================================
+		Using queue
+	===============================
+
+	php artisan queue:table
+	php artisan migrate
+
+	NOW=== config/queue.php file
+	-----------------------------
+	 'default' => env('QUEUE_CONNECTION', 'sync'),
+
+	we have to change database of sync... for this have to go .env file..
+
+			QUEUE_CONNECTION=database
+
+
+	ann Now--------------Have to notification class , use 
+
+		implements ShouldQueue
+
+
+
+
+===============but here is a problem==============
+	mailtrap.. email view korer por.. view ar link kaz kore na.. its maybe localhost...ar jonno
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

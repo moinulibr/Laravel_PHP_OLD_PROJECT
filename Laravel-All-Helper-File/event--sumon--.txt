@@ -1,0 +1,185 @@
+
+==============================================================================================================
+		Event
+	=====================
+				when something hapend or hapending [creating,created, retrived,updating,updated,deleting,deleted] from or with database,
+	then create a event....
+	________________________________________
+	
+	php artisan  make:event EventName
+
+	for event , should use it in the related Model.. like User Model...
+		User.php
+	
+	protected $dispatchesEvent = [				//[default property]
+		'created'   => EventName::class			// Event = Created => called to the Event Class
+	];		
+		//[we are firing event by this in the Model,, but we can also firing event in the controller.. for this event healper is aviable,,,like.. event(UserCreateEvent::class);]
+	
+	
+	
+	in the EventName.php file.........
+	________________________
+	use App\Model\User;
+	public $user;	
+
+	public function __constant(User $user)
+	{
+		$this->user = $user;
+	}
+	
+	broadcastOn = have to make  array blank
+
+	----_____________________-------_______________
+
+	Now have to make a listener
+
+	php artisan make:listener UserCreatedListener	//[Lintener]
+
+	
+	
+	Now have to bind event and listener in the Provider folder -> EventServiceProvider.php
+				this is Default	
+			
+		 protected $listen = [
+        		'App\Events\Event' => [
+            			'App\Listeners\EventListener',
+       					 ],
+   				 ];
+
+						all of the event or listener have to define there as array, like that's..........
+		
+								
+		 protected $listen = [			//['App\Events\Event' = Event. for [one event] or aganist of this event more [up to one/two] listener need to applied, so listener used as array]
+        		'UserCreated::class' => [
+            			UserCreatedListener::class,		//['App\Listeners\EventListener = Listener.. use as array, coz here we use more more against of one event]
+       					 ],
+   				 ];
+
+
+		
+
+	==============___________________====================
+
+	in the UserCreatedListener.php file
+		-----------------------
+
+    Class UserCreatedListener
+
+	public function handle($event)
+	{
+		$email = $event->user->email;    //[we get inserted email address. now we can do every things...]
+	}
+      }
+	
+___________________________________________________________________________________________________________________
+	
+	We can send a email by using event and listener ... so we can use same ...
+
+
+	----------------________________------------------- Email template or View 
+
+	php artisan make:mail SendVerification
+	
+	ant other configuration in .env file as my other Mail file .....
+
+	UserCreatedListener.php
+	------------------------
+	public function handle($event)
+	{
+		$email = $event->user->email;    //[we get inserted email address. now we can do every things...]
+		Mail::to($email)->send(new SendVerification($event->user));
+	}	
+	
+	
+	now in the SendVerificatoin.php file
+	------------------------------------
+	
+	 public $mess;
+    	 public $sub;
+
+  
+    public function __construct($subject,$message)
+    {
+        $this->sub = $subject;
+        $this->mess = $message;
+    }
+
+    public function build()
+    {
+        $e_subject  = $this->sub;
+        $e_message  = $this->mess;
+        
+        return $this->view('admin.pages.mail.sendmail',compact("e_message"))->subject($e_subject);
+    }
+
+__________________________________________________________________________________________________________
+
+	Route::get('/verify/{token}','AuthController@verifyEmail');
+
+	in the controller....
+	
+	public function verifyEmail($token)
+	{
+		$user = User::where('verification_token',trim($token))->first();
+		
+		if($user == "")
+		{
+		    session()->flash();
+		   redirect()->route(home);  
+		}
+		
+		$user->update(['verify'=>1,'verification_token'='']);
+		
+		redirect()->...... Or 
+
+		auth()->login($user);   //[login complete.. ]
+		
+		now can redirect here....
+	}
+
+
+----_______________________________------
+================================================================== use Queue ................
+
+	
+	config folder -- queue.php file....
+
+			//'default' => env('QUEUE_DRIVER', 'sync'),
+	'default' => env('QUEUE_DRIVER', 'database'),      //here used database
+
+	in the .env file..........
+	
+	QUEUE_DRIVER=database
+	
+	then......
+
+	php artisan queue:table
+
+	php artisan migrate
+
+
+
+	in the UserCreatedListener.php file
+		-----------------------
+     Class UserCreatedListener implements ShouldQueue
+	public function handle($event)
+	{
+		$email = $event->user->email;    //[we get inserted email address. now we can do every things...]
+	}
+      }
+
+
+	then.....
+
+	php artisan queue:work
+
+	corn
+
+
+
+
+
+
+
+

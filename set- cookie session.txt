@@ -1,0 +1,108 @@
+
+	
+
+		        setcookie('languageShortcode', $_GET['lang'], time()+60*60*24*365);
+			isset($_COOKIE['languageShortcode'])
+
+
+
+			//session(['user_id' => CRUDBooster::myId()]);
+			session()->put('user_id', CRUDBooster::myId());
+	       		 session(['lang_code'=>$_GET['lang']]);
+			 dd(session::get('user_id'));
+
+
+
+
+	
+	$test = array(
+   		'fname'=>'test',
+   		'lname'=>'test'
+		);
+		$response->withCookie(cookie('name', $test, 60));
+		return $response;
+
+
+
+
+https://webrewrite.com/store-array-values-cookie/
+	$prod = array(
+    0 => array(134563, 'philips'),
+    1 => array(156787, 'videocon'),
+    2 => array(78654, 'samsung')
+);
+Let’s try to set an array value into a cookie and see what happens.
+setcookie('products', $prod);
+
+
+
+
+	If we try to set an array value then a cookie will not be created. To set an array value into a cookie first, we need to convert them into a string .
+$prod = array(
+    0 => array(134563, 'philips'),
+    1 => array(156787, 'videocon'),
+    2 => array(78654, 'samsung')
+);
+$prod = json_encode($prod, true); setcookie('products', $prod);
+Now our cookie is set, We can retrieve their value using $_COOKIE global variable.
+$prod = $_COOKIE['products'];
+$prod = stripslashes($prod);    // string is stored with escape double quotes 
+$prod = json_decode($prod, true);
+ 
+var_dump($prod);
+
+
+
+
+
+We can use a serialize method to convert an array into a string and then store them in a cookie.
+$prod = array(
+    0 => array(134563, 'philips'),
+    1 => array(156787, 'videocon'),
+    2 => array(78654, 'samsung')
+);
+$prod = serialize($prod); 
+setcookie('products', $prod);
+
+
+Retrieving a  cookie value.
+$prod = $_COOKIE['products'];
+$prod = stripslashes($prod);     
+$prod = unserialize($prod);
+ 
+var_dump($prod);
+ find these two methods helpful for storing array values in a cookie. If you know any better method, you can discuss them in comments.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

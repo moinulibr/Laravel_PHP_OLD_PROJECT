@@ -1,0 +1,547 @@
+
+
+
+/*=========================================================================================*/
+	/*=========================Reload without refresh========================*/
+/*=========================================================================================*/
+  $("#abilityListContainer").load(location.href+" #abilityListContainer>*",""); 
+/*=========================================================================================*/
+	/*=========================Reload without refresh========================*/
+/*=========================================================================================*/
+
+
+
+
+/*=========================================================================================*/
+/*=========================================================================================*/
+<!--------------------------------Automatic Refresh After 2 seceond-------------------------->
+<script>
+    $(document).ready(function() {
+
+            function myFunction(){
+                //alert('working');
+                $("#divReloadWithoutRefresh").load(location.href+" #divReloadWithoutRefresh>*",""); 
+            }
+       			//Recursive Function
+                //---------------------------------------------------------------------
+                var i = 1; 
+                function myLoop () {          
+                setTimeout(function (){  
+                    myFunction(); 
+                    //alert('2 pore L hello');         
+                    i++;                    
+                        if (i < 10) {            
+                            myLoop();            
+                        }                      
+                    }, 2000)
+                }
+                myLoop();
+            //---------------------------------------------------------------------
+    });
+</script>
+<!--------------------------------Automatic Refresh After 2 seceond-------------------------->
+/*=========================================================================================*/
+/*=========================================================================================*/
+
+
+
+
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
+        <!-----for Ajax handeling----->
+<script type="text/javascript">
+    $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+</script>
+<!-----for Ajax handeling----->
+
+/*=========================================================================================*/
+/*=========================================================================================*/
+$(function(){
+
+	$('#addInformation').on("submit",function(e){
+		e.preventDefault();
+
+		var form = $(this);
+		var url = form.attr("action");
+		var type = form.attr("method");
+
+		var data = form.serialize();  // for getting All form data like, father_name etc....
+
+
+			//ajax start	
+			/*
+				url: ,
+				data: ,
+				type:,
+				datatype: ,
+				beforeSend:,
+				success: ,
+				complete:,
+
+				datatype = will be more then 3 typies. like  	"JSON,HTML,XML",
+							when we post data, then use JSON must, when we get data then use JSON OR HTML or Other
+
+				beforeSend:,
+				success: ,
+				complete:,  this 3 are also method, so have to use {}; so we use its like function like...
+
+					success: function(){
+						
+					}, here use must coma , coz this is also parametter...
+			*/
+				$.ajax({		// url,data,type,datatype,success thats all are the parametter.. so we should use , coma end of the point
+				url: url,
+				data: data,
+				type: type,
+				datatype:"JSON",
+				beforeSend:function(){
+					$('.loading').fadeIn();
+				},
+				success: function(data){
+						if(data == 'success')
+						{
+							$('#myModal').modal("hide");
+							swal("Great","Successfully Add Information","success");
+							form[0].reset();  //this for after completing processed, the all data of form will be clear.. like reset
+							return getinformation();
+						}else{
+							swal("Wrong","Information is not Added","error");
+						}
+					},
+				complete:function(){
+					$('.loading').fadeOut();
+				},
+		});
+		 //end ajax
+
+	});
+		// end submit optional details works
+
+
+
+
+
+
+
+			//Recursive Function
+//---------------------------------------------------------------------
+var i = 1;                     //  set your counter to 1
+
+function myLoop () {           //  create a loop function
+   setTimeout(function () {    //  call a 3s setTimeout when the loop is called
+     getinformation();
+     //alert('2 pore L hello');          //  your code here
+      i++;                     //  increment the counter
+      if (i < 10) {            //  if the counter < 10, call the loop function
+         myLoop();             //  ..  again which will trigger another 
+      }                        //  ..  setTimeout()
+   }, 3000)
+}
+
+myLoop();                      //  start the loop
+
+//---------------------------------------------------------------------
+
+
+
+
+
+
+
+
+		//geting view data from another blade file automatically
+//-----------------------------------------------------------------------
+
+ //getinformation();
+
+	//creating a function for getting
+	function getinformation(){
+		//alert('1 age k');
+		var url = $("#getData").data("url");  //when we set any data as <div id="getData" data-url="something">
+		$.ajax({
+				url: url,
+				type: "get",
+				datatype: "html",
+				success: function(response){
+					$('#showAllDataFromOtherPageByJson').html(response);
+				},
+		});
+	}
+	//end function
+
+//return getinformation();
+
+		
+
+
+
+		//-----view single 
+		//-----------------------------------------------------------------------
+
+					$(document).on("click", "#view", function(e){
+						e.preventDefault();
+						var id = $(this).data("id");
+						var url = $(this).attr('href');
+						
+						$.ajax({
+							url: url,
+							data: {id},
+							datatype: "JSON",
+							success: function(result){
+								$('#viewModal').modal('show');
+								$('#view_father_name').val(result.father_name);
+								$('#view_mother_name').val(result.mother_name);
+								$('#view_son_name').val(result.son_name);
+							},
+						});
+					});
+					
+
+		//-----------------------------------------------------------------------
+
+
+
+
+
+
+			//Edit Data
+		//-----------------------------------------------------------------------
+
+			$(document).on("click","#edit",function(arr){
+				arr.preventDefault();
+				var id = $(this).data('id');
+				var url = $(this).attr('href');
+				$.ajax({
+					url: url,
+					data: {id:id},
+					datatype: "JSON",
+					type: "GET",
+					success: function(editResult){
+						$('#editModal').modal('show');
+						$('#id').val(editResult.id);
+						$('#fatherName').val(editResult.father_name);
+						$('#motherName').val(editResult.mother_name);
+						$('#sonName').val(editResult.son_name);
+					},
+				});
+			});
+
+
+
+
+
+
+		//------------------------Updating---------------------------------------------------
+			$('#editInformation').on("submit",function(arg){
+				arg.preventDefault();
+
+				var form = $(this);
+				var url = form.attr("action");
+				var type = form.attr("method");
+				var data = form.serialize();  
+						$.ajax({		
+						url: url,
+						data: data,
+						type: type,
+						datatype:"JSON",
+						beforeSend:function(){
+							$('.loading').fadeIn();
+						},
+						success: function(data){
+								if(data == 'success')
+								{
+									$('#editModal').modal("hide");
+									swal("Great","Successfully Updated Information","success");
+									form[0].reset();  //this for after completing processed, the all data of form will be clear.. like reset
+									return getinformation();
+								}else{
+									swal("Wrong","Information is not Updated","error");
+								}
+							},
+						complete:function(){
+							$('.loading').fadeOut();
+						},
+				});
+				 //end ajax
+
+			});
+		// end submit optional details works
+		//------------------------------------------------------------------------
+
+
+
+
+
+
+		//-----Delete single-------
+		//-----------------------------------------------------------------------
+
+				$(document).on("click", "#delete", function(e){
+						e.preventDefault();
+						var id = $(this).data("id");
+						var url = $(this).attr('href');
+						
+						$.ajax({
+							url: url,
+							data: {id},
+							datatype: "JSON",
+							success: function(result){
+								return getinformation();
+									swal('Great',"Deleted Successfully!",'success');
+							},
+						});
+					});
+					
+
+		//-----------------------------------------------------------------------
+
+
+
+
+
+
+
+		//-----------------------------------------------------------------------
+		//-----------------------------------------------------------------------
+								//Pagination by ajax
+								//================
+
+			$(document).on("click",".pagination li a",function(e){
+					e.preventDefault();
+					var page = $(this).attr('href');
+					var pageNumber = page.split('?page=')[1]; // when we send any data in to the url (by GET method)
+														// split always delete the parameter from url,, by indexing like.. 0,1,2,3 etc
+					//console.log(pageNumber);			// delete all except [indexNumber];
+					
+					return getPagination(pageNumber);
+				});//split == delete some things...
+
+				function getPagination(pageNumber){
+					var createUrl = $('#getDataByPagination').data("url");
+					console.log(createUrl);
+					var url =  createUrl+"?page="+pageNumber;
+					$.ajax({
+						url: url,
+						type: "GET",
+						datatype:"HTML",
+						success: function(response){
+							$("#showAllDataFromOtherPageByJson").html(response);
+						},
+					});
+				}
+		//-----------------------------------------------------------------------
+
+});
+
+
+
+
+
+//the compare json format and html format 
+/*
+	in the controller,, after all processing completed then we use return.. return is 2 type
+		1. we return to view page , like return view('folder.show'); this is TYPE = HTML
+		2. we use only return ,, like return response()->json('something');
+				that is json type.....
+*/
+/*=========================================================================================*/
+
+
+
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+
+
+	//=====================================================================
+	<form action="{{ route('addInfo') }}" method="POST" id="addInformation">
+	//=====================================================================
+	    	<div id="getData" data-url="{{ route('getinfo') }}"></div>
+    		<div id="getDataByPagination" data-url="{{ url('/getPagination/byPageNumber') }}"></div>
+   		<!-- <span onload="getinformation"></span>-->
+
+	    <!------------------------------------------------------->
+    	<div id="getData" data-url="{{ route('getinfo') }}"></div>
+   	<!-- <span onload="getinformation"></span>-->
+		//====================
+		 <div class="form-group ">
+                    <label for="father_name">Father's Name:</label>
+                    <input name="father_name" disabled="disabled" type="text" class="form-control" id="view_father_name">
+                </div>
+                <div class="form-group ">
+                    <label for="mother_name">Mother's Name:</label>
+                    <input name="mother_name" disabled="disabled" type="text" class="form-control" id="view_mother_name">
+                </div>
+                <div class="form-group ">
+                    <label for="son_name">Son's Name:</label>
+                    <input name="son_name" disabled="disabled" type="text" class="form-control" id="view_son_name">
+                </div>
+
+
+	//=====================================================================
+		 <a href="" class="btn btn-info pull-right"data-toggle="modal" data-target="#myModal">Add New Information</a> 
+
+				@foreach($infor as $info)
+                                    <tr>
+                                        <td> {{ $info->father_name }} </td>
+                                        <td> {{ $info->mother_name }} </td>
+                                        <td> {{ $info->son_name }} </td>
+                                        <td>
+                                            <a id="view" href="{{ url('view/info') }}" data-id="{{ $info->id }}" class="btn btn-info">View</a>
+                                            <a id="edit" href="{{ url('edit/info') }}" data-id="{{ $info->id }}"class="btn btn-primary">Edit</a>
+                                            <a onclick="return confirm('Are Your Sure Want to delete this?');" id="delete" href="{{ url('delete/info') }}" data-id="{{ $info->id }}" class="btn btn-danger">Delete</a>
+                                        </td>
+                                    </tr>
+                                @endforeach
+	
+
+
+
+	//======================================================================
+<!-------------------------------------------->
+    <!--Edit /Update Information Modal -->
+        <div id="editModal" class="modal fade" role="dialog"> <!---class="modal fade" role="dialog"-->
+          <div class="modal-dialog">
+
+            <!-- Modal content-->
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close pull-right" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Edit  Infomation</h4>
+              </div>
+              <div class="modal-body">
+
+               <form action="{{ route('updateInfo') }}" method="POST" id="editInformation">
+                @csrf
+                <input type="hidden" name="id" id="id">
+                    <div class="form-group ">
+                        <label for="father_name">Father's Name:</label>
+                        <input name="father_name" type="text"  class="form-control" id="fatherName">
+                    </div>
+                    <div class="form-group ">
+                        <label for="mother_name">Mother's Name:</label>
+                        <input name="mother_name" value="" type="text" class="form-control" id="motherName">
+                    </div>
+                    <div class="form-group ">
+                        <label for="son_name">Son's Name:</label>
+                        <input name="son_name" value="" type="text" class="form-control" id="sonName">
+                    </div>
+
+
+                <input type="submit" class="btn btn-default" value="Update"> 
+                  
+               </form>
+	//====================================================================
+
+
+
+	///=======================================================Controller===========
+    public function index()
+    {
+         $data['infor'] = Information::orderBy('created_at','desc')->paginate(4);
+        return view('index',$data);
+    }
+   public function create()
+    {
+        //$data['infor'] = Information::latest()->get();
+        //return response()->json('Yes');
+    }
+
+
+ public function getInfo()
+    {
+        $data['infor'] = Information::orderBy('created_at','desc')->paginate(4);
+        return view('getinfo',$data);
+        //return response()->json('Yes');
+    }
+
+
+ public function getInfoByPagination()
+    {
+        $data['infor'] = Information::orderBy('created_at','desc')->paginate(4);
+        return view('getInfoByPagination',$data);
+    }
+  public function store(Request $request)
+    {
+        $info = new Information();
+        $info->user_id = 1;
+         $info->father_name = $request->father_name;
+         $info->mother_name = $request->mother_name;
+         $info->son_name = $request->son_name;
+         $save = $info->save();
+
+         if($save){
+            return response()->json("success");
+         }
+         else{
+            return response()->json("error");
+         }
+
+    }
+
+  public function show($id =null, Request $request)
+    {
+        $info = Information::findOrFail($request->id);
+
+       return response()->json($info);
+    }
+
+ public function edit($id = null, Request $request)
+    {
+       $result =  Information::findOrFail($request->id);
+       return $result;
+    }
+
+
+ public function update(Request $request, $id = null)
+    {
+         $id = $request->id;
+         $info =  Information::findOrFail($id);
+         $info->user_id = 1;
+         $info->father_name = $request->father_name;
+         $info->mother_name = $request->mother_name;
+         $info->son_name = $request->son_name;
+         $save = $info->save();
+
+         if($save){
+            return response()->json("success");
+         }
+         else{
+            return response()->json("error");
+         }
+    }
+
+
+  public function destroy($id = null, Request $request)
+    {
+        $delete =  Information::findOrFail($request->id)->delete();
+        if($delete){
+            return response()->json("delete");
+        }else{
+            return response()->json("notdelete");
+      
+   }
+
+
+
+
+Route::get('/home', 'HomeController@index')->name('home');
+Route::get('/table', 'HomeController@indexTable');
+
+Route::get('/info', 'UserInformationController@index')->name('info');
+Route::get('/get/info', 'UserInformationController@getInfo')->name('getinfo'); //use for get
+; //use for get
+
+//Route::get('/info/create', 'UserInformationController@create')->name('infocreate');//not using
+Route::post('/information', 'UserInformationController@store')->name('addInfo');
+
+
+Route::get('/view/info', 'UserInformationController@show')->name('viewInfo');
+Route::get('/edit/info', 'UserInformationController@edit')->name('editInfo');
+Route::post('/information/update', 'UserInformationController@update')->name('updateInfo');
+Route::get('/delete/info', 'UserInformationController@destroy')->name('deleteInfo');
+
+
+Route::get('/getPagination/byPageNumber', 'UserInformationController@getInfoByPagination');

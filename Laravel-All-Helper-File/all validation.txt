@@ -1,0 +1,394 @@
+============================================================================================
+			update
+			=======
+	  $input = $request->except('_token');
+     	 $validator = Validator::make($input,[
+                     'name' => 'required|min:2|max:50',
+                     'username' => 'required|min:2|max:30|unique:users,username,'.$id,
+                     'email' => 'required|max:150|unique:users,email,'.$id,
+                     'photo' => 'nullable|image|mimes:jpeg,jpg,png,gif',
+                    'about' => 'nullable|max:150',
+		 		]); 
+            
+		 	if($validator->fails()){
+                return redirect()->back()->withErrors($validator)->withInput();
+             }
+ 
+	----------------------------OR------------------------
+	 $request->validate([
+            'name' => 'required|min:2|max:50',
+            'username' => 'required|min:2|max:30|unique:users,username,'.$id,
+            'email' => 'required|max:150|unique:users,email,'.$id,
+            'photo' => 'nullable|image|mimes:jpeg,jpg,png,gif',
+            'about' => 'nullable|max:150',
+        ]);
+        
+
+================================================================================================
+
+================================================================================================
+ $input = $request->except('_token');
+
+		$validator = Validator::make($input,[
+                    'name' => 'required|min:2|max:50',
+                    'mail' => 'nullable|max:120|unique:employees,email',
+                    'phone' => 'required|unique:employees,phone|max:15|min:11',
+                    'nid_no' => 'required|unique:employees,nid_no|max:100|min:6',
+                    'address' => 'required|max:255|min:2',
+                    'experience' => 'required|min:2|max:50',
+                    'photo' => 'required|image|mimes:jpeg,jpg,png,gif|max:20000',
+                    'salary' => 'required|min:3|max:30',
+                    'vacation' => 'nullable|min:1|max:30',
+                    'city' => 'required|min:2|max:50',
+                    'user_roll' => 'required'
+				]); 
+		
+			if($validator->fails()){
+			   return redirect()->back()->withErrors($validator)->withInput();
+            }
+            
+
+
+
+=================================================================
+=================================================================
+ 
+       $validator =  $this->validate($request, [
+            'name' => 'required|min:2|max:50',
+            'mail' => 'nullable|max:120|unique:employees,email',
+            'phone' => 'required|unique:employees,phone|max:15|min:11',
+            'nid_no' => 'required|unique:employees,nid_no|max:100|min:6',
+            'address' => 'required|max:255|min:2',
+            'experience' => 'required|min:2|max:50',
+            'photo' => 'required|image|mimes:jpeg,jpg,png,gif|max:20000',
+            'salary' => 'required|min:3|max:30',
+            'vacation' => 'nullable|min:1|max:30',
+            'city' => 'required|min:2|max:50',
+            'user_roll' => 'required'
+                ], 
+                [
+            'name.required' => 'Name field is required',
+            'name.min' => 'You may use Minimum 2 character',
+            'name.max' => 'You may use Maximum 50 character',
+
+            'mail.max' => 'You may use Maximum 120 character',
+
+            'phone.required' => 'Phone field is required',
+            'phone.min' => 'You may use Minimum 11 character',
+            'phone.max' => 'You may use Maximum 15 character',
+
+            'nid_no.required' => 'NID No field is required',
+            'nid_no.min' => 'You may use Minimum 6 character',
+            'nid_no.max' => 'You may use Maximum 100 character',
+
+            'address.required' => 'Address field is required',
+            'address.min' => 'You may use Minimum 2 character',
+            'address.max' => 'You may use Maximum 255 character',
+
+            'experience.required' => 'Experience field is required',
+            'experience.min' => 'You may use Minimum 2 character',
+            'experience.max' => 'You may use Maximum 50 character',
+
+            'photo.required' => 'Photo field is required',
+ 
+            'salary.required' => 'Salary field is required',
+            'salary.min' => 'You may use Minimum 2 character',
+            'salary.max' => 'You may use Maximum 3 character',
+
+            'vacation.min' => 'You may use Minimum 1 character',
+            'vacation.max' => 'You may use Maximum 30 character',
+
+            'city.required' => 'City field is required',
+            'city.min' => 'You may use Minimum 2 character',
+            'city.max' => 'You may use Maximum 50 character',
+                ]   
+            );
+            if($validator->fails()){
+                return redirect()->back()->withErrors($validator)->withInput();
+            }
+
+
+
+=================================================================
+=================================================================
+ $validationRules =
+            [
+                'name' => 'required|min:2|max:50',
+                    'mail' => 'nullable|max:120|unique:employees,email',
+                    'phone' => 'required|unique:employees,phone|max:15|min:11',
+                    'nid_no' => 'required|unique:employees,nid_no|max:100|min:6',
+                    'address' => 'required|max:255|min:2',
+                    'experience' => 'required|min:2|max:50',
+                    'photo' => 'required|image|mimes:jpeg,jpg,png,gif|max:20000',
+                    'salary' => 'required|min:3|max:30',
+                    'vacation' => 'nullable|min:1|max:30',
+                    'city' => 'required|min:2|max:50',
+                    'user_roll' => 'required'
+            ];
+
+        $customMessage = [
+            'name.required' => 'Name field is required',
+            'name.min' => 'You may use Minimum 2 character',
+            'name.max' => 'You may use Maximum 50 character',
+
+            'mail.max' => 'You may use Maximum 120 character',
+
+            'phone.required' => 'Phone field is required',
+            'phone.min' => 'You may use Minimum 11 character',
+            'phone.max' => 'You may use Maximum 15 character',
+
+            'nid_no.required' => 'NID No field is required',
+            'nid_no.min' => 'You may use Minimum 6 character',
+            'nid_no.max' => 'You may use Maximum 100 character',
+
+            'address.required' => 'Address field is required',
+            'address.min' => 'You may use Minimum 2 character',
+            'address.max' => 'You may use Maximum 255 character',
+
+            'experience.required' => 'Experience field is required',
+            'experience.min' => 'You may use Minimum 2 character',
+            'experience.max' => 'You may use Maximum 50 character',
+
+            'photo.required' => 'Photo field is required',
+ 
+            'salary.required' => 'Salary field is required',
+            'salary.min' => 'You may use Minimum 2 character',
+            'salary.max' => 'You may use Maximum 3 character',
+
+            'vacation.min' => 'You may use Minimum 1 character',
+            'vacation.max' => 'You may use Maximum 30 character',
+
+            'city.required' => 'City field is required',
+            'city.min' => 'You may use Minimum 2 character',
+            'city.max' => 'You may use Maximum 50 character',
+        ];
+
+        $validateFormData = request()->validate($validationRules, $customMessage);
+
+
+
+
+
+=================================================================
+
+
+
+
+
+
+=============================================================================================
+
+		update validation
+			=================
+	  $input = $request->except('_token');
+     	 $validator = Validator::make($input,[
+                     'name' => 'required|min:2|max:50',
+                     'username' => 'required|min:2|max:30|unique:users,username,'.$id,
+                     'email' => 'required|max:150|unique:users,email,'.$id,
+                     'photo' => 'nullable|image|mimes:jpeg,jpg,png,gif',
+                    'about' => 'nullable|max:150',
+		 		]); 
+            
+		 	if($validator->fails()){
+                return redirect()->back()->withErrors($validator)->withInput();
+             }
+ 
+	----------------------------OR------------------------
+	 $request->validate([
+            'name' => 'required|min:2|max:50',
+            'username' => 'required|min:2|max:30|unique:users,username,'.$id,
+            'email' => 'required|max:150|unique:users,email,'.$id,
+            'photo' => 'nullable|image|mimes:jpeg,jpg,png,gif',
+            'about' => 'nullable|max:150',
+        ]);
+        
+
+================================================================================================
+	php artisan config:clear 	 	php artisan cache:clear 	
+	
+	$this->validate(
+$request, [
+
+	 'title' => 'required|min:10'
+,
+	'picture' => 'nullable|image'   // nullable field but its checked image... not image just validate result false
+		 ], [
+      
+	  'title.required' => 'this is my custom error message for required',
+ 
+	  'title.min' => 'Minimum 10 character'
+,
+	  'title.max' => 'Maximum 100 character', 
+		 ]
+   
+		);
+
+	unique filed........
+	------------------------
+	 'subcatname' =>'required|unique:subcategories,name|min:5|max:100',
+
+			unique:TableName,tableFiledName
+		form field name is subcatname and database table field name is name.... 
+	
+
+
+
+
+
+
+
+
+
+
+=================================================================
+
+=================================================================
+ 		$input = $request->except('_token');
+
+		$validator = Validator::make($input,[
+                    'name' => 'required|min:2|max:50',
+                    'mail' => 'nullable|max:120|unique:employees,email',
+                    'phone' => 'required|unique:employees,phone|max:15|min:11',
+                    'nid_no' => 'required|unique:employees,nid_no|max:100|min:6',
+                    'address' => 'required|max:255|min:2',
+                    'experience' => 'required|min:2|max:50',
+                    'photo' => 'required|image|mimes:jpeg,jpg,png,gif|max:20000',
+                    'salary' => 'required|min:3|max:30',
+                    'vacation' => 'nullable|min:1|max:30',
+                    'city' => 'required|min:2|max:50',
+                    'user_roll' => 'required'
+				]); 
+		
+			if($validator->fails()){
+			   return redirect()->back()->withErrors($validator)->withInput();
+            }
+            
+
+
+
+=================================================================
+=================================================================
+ 
+       $validator =  $this->validate($request, [
+            'name' => 'required|min:2|max:50',
+            'mail' => 'nullable|max:120|unique:employees,email',
+            'phone' => 'required|unique:employees,phone|max:15|min:11',
+            'nid_no' => 'required|unique:employees,nid_no|max:100|min:6',
+            'address' => 'required|max:255|min:2',
+            'experience' => 'required|min:2|max:50',
+            'photo' => 'required|image|mimes:jpeg,jpg,png,gif|max:20000',
+            'salary' => 'required|min:3|max:30',
+            'vacation' => 'nullable|min:1|max:30',
+            'city' => 'required|min:2|max:50',
+            'user_roll' => 'required'
+                ], 
+                [
+            'name.required' => 'Name field is required',
+            'name.min' => 'You may use Minimum 2 character',
+            'name.max' => 'You may use Maximum 50 character',
+
+            'mail.max' => 'You may use Maximum 120 character',
+
+            'phone.required' => 'Phone field is required',
+            'phone.min' => 'You may use Minimum 11 character',
+            'phone.max' => 'You may use Maximum 15 character',
+
+            'nid_no.required' => 'NID No field is required',
+            'nid_no.min' => 'You may use Minimum 6 character',
+            'nid_no.max' => 'You may use Maximum 100 character',
+
+            'address.required' => 'Address field is required',
+            'address.min' => 'You may use Minimum 2 character',
+            'address.max' => 'You may use Maximum 255 character',
+
+            'experience.required' => 'Experience field is required',
+            'experience.min' => 'You may use Minimum 2 character',
+            'experience.max' => 'You may use Maximum 50 character',
+
+            'photo.required' => 'Photo field is required',
+ 
+            'salary.required' => 'Salary field is required',
+            'salary.min' => 'You may use Minimum 2 character',
+            'salary.max' => 'You may use Maximum 3 character',
+
+            'vacation.min' => 'You may use Minimum 1 character',
+            'vacation.max' => 'You may use Maximum 30 character',
+
+            'city.required' => 'City field is required',
+            'city.min' => 'You may use Minimum 2 character',
+            'city.max' => 'You may use Maximum 50 character',
+                ]   
+            );
+            if($validator->fails()){
+                return redirect()->back()->withErrors($validator)->withInput();
+            }
+
+
+
+=================================================================
+=================================================================
+ $validationRules =
+            [
+                'name' => 'required|min:2|max:50',
+                    'mail' => 'nullable|max:120|unique:employees,email',
+                    'phone' => 'required|unique:employees,phone|max:15|min:11',
+                    'nid_no' => 'required|unique:employees,nid_no|max:100|min:6',
+                    'address' => 'required|max:255|min:2',
+                    'experience' => 'required|min:2|max:50',
+                    'photo' => 'required|image|mimes:jpeg,jpg,png,gif|max:20000',
+                    'salary' => 'required|min:3|max:30',
+                    'vacation' => 'nullable|min:1|max:30',
+                    'city' => 'required|min:2|max:50',
+                    'user_roll' => 'required'
+            ];
+
+        $customMessage = [
+            'name.required' => 'Name field is required',
+            'name.min' => 'You may use Minimum 2 character',
+            'name.max' => 'You may use Maximum 50 character',
+
+            'mail.max' => 'You may use Maximum 120 character',
+
+            'phone.required' => 'Phone field is required',
+            'phone.min' => 'You may use Minimum 11 character',
+            'phone.max' => 'You may use Maximum 15 character',
+
+            'nid_no.required' => 'NID No field is required',
+            'nid_no.min' => 'You may use Minimum 6 character',
+            'nid_no.max' => 'You may use Maximum 100 character',
+
+            'address.required' => 'Address field is required',
+            'address.min' => 'You may use Minimum 2 character',
+            'address.max' => 'You may use Maximum 255 character',
+
+            'experience.required' => 'Experience field is required',
+            'experience.min' => 'You may use Minimum 2 character',
+            'experience.max' => 'You may use Maximum 50 character',
+
+            'photo.required' => 'Photo field is required',
+ 
+            'salary.required' => 'Salary field is required',
+            'salary.min' => 'You may use Minimum 2 character',
+            'salary.max' => 'You may use Maximum 3 character',
+
+            'vacation.min' => 'You may use Minimum 1 character',
+            'vacation.max' => 'You may use Maximum 30 character',
+
+            'city.required' => 'City field is required',
+            'city.min' => 'You may use Minimum 2 character',
+            'city.max' => 'You may use Maximum 50 character',
+        ];
+
+        $validateFormData = request()->validate($validationRules, $customMessage);
+
+
+
+
+
+=================================================================
+
+
+
+
+
+

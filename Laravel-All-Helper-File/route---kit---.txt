@@ -1,0 +1,16 @@
+	
+	Route
+	=====
+
+	Route::group(['as'=> 'admin.', 'prefix'=>'admin' , 'namespace' => 'Admin',
+		'middleware' => ['auth','admin']], function(){
+
+		});
+
+
+
+		//[as == routeName, prefix == url_First_part , namespace == Controller Folder name]
+	Route::group(['as'=> 'admin.', 'prefix'=>'admin' , 'namespace' => 'Admin',
+		'middleware' => ['auth','admin']], function(){
+
+		});

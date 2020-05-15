@@ -1,0 +1,295 @@
+<input type="button" value="Print This" onclick='javascript:printDiv("toprint{{ $order->id }}")' />
+                    @if(count($orders) > 0)
+                            @foreach ($orders as $item)
+                                @php
+                                    $allProduct =  \App\OrderDetails::where('order_id',$item->id)->orderBy('id','desc')->get()
+                                @endphp
+                                
+                                <div id="toprint{{ $item->id  }}" style="display:none;">
+                                    <style>
+                                        @import url('https://fonts.googleapis.com/css?family=Amarante');
+                              
+                                      html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, embed, figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, section, summary, time, mark, audio, video {
+                                        margin: 0;
+                                        padding: 0;
+                                        border: 0;
+                                        font-size: 100%;
+                                        font: inherit;
+                                        vertical-align: baseline;
+                                        outline: none;
+                                        -webkit-font-smoothing: antialiased;
+                                        -webkit-text-size-adjust: 100%;
+                                        -ms-text-size-adjust: 100%;
+                                        -webkit-box-sizing: border-box;
+                                        -moz-box-sizing: border-box;
+                                        box-sizing: border-box;
+                                      }
+                                      html { overflow-y: scroll; }
+                                      body { 
+                                        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+                                        font-size: 62.5%;
+                                        line-height: 1;
+                                        color: #585858;
+                                        padding: 22px 10px;
+                                        padding-bottom: 55px;
+                                      }
+                              
+                                      ::selection { background: #5f74a0; color: #fff; }
+                                      ::-moz-selection { background: #5f74a0; color: #fff; }
+                                      ::-webkit-selection { background: #5f74a0; color: #fff; }
+                              
+                                      br { display: block; line-height: 1.6em; } 
+                              
+                                      article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav, section { display: block; }
+                                      ol, ul { list-style: none; }
+                              
+                                      input, textarea { 
+                                        -webkit-font-smoothing: antialiased;
+                                        -webkit-text-size-adjust: 100%;
+                                        -ms-text-size-adjust: 100%;
+                                        -webkit-box-sizing: border-box;
+                                        -moz-box-sizing: border-box;
+                                        box-sizing: border-box;
+                                        outline: none; 
+                                      }
+                              
+                                      blockquote, q { quotes: none; }
+                                      blockquote:before, blockquote:after, q:before, q:after { content: ''; content: none; }
+                                      strong, b { font-weight: bold; } 
+                              
+                                      table { border-collapse: collapse; border-spacing: 0; }
+                                      img { border: 0; max-width: 100%; }
+                              
+                                      h1 { 
+                                        font-family: 'Amarante', Tahoma, sans-serif;
+                                        font-weight: bold;
+                                        font-size: 2.6em;
+                                        line-height: 1.7em;
+                                        margin-bottom: 5px;
+                                        text-align: center;
+                                      }
+                              
+                                      
+                                      #office_info {
+                                        margin: 0 auto;
+                                        width: 850px;
+                                        font-size: 1.0em;
+                                        margin-bottom: 0px;
+                                        text-align: center;
+                                        border-bottom: .75px solid #BEBEBE;
+                                        font-family: cursive;
+                                      }
+                              
+                                      #delivery_man {
+                                        margin: 0 auto;
+                                        width: 850px;
+                                        font-size: 1.2em;
+                                        margin-top: 6%;
+                                        margin-bottom: 10px;
+                                        color:#585858;
+                                        font-family: monospace;
+                                      }
+                              
+                                      /** page structure **/
+                                      #wrapper {
+                                        display: block;
+                                        width: 850px;
+                                        background: #fff;
+                                        margin: 0 auto;
+                                        padding: 10px 17px;
+                                        /*-webkit-box-shadow: 2px 2px 3px -1px rgba(0,0,0,0.35);*/
+                                      }
+                              
+                                      #keywords {
+                                        margin: 0 auto;
+                                        font-size: 1.2em;
+                                        margin-bottom: 15px; 
+                                        float: left;
+                                        float: clear;
+                                        /*font-size: 13px;*/
+                                      }
+                              
+                                      #keywords thead {
+                                        cursor: pointer;
+                                        background: #c9dff0;
+                                        font-family: initial;/*moinul*/
+                                      }
+                                      #keywords thead tr th { 
+                                        font-weight: bold;
+                                        padding: 12px 5px 10px 7px; /*moinul*/
+                                        font-size: 15px;
+                                       /* padding: 12px 30px;
+                                        padding-left: 42px;
+                                       */
+                                      }
+                                      #keywords thead tr th span { 
+                                        padding-right: 20px;
+                                        background-repeat: no-repeat;
+                                        background-position: 100% 100%;
+                                      }
+                              
+                                      /*
+                                      #keywords thead tr th.headerSortUp, #keywords thead tr th.headerSortDown {
+                                        background: #acc8dd;
+                                      }
+                              
+                                      #keywords thead tr th.headerSortUp span {
+                                        background-image: url('https://i.imgur.com/SP99ZPJ.png');
+                                      }
+                                      #keywords thead tr th.headerSortDown span {
+                                        background-image: url('https://i.imgur.com/RkA9MBo.png');
+                                      }
+                                      */
+                              
+                                      #keywords tbody tr { 
+                                        color: #555;
+                                        font-family: serif; /*moinul*/
+                                      }
+                                      #keywords tbody tr td {
+                                        text-align: center;
+                                        padding: 10px 5px;
+                                        font-size: 13px;
+                                      }
+                                      #keywords tbody tr td.lalign {
+                                        text-align: left;
+                                      }
+                                      table  tr td{
+                                      border: .75px solid #BEBEBE;
+                                      }
+                                    </style>
+                              
+                                    <style>
+                                        .page-break{
+                                            page-break-after:always;
+                                            }
+                                    </style>
+                                      
+                                     @foreach ($allProduct as $product)
+                                    <div id="wrapper">
+                                        <h1>{{  $softwareSetting->name }}</h1>
+                                        <div id="office_info" style="margin: 0 auto;">
+                                            <span style="margin-right:.5%;">Mobile No:  {{ $softwareSetting->phone1 }} ,  {{ $softwareSetting->phone2 }}</span>
+                                            <span style="margin-right:.5%;">Address: {{ $softwareSetting->address }}
+                                            </span>
+                                            <div style="height:.5%;"> &nbsp;</div>
+                                        </div>
+                                        <div style="height:30%;"> &nbsp;</div>
+                                        
+                        
+                                        <div style="margin-top:7%;width:850px;margin-bottom:2%;">
+                                          <span style="font-family: cursive;font-weight:700;font-size:15px;">  Product Details </span>
+                                          <span class="pull-right" style="margin-right:1%;"> <span> Date </span> : {{ date('d-m-Y') }} </span>
+                                        </div>
+                                        <div style="height:.5%;"> &nbsp;</div>
+                        
+
+                                        
+                                        <table id="keywords" cellspacing="0" cellpadding="0" >
+                                            {{-- - <thead>
+                                                <tr style="border:1px solid #989898;">
+                                                  <th style="border:1px solid #989898;"><span>Keywords</span></th>
+                                                  <th style="border:1px solid #989898;"><span>Impressions</span></th>
+                                                  <th style="border:1px solid #989898;"><span>Clicks</span></th>
+                                                </tr>
+                                              </thead> 
+                                              <tbody>--}}
+                                                
+                                                <tr>
+                                                    <td class="lalign">Company Name</td>
+                                                    <td class="">{{ $product->merchant_id != NULL ? $product->merchant_info->company_name  : "" }}</td>
+                                                    <td class="">Com. Phone</td>
+                                                    <td class="">{{ $product->merchant_id != NULL ? $product->merchant_info->phone  : "" }}</td>
+                                                </tr>
+                                                <tr>
+                                                  <td class="lalign">Product ID</td>
+                                                  <td class="">{{ $product->tracking_id }}</td>
+                                                  <td class="">Receiver Phone</td>
+                                                  <td class="">{{ $product->receiver_phone }}</td>
+                                                </tr>
+                                                <tr>
+                                                  <td class="lalign">Product Description</td>
+                                                  <td colspan="3" class="">{{ $product->product_description }}</td>
+                                              </tr>
+                                                <tr>
+                                                    <td class="lalign">Receiver Name</td>
+                                                    <td class="" colspan="3">{{ $product->receiver_name }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="lalign">Receiver Address</th>
+                                                    <td class="" colspan="3">{{ $product->receiver_address }} </td>
+                                                </tr>
+                                                <tr>
+                                                  <td class="lalign">Delivery System</td>
+                                                  <td colspan="3" class="">{{ $product->delivery_system->system_details }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="lalign">Product Amount</td>
+                                                    <td class="">{{ $product->total_amount }} Tk</td>
+                                                    <td class="">Total Amount</td>
+                                                    <td class="">{{ $product->total_amount + $product->delivery_system->weight_charge }} Tk</td>
+                                                </tr>
+                                                
+                                              {{-- -</tbody> --}}
+                                            </table>
+                                    </div> 
+                                    <div class="page-break"></div>
+                                    @endforeach
+                                </div>
+                                {{-- -<input type="button" value="Print This" onclick='javascript:printDiv("toprint{{ $alProduct->id }}")' />--}}
+                                  <!----print div---end--->   
+                            @endforeach
+                        @else
+                        <h2 class="text-center mb-30">No Data Found For Print</h2>
+                    @endif
+
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+@endsection
+
+@section("javascript")
+ 
+    <!--------for Print option ---->
+{{-- --<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script> --}}
+<script src="http://www.position-absolute.com/creation/print/jquery.printPage.js "></script>
+<script type="text/javascript">
+    $(document).ready(function(){
+        $('.btnPrint').printPage();
+    });
+</script>
+<!--------for Print option ---->
+
+    <!-- Jquery DataTable Plugin Js -->
+    <script src="{{ asset('admin') }}/plugins/jquery-datatable/jquery.dataTables.js"></script>
+    <script src="{{ asset('admin') }}/plugins/jquery-datatable/skin/bootstrap/js/dataTables.bootstrap.js"></script>
+    <script src="{{ asset('admin') }}/plugins/jquery-datatable/extensions/export/dataTables.buttons.min.js"></script>
+    <script src="{{ asset('admin') }}/plugins/jquery-datatable/extensions/export/buttons.flash.min.js"></script>
+    <script src="{{ asset('admin') }}/plugins/jquery-datatable/extensions/export/jszip.min.js"></script>
+    <script src="{{ asset('admin') }}/plugins/jquery-datatable/extensions/export/pdfmake.min.js"></script>
+    <script src="{{ asset('admin') }}/plugins/jquery-datatable/extensions/export/vfs_fonts.js"></script>
+    <script src="{{ asset('admin') }}/plugins/jquery-datatable/extensions/export/buttons.html5.min.js"></script>
+    <script src="{{ asset('admin') }}/plugins/jquery-datatable/extensions/export/buttons.print.min.js"></script>
+
+    {{-- --}}
+    <script src="{{ asset('admin') }}/js/pages/tables/jquery-datatable.js"></script>
+
+
+    <script>
+        function printDiv(divID)
+        {
+            var divElements = document.getElementById(divID).innerHTML;
+            var oldPage = document.body.innerHTML;
+            
+            document.body.innerHTML = 
+            "<html><head><title></title></head><body>" +
+            divElements + "</body></html>";
+
+            window.print();
+            document.body.innerHTML = oldPage;
+        }
+    </script>
+
+
+@endsection

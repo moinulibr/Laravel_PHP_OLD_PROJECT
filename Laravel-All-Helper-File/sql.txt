@@ -1,0 +1,367 @@
+	sql 
+---------------------------
+
+	DML  =  Data Manipullation  Language
+	SQL  =  Structured Query Language 
+	
+
+	------
+	Insert
+	-------------------------
+	-------------------------
+		INSERT table_name SET 'filed'='value' |or| INSERT table_name SET field='value'
+	when we want to insert database table and the table or field name is same to Keyword of sql ... then its not working..
+	then our targeted table or field name have to covered or wrape by (``)......  its on the upto tab button.. where (~) its also
+
+
+	------
+	Update
+	-------------------------
+	-------------------------
+		UPDATE table_name SET 'filed'='value' WHERE field='value' |or| INSERT table_name SET field='value' WHERE field='value'
+	
+	-------	
+	Delete
+	-------------------------
+	-------------------------
+		DELETE FROM table_name WHERE field='value'
+
+		after deleting , the primary key mean id is also deleted. if we want to start from again from id no 1 ...	
+			have to go.. o 	More->Operations->Delete data or Table->Empty the table(TRUNCATE)... 
+	
+
+	-------------
+	Select or View
+	-------------------------
+	-------------------------
+		1. singal field from a table
+			-------------------
+			SELECT name FROM table_name
+
+		2. More field but not all though all field is possible in this way.. but not need to hard working..
+			------------------
+			SELECT name,price FROM table_name
+
+		3. All field select
+			----------------
+			SELECT * FROM table_name
+
+			...Sorting or Sorting Query... Actually its works (or its depends) on the data type of the (thats / targeted) fields
+			--------------------------------------- 
+		4. SELECT * FROM table_name ORDER BY id DESC/ASC   //(by default it starts from ASC)	
+		5.
+		6. SELECT * FROM table_name ORDER BY name   //(by default it starts from A to Z)
+		7. SELECT * FROM table_name ORDER BY name  DESC //(it starts from Z to A)
+			----------------------------------
+			its shown 1 field end of the 4 .. mean...  seser 4 tar pore 1 ta 
+		8. SELECT * FROM table_name ORDER BY id DESC LIMIT 4,1   	//
+			---------------------------------------
+			its shown 1 field after 4 field .. mean...  prothom 4 tar pore 1 ta 
+		9. SELECT * FROM table_name ORDER BY id ASC LIMIT 4,1   	//
+	  
+	   Arithmatic Operator..+-*/
+		---------------
+		SELECT name, price, price+2 FROM table_name
+		SELECT name, price, price-2 FROM table_name
+		SELECT name, price, price*2 FROM table_name
+		SELECT name, price, price/2 FROM table_name
+		
+			Rename....the field
+				SELECT name, price as oldPrice, price-2 as newPrice FROM table_name
+	-----------------------------------------------------------------------------------------------------------------------------
+
+
+	-----------------------------------------------------------------------------------------------------------------------------
+	-----------------------------------------------------------------------------------------------------------------------------
+	Comparison Operators .....Actually its works (or its depends) on the data type of the (thats / targeted) fields
+	-----------------------( = , !=> , < , >= , <= , )
+
+		1. SELECT * FROM table_name WHERE cat_id = '2'       //WHERE field = 'value' we can apply it in any field or collum
+		2. SELECT * FROM table_name WHERE cat_id != '2'      //WHERE field != 'value' we can apply it in any field or collum// get all without 2 .. or except 2   
+		.....SELECT * FROM table_name WHERE name ='Mamun' ... like.....
+
+			( >, < ) it's only apply in number or numeric or INTGER or FLOOT datatype field or value .. not applied to any field or collum
+
+		3. SELECT * FROM table_name WHERE id < 5    //WHERE field='value' / get all below of id no. 5  
+		4. 3. SELECT * FROM table_name WHERE price < 500      // WHERE field='value'
+		5. SELECT * FROM table_name WHERE id > 5    //WHERE field='value' / get all top of the id no. 5  
+		6. SELECT * FROM table_name WHERE id >= 5
+		7. SELECT * FROM table_name WHERE id <= 5
+	-----------------------------------------------------------------------------------------------------------------------------
+
+
+	-----------------------------------------------------------------------------------------------------------------------------
+	-----------------------------------------------------------------------------------------------------------------------------
+	Logical Operator 
+	-------------------------( or , and )
+			OR operator : works in any row or collum.. mean any field in the table
+		1. SELECT * FROM table_name WHERE id = '4' OR id ='10'
+		2. SELECT * FROM table_name WHERE name = 'Shart' OR id ='10'
+
+			AND operator : works only a singal row... 
+		3. SELECT * FROM table_name WHERE uname = 'moinul' AND password = '123456'
+		4. SELECT * FROM table_name WHERE id >10 AND price <500
+		5. SELECT * FROM table_name WHERE id >10 AND price <= 500
+		6. SELECT * FROM table_name WHERE id >= 10 AND price >= 500
+	-----------------------------------------------------------------------------------------------------------------------------
+
+	-----------------------------------------------------------------------------------------------------------------------------
+	-----------------------------------------------------------------------------------------------------------------------------
+	Agregate function
+	---------------------( sum() , count(), min(), max() , avg() )
+	-------------------------------------------------------------------- Agregate function uses before FROM
+		SUM() .it's only apply in number or numeric or INTGER or FLOOT datatype field or value .. not applied to any field or collum 
+	1. SELECT sum(price) FROM table_name      // total Amount of price field. its make + 
+		
+		COUNT() its apply in any field or collum
+	2. SELECT count(price) FROM table_name    // how many price field have in this table ... 
+
+		MIN() . it's only apply in number or numeric or INTGER or FLOOT datatype field or value .. not applied to any field or collum 
+	3. SELECT min(price) FROM table_name
+
+		MAX() . it's only apply in number or numeric or INTGER or FLOOT datatype field or value .. not applied to any field or collum 
+	3. SELECT max(price) FROM table_name
+
+		AVG() . it's only apply in number or numeric or INTGER or FLOOT datatype field or value .. not applied to any field or collum 
+	3. SELECT avg(price) FROM table_name       //its make total amount  / total collum 
+
+	4. SELECT sum(price) as totalPrice max(price) as maximumPrice min(price) as minimumPrice avg(price) as avgeragePrice count(id) as totalProduct
+		FROM table_name
+	5. SELECT sum(price) as totalPrice max(price) as maximumPrice min(price) as minimumPrice avg(price) as avgeragePrice count(id) as totalProduct
+		FROM table_name WHERE id > '700'
+
+	-----------------------------------------------------------------------
+	-----------------------------------------------------------------------------------------------------------------------------
+	-----------------------------------------------------------------------------------------------------------------------------
+	Searching Query
+	-----------------(like keyword and %  and its incassensative)
+	SELECT * FROM table_name WHERE name like '%mo%'
+	SELECT * FROM table_name WHERE name like '%an%' peice like '%10%' or description like '%cloth%'
+	-----------------------------------------------------------------------------------------------------------------------------
+	-----------------------------------------------------------------------------------------------------------------------------
+	
+	Create View
+	-----------
+		CREATE VIEW viewNameLikeProduct as SELECT name FROM table_name
+
+
+	-----------------------------------------------------------------------------------------------------------------------------
+	Expression Query ..Calculate Percentage
+	----------------------------------
+		1. SELECT name,price, (price*10)/100 as persent FROM table_name
+		** SELECT name , price, (price*10)/100 as discount, price-(price*10)/100 as discountPrice FROM table_name  //we can't (-+*/ from vertual name like as rename)
+		2. SELECT name, price, price-(price*10)/100 as discount FROM table_name
+		3. SELECT name, price, price+(price*10)/100 as withText FROM table_name 
+		4. SELECT name, price, price+(price*10)/100 as withText FROM table_name WHERE price > 500
+	-----------------------------------------------------------------------------------------------------------------------------
+
+
+	Character Manipulation Function
+	---------------------------------
+		1 UPPER Character LOWER Character. upper(), lower()
+			*1*. SELECT upper(name) FROM table_name  //All character will be Upper
+			*2*. SELECT lower(name) FROM table_name  //All character will be Lower
+		     
+			if we want to some row or field beside each other.. then we can use concate()
+			*3*. SELECT concat(name,price) FROM table_name  
+			
+				if we want to make a space between name  and price field
+     			*4*. SELECT concat(name,' ',price) FROM table_name      // uses space in '' 
+				Extra some string can be added by concat()  // which string is not in the table just Extra
+			*5*. SELECT concat('Hello','','World') FROM table_name
+		
+				Substr()
+				------------
+			*6*. SELECT substr(description,1,20) FROM table_name		// 2nd parametter start from and 3rd is end or Tel..
+
+				Lenght()
+				---------
+			*7*. SELECT lenght(name) FROM table_name	   // only lenght , not field name
+			*8*. SELECT name , lenght(name) FROM table_name     //with field name mean field value
+
+				Instr()
+				------- possition of my targeted character in the line
+			*9*. SELECT instr(name,'n') FROM table_name     //4 // where name is = moinul
+			*10*.SELECT name, instr(name,'n') FROM table_name //moinul 4 //where name is = moinul  
+
+				Lpad(), Rpad()	...we can lavel all the lenght of the field
+				--------------- add something string beside the targeted field by using lpad() or rpad();
+			*11*.SELECT lpad(name,20,'*') FROM table_name    //(*) it will be added in left side of the name field value.	
+			*12*.SELECT rpad(name,20,'*') FROM table_name    //(*) it will be added in right side of the name field value.		
+
+    	-----------------------------------------------------------------------------------------------------------------------------
+	
+	Number Function
+	---------------
+		round()
+		------ its apply only floot type 
+		#1#. SELECT  round(price,2) FROM table_name   // its shown 2 number character after (.) doshomik and also make it round
+		
+		truncate()
+		---------- if we don't want to show any number character after (.) doshomik
+		#2#. SELECT truncate(price,0) FROM table_name	   // nothings after (.) doshomik
+ 		#3#. SELECT truncate(price,1) FROM table_name      // its shown 1 number character after (.) doshomik ,but not round 
+		
+		mod()
+		----- 
+		#4#. SELECT mod(price,4) FROM table
+		#5#. SELECT price, mod(price,4) FROM table
+
+    	-----------------------------------------------------------------------------------------------------------------------------
+	-----------------------------------------------------------------------------------------------------------------------------
+	IN and Notin
+	------------ in(), notin(),
+	
+		*1*. SELECT * FROM table_name WHERE cat_id in(2,10)
+		*2*. SELECT * FROM table_name WHERE name in('moinul','masud','nondan') 		//only this item will be shown
+		*2*. SELECT * FROM table_name WHERE name not in('moinul','masud','nondan')	// without this , every things will be shown 
+
+	-----------------------------------------------------------------------------------------------------------------------------
+	-----------------------------------------------------------------------------------------------------------------------------
+	distinct()
+	---------- if the same name or other have more times in the table , then distinct() shown only singal time. (1 bar show korbe)
+		
+		*1*. SELECT distinct(cat_id) FROM table_name
+		*2*. SELECT distinct(cat_id) FROM table_name WHERE status ='1'
+
+	-----------------------------------------------------------------------------------------------------------------------------
+	-----------------------------------------------------------------------------------------------------------------------------
+	Group By
+	--------- 
+	
+		*1*. SELECT cat_id FROM table_name GROUP BY cat_id
+		*2*. SELECT cat_id, count(*) as categoryCounted FROM table_name GROUP BY cat_id
+
+
+	Having()
+	----------
+		*1*. SELECT cat_id, count(*) as categoryCounted FROM table_name GROUP BY cat_id
+			 HAVING count(*)>2  ORDER BY categoryCounted 				// which is bigger then 2
+
+
+
+	-----------------------------------------------------------------------------------------------------------------------------
+	-----------------------------------------------------------------------------------------------------------------------------
+	Sub-Query
+	----------
+	SELECT * FROM table_name price IN (SELECT price FROM table_name WHERE price > 50)
+
+	-----------------------------------------------------------------------------------------------------------------------------
+	-----------------------------------------------------------------------------------------------------------------------------
+
+
+
+	Create table by useing sql
+	-------------------------
+		CREATE TABLE table_name(
+				id INT NOT NULL AUTO_INCREMENT,
+				name VARCHAR(100) NOT NULL, 
+				img VARCHAR(5) NULL,
+				PRIMARY KEY(id)
+				)
+	-----------------------------------------------------------------------------------------------------------------------------
+
+		Insert data from table1 To table2
+		--------------------------------
+		INSERT INTO table_name2(id,name) SELECT id, name FROM table_name1
+
+	-----------------------------------------------------------------------------------------------------------------------------
+
+
+	Create another table from a table and also insert data
+	------------------------------------------------------
+		CREATE TABLE table_name3 AS SELECT id,name FROM table_name  // create another table , table_name3 and aslo insert data from table_name
+		but.....we want no data in new table.. only field 
+			Truncate mean table empty... and start id no 1..
+	TRUNCATE TABLE table_name
+
+	-----------------------------------------------------------------------------------------------------------------------------
+
+	Table Drop
+	----------
+	DROP TABLE table_name
+
+	
+	Table Rename
+	------------
+	RENAME TABLE crruntTableOrOldTable TO newTableName
+
+	add new field in the Table
+	--------------------------
+	ALTER TABLE table_name ADD newField VARCHAR(100) 
+
+	-----------------------------------------------------------------------------------------------------------------------------
+
+	
+	-----------------------------------------------------------------------------------------------------------------------------
+	
+	Join table		1 character == 1 byte
+	----------
+	primary key = foreign key
+
+	1. SELECT tableName1.name as productName, tableName2.name as categoryName, price,description FROM tableName1,tableName2
+		WHERE tableName2.id = cat_id
+
+	2. SELECT tableName1.name as productName, tableName2.name as categoryName, tableName3.name as CustomerName,
+		 price,description FROM tableName1,tableName2,tableName3,tableName4  
+			WHERE tableName2.id = cat_id and
+			      tableName3.id = customer_id and
+			      tableName1.id = product_id
+
+	have to check
+	-------------
+	3. SELECT tableName1.name as productName, tableName2.name as categoryName, tableName3.name as CustomerName,
+		 price,description FROM tableName1,tableName2,tableName3,tableName4  
+			WHERE tableName2.id = tableName1.cat_id and
+			      tableName3.id = tableName4.customer_id and
+			      tableName1.id = tableName4.product_id
+							---------------
+		this is for php.. but laravel db::query , i used join or leftJoin query is best.. just have to check in php..
+		if its works then i have accept thats laravel query for php...
+
+
+	-----------------------------------------------------------------------------------------------------------------------------
+	Left , Right Outer join
+	---------------------------
+	1. SELECT product.name as pname, category.name as catName FROM categoryTable LEFT OUTER JOIN product ON category.id = cat_id	
+	2. SELECT product.name as pname, category.name as catName FROM categoryTable RIGHT OUTER JOIN product ON category.id = cat_id
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

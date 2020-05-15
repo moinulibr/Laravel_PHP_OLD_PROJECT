@@ -1,0 +1,132 @@
+
+
+	Google Map
+   ==================> https://github.com/bradcornford/Googlmapper
+
+	step: 1
+	=======
+	
+	in the composer.json file have to add this
+	
+	"require":{
+		"cornford/googlmapper":"2.*"
+		}
+
+
+	step:2
+	=======> in the cmd
+	
+	composer update
+
+	
+	step:3
+	====== in the config -> app.php file , have to add in providers and aliases... 
+	
+		Cornford\Googlmapper\MapperServiceProvider::class,
+
+	
+		and in the alises .......
+
+		'Mapper'   => Cornford\Googlmapper\Facades\MapperFacade::class,
+	
+	step:4
+	======> in the cmd
+	php artisan vendor:publish --provider="Cornford\Googlmapper\MapperServiceProvider" --tag=googlmapper
+
+
+	step:5
+	======> in the controller
+
+	use Cornford\Googlmapper\Mapper;
+
+	public function index()
+	{
+	   Mapper::map(53.381128999999999990000,-1.470005000000040000);	//[map(Latitude,Longitude)]
+		return view('blade.file');	
+	}
+	
+
+	step:6
+	=======> in the blade file
+
+	<div style="width:500px; height:500px;">
+		{!! Mapper::render() !!}
+	</div>
+
+
+----------------------------------------------
+
+	latlong.net
+	
+	Get Latitude and  Longitude
+
+	place name
+
+	Bangladesh... Find
+
+	Latitude	 Longitude
+	like5454544 , likej2454545
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

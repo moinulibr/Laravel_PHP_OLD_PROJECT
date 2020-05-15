@@ -1,0 +1,77 @@
+
+
+	
+		
+	config folder -- queue.php file....
+
+			//'default' => env('QUEUE_DRIVER', 'sync'),
+	'default' => env('QUEUE_DRIVER', 'database'),      //here used database
+
+	in the .env file..........
+	
+	QUEUE_DRIVER=database
+	
+	then......
+
+	php artisan queue:table
+
+	php artisan migrate
+
+
+
+	in the UserCreatedListener.php file
+		-----------------------
+     Class UserCreatedListener implements ShouldQueue
+	public function handle($event)
+	{
+		$email = $event->user->email;    //[we get inserted email address. now we can do every things...]
+	}
+      }
+
+
+	then.....
+
+	php artisan queue:work
+
+	corn
+
+
+
+
+
+
+
+===============================================================
+		Using queue
+	===============================
+
+	php artisan queue:table
+	php artisan migrate
+
+	NOW=== config/queue.php file
+	-----------------------------
+	 'default' => env('QUEUE_CONNECTION', 'sync'),
+
+	we have to change database of sync... for this have to go .env file..
+
+			QUEUE_CONNECTION=database
+
+
+	ann Now--------------Have to notification class , use 
+
+		implements ShouldQueue
+
+
+
+
+===============but here is a problem==============
+	mailtrap.. email view korer por.. view ar link kaz kore na.. its maybe localhost...ar jonno
+
+
+
+
+
+
+
+
+

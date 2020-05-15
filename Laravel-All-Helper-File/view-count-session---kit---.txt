@@ -1,0 +1,16 @@
+
+	 $post = Post::where('is_approved',1)->where('status',1)->where('slug',$slug)->first();
+        $data['post'] = $post;
+        $blogKey = "blog_".$post->id;
+
+        
+        /*
+        if(Session::has($blogKey)){
+            echo "ase"; //session()->forget($blogKey);
+        }
+        */
+        if(!Session::has($blogKey)){
+            //echo "nai";
+            $post->increment('view_count');
+            Session::put($blogKey,1);
+        }

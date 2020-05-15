@@ -1,0 +1,248 @@
+
+	 $firstDay=date('Y-m-d',strtotime("first day of this month"));
+             $lastDay=date('Y-m-d',strtotime("last day of this month"));
+            date('Y-m-t');               
+    
+<!-- ====================================================================== --> 
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="table">
+                                <table class="table table-bordered table-striped">
+                                    <thead>
+                                        <tr style="background-color:silver; text-align:center;">
+                                            <th style="color:indigo; text-align:center;font-size:24px;">
+                                                <strong> Daily Expense</strong>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+<!-- =========================================================================================================== --> 
+    <!----------------------------------Search----------------------------------> 
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form">
+                                <form method="GET" action="{{ route('admin.dailyreport.index') }}" >
+                                    <div class="table">
+                                        <table class="table table-striped table-bordered">
+                                            <thead>
+                                                <tr style="background-color:#eee;">
+                                                    <th style="text-align:right;">
+                                                        <label for="day"  style="color:red;text-align:right">Day</label>
+                                                    </th>
+                                                    <th>
+                                                        <select name="day" id="" class="form-control">
+                                                            @php
+                                                            $day = 120;
+                                                            @endphp
+                                                            <option value="0"> Select a Day </option>
+                                                            <option value="today" @isset($startDate) {{ $startDate == "today" ?'selected' : '' }} @endisset> Only Todays </option>
+                                                            @for ($i = 1; $day >=$i; $i++)
+                                                            <option @isset($startDate) {{ $startDate == $i ? 'selected' : '' }} @endisset value="{{ $i }}">From Last {{ $i }} Days</option>   
+                                                            @endfor
+                                                        </select>
+                                                    </th>
+                                                    <th>
+                                                        <input class="btn btn-pink " type="submit" value="Search"/>
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                        </table>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form">
+                                <form method="GET" action="{{ route('admin.dailyreport.index') }}" >
+                                    <div class="table">
+                                        <table class="table table-striped table-bordered">
+                                            <thead>
+                                                <tr style="background-color:#eee;">
+                                                    <th style="text-align:right;">
+                                                        <label for="from"  style="color:red;text-align:right">From</label>
+                                                    </th>
+                                                    <th>
+                                                        <input type="date" name="from" id="" class="form-control">
+                                                    </th>
+                                                    <th style="text-align:right;">
+                                                        <label for="to"  style="color:red;text-align:right">To</label>
+                                                    </th>
+                                                    <th>
+                                                        <input type="date" id="" name="to" class="form-control">
+                                                        {{-- --
+                                                            <select name="day" id="" class="form-control">
+                                                            @php
+                                                            $day = 120;
+                                                            @endphp
+                                                            <option value="0"> Select a Day </option>
+                                                            <option value="today" {{ $startDate == "today" ?'selected' : '' }}> Only Todays </option>
+                                                            @for ($i = 1; $day >=$i; $i++)
+                                                            <option {{ $startDate == $i ? 'selected' : '' }} value="{{ $i }}">From Last {{ $i }} Days</option>   
+                                                            @endfor
+                                                        </select>    
+                                                        --}}
+                                                    </th>
+                                                    <th>
+                                                        <input class="btn btn-pink " type="submit" value="Search"/>
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                        </table>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="col-md-1 pull-right">
+                            <div class="table">
+                                <table class="table table-striped table-bordered">
+                                    <thead>
+                                        <tr style="background-color:#eee;">
+                                            <th>
+                                                <a href="" data-toggle="modal" data-target="#myModal"> Option</a>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+<!----==============================================---->
+<!----------------------------------Search More Option----------------------------------------->
+                    <div id="myModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
+                        <div class="modal-dialog"> 
+                            <div class="modal-content p-0 b-0">
+                                <div class="panel panel-color panel-primary">
+                                    <div class="panel-heading" style="text-align:left;"> 
+                                        <div class="row text-center">
+                                            <div class="col-md-11">
+                                                <strong style="color:yellow;"> Please Select The required Field</strong>
+                                            </div>
+                                            <div class="col-md-1">
+                                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                                            </div>
+                                        </div>
+                                    </div> 
+                                    <div class="panel-body"> 
+                                        <div class="table">
+                                            <table class="table table-bordered table-striped">
+                                                <thead>
+                                                    <tr>
+                                                    <form action="{{ route('admin.salary.create') }}" method="GET">
+                                                        <th style="width:20%; text-align:right;"><span class="form-control year">Year</span></th>
+                                                        <th>
+                                                            <select name="year" id="year" class="form-control year">
+                                                                <option value="0"> Select One</option>
+                                                                @php
+                                                                $year = date('Y');
+                                                                $year2 = 2017;
+                                                                @endphp
+                                                                @for ($i = 1; $year2 <= $year; $year--)
+                                                                <option value="{{ $year }}" @if (isset($yearData)) {{ $yearData == $year ? 'selected' : '' }} 
+                                                                @else {{ date('Y') == $year ? 'selected' : '' }}  @endif> {{ $year }} </option>
+                                                                @endfor
+                                                            </select>
+                                                        </th>
+                                                        <th style="width:20%; text-align:right;"> <span class="form-control month">Month</span></th>
+                                                        <th>
+                                                            <select name="month" id="month" class="form-control month">
+                                                                <option value="0">Select One</option>
+                                                                @php
+                                                                $month = 12;
+                                                                @endphp
+                                                                @for ($i = 1; $i<=$month; $month--)
+                                                                <option value="{{ $month }}" @if (isset($monthData)) {{ $monthData == $month ? 'selected' : '' }}
+                                                                    @else {{ date('m') == $month ? 'selected' : '' }}  @endif> {{ $month }} </option>
+                                                                @endfor
+                                                            </select>
+                                                        </th>
+                                                    </tr>
+                                                <tr>
+                                                        <th colspan="4">
+                                                                <input type="submit" value="Search" style="background-color:brown;color:yellow;" class="form-control">  
+                                                            </form>
+                                                        </th>
+                                                </tr>
+                                                </thead>
+                                            </table>
+                                        </div>  
+                                        <!-----------
+                                            <form method="GET" action="">
+                                                <table class="table table-hover table-striped">
+                                                    <thead style="font-size:12px;color:gray;font-weight:700;">
+                                                        <tr style="text-align:center;">
+                                                            <td style="text-align:right;">From Date</td>
+                                                            <td>:</td>
+                                                            <td>
+                                                                <input name="fromDate" type="date" class="form-control">
+                                                            </td>
+                                                        </tr>
+                                                        <tr style="text-align:center;">
+                                                            <td style="text-align:right;">To Date</td>
+                                                            <td>:</td>
+                                                            <td>
+                                                                <input name="toDate" type="date" class="form-control">
+                                                            </td>
+                                                        </tr>
+                                                        <tr style="text-align:center;">
+                                                            <td style="text-align:right;">Village Doctor Name</td>
+                                                            <td>:</td>
+                                                            <td>
+                                                                <select name="doctorName" id="" class="form-control">
+                                                                    <option value="0">Select A Doctor</option>
+                                                                </select>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td colspan="3">
+                                                                <input type="submit" value="Search" style="background-color:brown;color:yellow;" class="form-control">
+                                                            </td>
+                                                        </tr>
+                                                    </thead>
+                                                </table> 
+                                            </form>     
+                                        -------------->            
+                                    </div> 
+                                </div>    
+                            </div>
+                        </div><!-- /.modal -->
+                    </div>
+<!---------------------------------Search More Option------------------------------------------> 
+<!----==============================================---->
+<!-------------------------------Search end---------------------------------------->
+<!-- =========================================================================================================== --> 
+                            <div class="row">
+                                <div class="col-sm-9">
+                                    <div class="table">
+                                        <table class="table table-bordered table-striped">
+                                            <thead>
+                                                <tr style="background-color:burlywood;">
+                                                    <th style="color:blue;text-align:center;">Message will be shown here</th>
+                                                </tr>
+                                            </thead>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="col-sm-3">
+                                    <div class="table">
+                                        <table class="table table-bordered table-striped">
+                                            <thead>
+                                                <tr style="background-color:chocolate;">
+                                                    <th style="color:darkblue;text-align:center;">Total Amount</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr style="background-color:burlywood;">
+                                                    <td style="color:darkblue;text-align:center;">
+                                                        <strong>500 Tk</strong>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+<!-- =========================================================================================================== --> 

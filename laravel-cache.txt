@@ -1,0 +1,31 @@
+	
+	use Illuminate\Support\Facades\Cache;
+	
+	$time = Cache::remember('key', 0.34, function(){
+   	 return time();
+	});
+
+		$meta = Cache::rememberForever($key, function() use($key){
+			return ServiceModel::where('key', $key)->first();
+		});
+	Cache::forget($key);
+
+
+
+	    $meta = Cache::rememberForever('user_'.$uId, function() use($uId){
+            $countries=DB::table('countries')->select('language_shortcode')->where('status',1)->get();
+            $total=0;
+            foreach($countries as $country) {
+              $table_name="drm_translation_".$country->language_shortcode;
+              $total_products = DB::table('drm_products')
+              ->join($table_name, $table_name.'.product_id', '=', 'drm_products.id')
+              ->where('drm_products.user_id', '=', $uId)
+              ->wherenull('drm_products.deleted_at')
+              ->count();
+              $total=$total+$total_products;
+            }
+            return $total;
+		});
+        dd( $meta);
+
+Answer 0 ase.. but asbe ank beshi..

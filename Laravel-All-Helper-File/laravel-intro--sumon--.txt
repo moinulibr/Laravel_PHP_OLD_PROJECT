@@ -1,0 +1,219 @@
+
+
+
+
+-----------------------------------------------------------------------------------------END-------------------------------------------
+	in the Config folder
+	===================(for starting our appliction, we have to change or set or configuration somethings in the App.php file...)
+
+		App.php
+		=======
+		
+		'key' =>env('APP_KEY','set app key here')  //[its get from .env file or we can generate by this command,, php artisan key:generate]
+		'name' => env('APP_NAME','Set Our Project Name where is default'),
+		'debug' =>env('APP_DEBUG',false),	//[Error message can not show if we set false. its uses in the production mode. but in development mode have to set true]
+		'timezone'=>'Asia/Dhaka';
+	
+	
+	
+	
+	Now in .env file (envirment variable)	
+	===================================== (comment or application search in the .env file, if not found , then its goes to the App.php file)
+	
+		APP_DEBUG = true  //[for getting error message ]
+		
+
+-----------------------------------------------------------------------------------------END-------------------------------------------
+
+	'providers' => [
+				which service is using laravel all are here.  If we want to use another or extra (3rd party pakage service)  services 
+					Then have to mention here
+			],
+	
+	'Aliases' => [
+				\\ Aliase = nick name , short name 
+				Its make a small or short name of a big namespace  (Class name) . 
+			When we use any namespace or class name for any service in the providers, then have to set in Aliase for a shorname (for useable this class)
+		    ],
+	
+		
+	
+
+-----------------------------------------------------------------------------------------END-------------------------------------------
+	
+	
+	
+	
+			Routing Every things..
+	===============================================================
+
+		Route::group(['prefix'=>'admin/'],function(){
+			Route::get('create','controllerName@method')->name();
+		});
+	
+	We can use middleware in Route Group...
+	
+		Route::group(['prefix'=>'admin/','middleware'=>'auth'],function(){
+			Route::get('create','controllerName@method')->name();
+		});
+	
+	We can use Namespace in Route group..(though namespace is controller related.. and its likes folder name)
+	
+	
+		Route::group(['namespace'=>'admin'],function(){
+			Route::get('create','controllerName@method')->name();
+		});
+	
+	
+	
+	We can use name in the Route group....this diffierent type rules..
+	
+		Route::name('admin.')->namespace('adminFolder')->prefix('admin/')->group(function(){
+			Route::get('create','controllerName@method');
+		});
+	
+	
+	
+	
+	
+	
+	We can set or pre-define in our URL Type (string type or numeric type?).. URL will be numeric or string ?? we can set in Route...
+	
+	Route::get('/user/{id}/{name}','controller@method')->where('id', '[0-9]+');
+
+	
+	
+		Lravel Regular Expression Feature
+	==================================================
+
+	Route::get('/user/{id}/{name}','controller@method');
+
+		Optional Parametter
+	 =================================
+	
+	Route::get('/user/{id}/{name?}','controller@method');
+
+	in controller
+	------------
+	public function index($id,$name=""){}
+		
+	
+-----------------------------------------------------------------------------------------
+
+	Send Multipule data by ancor tag <a>
+	
+	<a href="{route('name',['id','name'])}" > Click </a>
+	
+	
+	
+-----------------------------------------------------------------------------------------
+
+	Resource Controller
+	====================
+	php artisan make:controller homeController --resource
+
+	In Route Controller
+	-------------------
+	Route::resource('string_slug','controllerName');
+
+	Route::resource('slug','controllername)->only([which method want to use]);	
+	Route::resource('slug','controllername)->except([which method don't want to use]);	
+	
+	
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

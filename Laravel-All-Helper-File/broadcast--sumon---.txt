@@ -1,0 +1,219 @@
+		broadcasting and echo 
+	========================================
+
+	as a server .. web websockets
+	
+	laravel echo is a websockets type server.. which reailtime data receiver ..
+	
+	why websocaket..??
+	
+	1. unnessasary pressure to my server.
+	2. websockets is faster.
+	3. two way communication
+	4. more reailable
+	websockets connected with both site, so if some changes then its return to the client site without refresh... its automatically works...
+		
+	 	other Way... ajax...
+	altime send request to the server, for getting  changes value , just ajax ask to the server always some value changes in database???
+
+	
+	pusher::
+	======= pusher is a reailtime data getting and passing 3rd party service provider...
+--------------------------------------------------------------------------------------------------------------------------------------------------
+
+	Channel???
+	=========
+	
+	1. public channel : without authentication.. every body can get notification or message if he subscribe this..
+		1/1. subscribe: connected with this channel 
+		1/2. listen  : connected and get notification, when changes or postin some new in this channel.......
+
+	2 private channel: restected data , only targeted ordians can get ..  we can emplements customs authentication logic . like... client authenticat id and send data id if equal then client get this data..
+	
+	3. presence: no data send. just we know from there, which clients are connected now with our site... like... who are in online now??
+	
+------------------------------------------------------------------------------------------------------
+		works start--....
+	=============================
+	
+	step:1: create a event 
+	====
+		php artisan  make:event EventName  [PostCreated]
+	
+	step:2: some changes or add somethings in the config / broadcasting.php
+	======
+
+		    //'default' => env('BROADCAST_DRIVER', 'null'), 
+		    'default' => env('BROADCAST_DRIVER', 'pusher'),
+			
+	step:3: have to instolled
+	======
+		composer require pusher/pusher-php-server "~3.0"
+
+	
+	step:4: changes in the .env file .. from pusher.com 
+	=====
+	BROADCAST_DRIVER=pusher
+
+	PUSHER_APP_ID="727692"
+	PUSHER_APP_KEY="bfb6148d84293aee5cfb"
+	PUSHER_APP_SECRET="78e6782fd846c0f718f5"
+	PUSHER_APP_CLUSTER="ap2"
+	
+	--------- finished for back-end configuration ------------ 
+	
+	step:5:  
+	======	in the App\Events
+		PostCreated.php file
+		use App\Model\Post;
+	
+	Class PostCreated implements ShouldBroadcast{	  //[extra added in the Event file.. implements ShouldBroadcast]
+
+	public $post;
+	publci function __constract(Post $post)
+	{
+	$this->post=$post;	//[which data want to send , mentioned here]
+	}
+
+	public function broadcastOn()
+	{
+		return new Channel('post.created');    //[here mentioned only channel name... here channel name is... post.created and it is public Channel]
+		//return PrivateChannel('post.create');  /[here is mentioned private channel. all are same]
+	}
+
+     }	
+	
+
+		if we use private channel.... then have to go to routes / channels.php file
+		=============---------------=====================   
+
+		Broadcast::channel('App.User.{id}', function ($user, $id) {
+   			 return (int) $user->id === (int) $id;
+		    });
+			
+			==== have to changes ======
+
+		Broadcast::channel('post.created', function ($post) {
+   			 return (int) auth()->user->id != (int) $post->user_id;
+		    });
+
+		and in the master.blade.php file have to change private
+
+			Echo.private('post.created')	
+	 		 .listen('PostCreated', (e) => {
+	    			console.log(e.post);
+    				});
+
+
+	------- Back-end logic end-------now have to show this data from pusher to client or fornt-end site.--------
+	____________________________________________________________________________________________________________
+
+	step:6: have to instol laravel echo 
+		
+	 	yarn add laravel-echo pusher-js --save
+
+	------------------------------
+	
+	step:7:: resources/assets/js/bootstrap.js file...
+	=======
+				we will un-comment this....
+
+	 import Echo from 'laravel-echo'
+
+	 window.Pusher = require('pusher-js');
+
+	 window.Echo = new Echo({
+	    broadcaster: 'pusher',
+	     key: 'your-pusher-key',
+	     cluster: 'mt1',
+	     encrypted: true
+	 });
+
+	--------------------------
+
+	step:8: https://laravel.com/docs/5.8/broadcasting#installing-laravel-echo [from here we colloct ... Listening For Events parts]
+	======
+	
+		Echo.channel('orders')			//[orders = Channel name == post.created.... here we mentioned]
+    		.listen('OrderShipped', (e) => {	//[listen('OrderShipped' = EventClassName == PostCreated .... here we mentioned ]
+       		 console.log(e.order.name);		//[ console.log(e.order.name = data passing in which key,, == post .... here we mentioned]
+    		});
+
+
+	and its pasted in the place whre i want to show this notification... like Master.blade.php.. if its for everbody........
+	
+	
+	Echo.channel('post.created')	
+	  .listen('PostCreated', (e) => {
+	    console.log(e.post);
+    		});
+
+	
+
+		now all data geted.......
+
+	now 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

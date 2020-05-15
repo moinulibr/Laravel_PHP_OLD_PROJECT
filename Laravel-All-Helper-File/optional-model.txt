@@ -1,0 +1,33 @@
+
+	
+
+	    	public function studentTable()
+		{
+    			return $this->belongsTo(Student::class,'student_id');
+    		}
+    		public function getSenderNameAttribute()
+    		{
+        		return optional($this->studentTable)->student_sid;
+    		}
+
+
+
+
+
+	
+
+	    	public function user()
+    		{
+        		return $this->belongsTo('App\User','id');
+    		}
+    		//attributes
+    		public function getSenderNameAttribute()
+    		{
+        		return $this->user->name; //error is happening in this line i do not know why
+    		}
+				
+			//this is right..
+		public function getSenderNameAttribute()
+		{
+    			return optional($this->user)->name;
+		}

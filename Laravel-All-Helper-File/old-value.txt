@@ -1,0 +1,53 @@
+
+
+
+
+	old value
+		<select name="catname" class="form-control" id="inputEmail3">
+                    <option value=""> Please Select One</option>
+                    @foreach ($allcat as $item)
+                        @if (old('catname') == $item->id)
+                        <option value="{{ $item->id }}" selected>{{ $item->name }}</option>
+                        @else 
+                          <option value="{{ $item->id }}">{{ $item->name }}</option>
+                        @endif
+                    @endforeach
+         	 </select>
+
+	------------------------
+ 		@if ($errors->has('subcatname'))              
+                    <span class="invalid-feedback red" role="alert">                        
+                          <strong>{{ $errors->first('subcatname') }}</strong>                        
+                    </span>                           
+                   @endif
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

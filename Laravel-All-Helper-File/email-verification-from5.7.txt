@@ -1,0 +1,115 @@
+
+	email validation from laravel 5.7
+		-------------------------
+	
+	in the users table have to add a field..name:  email_verified_at
+		===========================
+		  email_verified_at  //also add in the database migration file users tables
+		===========================
+
+	in the User model...
+
+	class User extends Authenticatable implements MustVerifyEmail
+	{
+	
+	}
+
+
+	in the web.php file
+		-----------
+
+	Auth::routes(['verify' => ture]);
+
+
+	protecting Routes...............
+	in the web.php 
+		
+		if we want to protect more and more route....
+	Route::get('/home',function(){
+		//only verified users may enter.....
+	})->middleware('verified');
+
+		if we want to protected only one or two route
+			then have to use like......
+
+	Route::get('','')->middleware('verified');
+
+
+	--------------------------------------
+	Have to change in the .env file 
+	
+	MAIL_DRIVER=smtp
+MAIL_HOST=smtp.mailtrap.io
+
+	MAIL_PORT=587
+	
+MAIL_USERNAME=myemail
+	
+MAIL_PASSWORD=123456
+	
+MAIL_ENCRYPTION=tls
+		===========
+	AND also have to make sure in the my gmail account..
+		allow less .... on.....
+		-----------------------------
+
+	then.. in the config/mail.php file.. have to add somethings in line no 102
+		==========================
+	'sendmail' =>'/usr/sbin/sendmail -bs',
+	'stream' => [
+	'ssl' => [
+	'allow_self_signed' => true,
+	'verify_peer' => false,
+	'verify_peer_name' => false,
+		],
+	 ],
+	----------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
