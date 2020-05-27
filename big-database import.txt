@@ -1,4 +1,19 @@
+	Import
+	######
+	mysqldump -u root -p abc > abc.sql
+	F:\xampp\mysql\bin>mysqldump -u root -p abc > abc.sql > "F:\backupABC.sql"   #[source where i want to download] 
+
+	HIT TO DATABASE -> IMPORT AND EXPORT
+	###################################
+	mysql -u root -p abc ##[this is practised]
+	show databases;
+	use pro;
+
+	##**mysql -u root -p abc < abc.sql
 	 
+
+
+
 	.\mysql -u root -p
 	password
 	show databases; show databases;
