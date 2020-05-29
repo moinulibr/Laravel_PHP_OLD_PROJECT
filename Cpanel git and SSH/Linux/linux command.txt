@@ -1,4 +1,42 @@
-	
+		# DATABASE Export AND IMPORT #
+	/*
+	|----------------------------------------------------------------------------------------------------------------
+	|
+	| Export Database
+	|----------------------------------------------------------
+	| mysqldump -u root -p mydbscheme > mydbscheme_dump.sql
+	| mysqldump -u <username> -p <db_name> > <backup_file>.sql
+	| #####
+	| mysqldump -u dotcaayc_office -p dotcaayc_office > mydb_office_dump.sql #[working perfect]
+	| password: dotcaayc_office
+	|
+	| ## for a single table
+	| mysqldump -u dotcaayc_office -p dotcaayc_office accounts > accounts_table__dump.sql
+	| password: dotcaayc_office
+	|
+	|-----------------------------------------------------------------------------------
+	| ##Import
+	|----------------------------------------------------------------
+	| mysql -u dotcaayc_pos -p  dotcaayc_pos <  mydbscheme_dump.sql ####[working perfect]
+	| mysql -u dotcaayc_pos -pdotcaayc_pos dotcaayc_pos <  mydbscheme_dump.sql ####[working perfect]
+	| mysql -u dotcaayc_pos -p  dotcaayc_pos < /home/dotcaayc/puttysshkey/Laravel/mydb_office_dump.sql ####[working perfect]
+	|
+	|
+	|-------------------------------------------------------------------------------------------------------------
+	*/
+
+
+
+	/*
+	|---------------------------------------------------------------------------------------
+	| Directories 
+	| pwd #[present working directory]
+	|-------------------------------------------------------------------------------------
+	|
+	|	######## List of the courrent working directories #######
+	|	 	***** pwd
+	|-----------------------------------------------------------------------------------------
+	*/
 	
 	/*
 	|---------------------------------------------
@@ -7,9 +45,11 @@
 	|
 	|	#########Forward =>  ########
 	|		***** cd myDestination  ## like $ cd F #F= F drive
+	|
+	| ###### cd .. ##### #[its returns one step.. one step back]
 	|	########Backwards <= ########
-	|		***** cd /  ## like $ cd / #back to c drive
-	|	###### cd .. ##### like cd /
+	|		***** cd /  ## like $ cd / #back to root / home drive
+	|	
 	|----------------------------------------------------
 	*/
 
@@ -72,6 +112,7 @@
 	|	2. Add content 
 	|	3. Press 'ctrl + d' to return to command prompt.
 	|	#######
+	|	###### touch fineName file1 file2 file3 #[create file without content]
 	|-----------------------------------------------------------------------------------------
 	*/
 
@@ -117,6 +158,8 @@
 	|	######## cp filename /new_file_location #######  
 	| #LIKE. Suppose we want to move the file "sample2" to location /home/moinul/Documents..
 	|	##cp fileTwo /home/dotcaayc/puttysshkey/Laravel
+	|--------------------------------------------------------
+	| ##cp fileTwo file5 ##[same directory, copy fileTwo and make new file as file5]
 	|-----------------------------------------------------------------------------------------
 	*/
 	
@@ -143,8 +186,19 @@
 	| rm file*  #[we may use (*)  for all after *]
 	*/
 	
-
-
+	/*
+	|---------------------------------------------------------------------------------------
+	| Link Files to another file
+	| The 'ln' command 
+	|-------------------------------------------------------------------------------------
+	|
+	|	######## ln fileName1 fileName2 #######  
+	|-----------------------------------------------------------------
+	| 	## ln -s file1 file3
+	| create new file as  file3 , its a symbolic / shortcurt link.. its represent file1
+	|----------------------------------------------------------------------------------------
+	*/
+	
 
 	/*
 	|---------------------------------------------------------------------------------------
@@ -154,6 +208,8 @@
 	|	######## mv filename newfilename #######  
 	|-----------------------------------------------------------------------------------------
 	*/
+
+
 
 
 	/*
@@ -169,13 +225,25 @@
 	|-----------------------------------------------------------------------------------------
 	*/
 
+	/*
+	|---------------------------------------------------------------------------------------
+	| Copy Directory
+	| cp -r
+	|-------------------------------------------------------------------------------------
+	|
+	|	######## cp -r  directoryname/FolderName newdirectoryname #######  #[same directory]
+	|	######## cp -r  directoryname/FolderName /home/dotcaayc/puttysshkey/Laravel #######  #[others directory]
+	|-----------------------------------------------------------------------------------------
+	*/
 
 	/*
 	|---------------------------------------------------------------------------------------
 	| Removing Directories
 	|-------------------------------------------------------------------------------------
 	|
-	|	######## rmdir directoryname #######  
+	|	######## rmdir directoryname #######  #[single directory]
+	|	######## rm -r directory/FolderName #### #[single directory]
+	|	######## rm -r * ######  #[deleting all directories / Folders]
 	|-----------------------------------------------------------------------------------------
 	*/
 
@@ -188,6 +256,21 @@
 	|	######## mv directoryname newdirectoryname #######  
 	|-----------------------------------------------------------------------------------------
 	*/
+
+
+	/*
+	|---------------------------------------------------------------------------------------
+	| Search File in a Folder
+	| grep    # grep -i 
+	|-------------------------------------------------------------------------------------
+	|
+	|	######## grep fileName FolderName #######  #[case sensitive] #[match all according the search word]
+	|	######## grep -i fileName FolderName #######  #[ignore-case sensitive #[case insensitive]]
+	|	######## grep -w fileName FolderName #######  #[only match with the search word]
+	|-----------------------------------------------------------------------------------------
+	*/
+
+
 
 	/*
 	|---------------------------------------------------------------------------------------

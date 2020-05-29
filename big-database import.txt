@@ -11,7 +11,8 @@
 
 	##**mysql -u root -p abc < abc.sql
 	 
-
+	mysql -u root -p test < "C:\Users\lenovo E450\desktop\backup.sql"
+	mysql -u root -p test < "C:\Users\lenovo E450\desktop\backup.sql"
 
 
 	.\mysql -u root -p

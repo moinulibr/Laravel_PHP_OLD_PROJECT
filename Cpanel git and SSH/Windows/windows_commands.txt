@@ -1,0 +1,65 @@
+
+	scp file1 /C:\Users\Public\Downloads
+	/*
+	|---------------------------------------------------------
+	|	dir
+	|	cd ..
+	|	cd Desktop
+	|	cd\
+	|
+	*/
+
+	### download from local database... 
+		
+	mysqldump -u root -p rajon_vai > rajon_vai.sql  ###[mysqldump -u username -p databasename > filename.sql]
+		###### download to the desktop ######		## select 
+	mysqldump -u root -p rajon_vai > rajon_vai.sql > "C:\Users\lenovo E450\desktop\backup.sql"
+
+
+	###### Import from  on the desktop 
+	mysql -u root -p test < "C:\Users\lenovo E450\desktop\backup.sql"
+
+
+
+
+	
+	.\mysql -u root -p
+	password
+	show databases; show databases;
+	use databaseName;   use restruent;
+	source newdatabase.sql;   source chalet9.sql;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
