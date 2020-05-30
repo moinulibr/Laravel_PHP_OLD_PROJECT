@@ -1,0 +1,778 @@
+
+https://www.google.com/search?q=how+to+pass+or+receive+data+from+rest+api+in+php&oq=how+to+pass+or+receive+data+from+rest+api+in+php&aqs=chrome..69i57.69399j0j7&sourceid=chrome&ie=UTF-8
+
+https://stackoverflow.com/questions/9802788/call-a-rest-api-in-php
+
+https://stackoverflow.com/questions/2445276/how-to-post-data-in-php-using-file-get-contents
+
+https://weichie.com/blog/curl-api-calls-with-php/
+
+// Method: POST, PUT, GET etc
+// Data: array("param" => "value") ==> index.php?param=value
+
+function CallAPI($method, $url, $data = false)
+{
+    $curl = curl_init();
+
+    switch ($method)
+    {
+        case "POST":
+            curl_setopt($curl, CURLOPT_POST, 1);
+
+            if ($data)
+                curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
+            break;
+        case "PUT":
+            curl_setopt($curl, CURLOPT_PUT, 1);
+            break;
+        default:
+            if ($data)
+                $url = sprintf("%s?%s", $url, http_build_query($data));
+    }
+
+    // Optional Authentication:
+    curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+    curl_setopt($curl, CURLOPT_USERPWD, "username:password");
+
+    curl_setopt($curl, CURLOPT_URL, $url);
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+
+    $result = curl_exec($curl);
+
+    curl_close($curl);
+
+    return $result;
+}
+
+
+
+
+
+
+    public static function doCulrRequest($url, $curl_header, $alldata = null, $request_type = 'POST')
+    {
+        $ch = curl_init();
+        curl_setopt_array($ch, array(
+            CURLOPT_URL => $url,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => "",
+            CURLOPT_HEADER => 0,
+            CURLOPT_CUSTOMREQUEST => $request_type,
+            CURLOPT_HTTPHEADER => $curl_header,
+            CURLOPT_POSTFIELDS => $alldata,
+            CURLOPT_FOLLOWLOCATION => true
+        ));
+
+        $output = curl_exec($ch);
+
+        if(!empty(self::$userId) && json_decode($output)->status == 'error'){
+            User::find(self::$userId)->notify(new DRMNotification('Gambio Export '. json_decode($output)->message . $output, '', '#'));
+        }
+
+        return $output;
+    }
+
+
+
+
+   public function createNewProduct($productsarray, $category_ids)
+    {
+        $api_path = "api.php/v2/";
+        $user = $this->shop_details->user;
+        $pass = $this->shop_details->userpas;
+        $auth = base64_encode("$user:$pass");
+        $url = $this->shop_details->url . $api_path . "products";
+        $curl_header = array("accept: application/json", "authorization: Basic " . $auth, "content-type: application/json");
+        $alldata = json_encode($productsarray);
+        $insertProducts = $this->doCulrRequest($url, $curl_header, $alldata, 'POST');
+        $this->doAfterProductCreate($insertProducts, $category_ids);
+    }
+
+    public function doAfterProductCreate($insertProducts, $category_ids)
+    {
+        $all_response_array = json_decode($insertProducts);
+        if (count((array) $all_response_array->created) > 0) {
+            $this->handleCreateSuccess($all_response_array->created, $category_ids);
+        }
+    }
+
+
+	
+
+    public function updateProduct($productsarray)
+    {
+        $product_id = $productsarray['id'];
+
+        $api_path = "api.php/v2/";
+        $user = $this->shop_details->user;
+        $pass = $this->shop_details->userpas;
+        $auth = base64_encode("$user:$pass");
+        $url = $this->shop_details->url . $api_path . "products";
+        $curl_header = array("authorization: Basic " . $auth, "content-type: application/json");
+        $alldata = json_encode($productsarray);
+
+        $updateProducts = $this->doCulrRequest($url, $curl_header, $alldata, 'PUT');
+
+        $this->doAfterProductUpdate($updateProducts);
+    }
+
+    public function doAfterProductUpdate($updateProducts)
+    {
+        $all_response_array = json_decode($updateProducts);
+        if (count((array) $all_response_array->affected) > 0) {
+            $this->handleUpadteSuccess($all_response_array->affected);
+        }
+    }
+
+    public function handleUpadteSuccess($success_products)
+    {
+        $success_product_ean = collect($success_products)->pluck('ean')->toArray();
+
+        $info = [];
+        foreach ($success_products as $success_product) {
+
+            $info[] = array(
+                'user_id' => $this->user_id,
+                'shop_id' => $this->shop_id,
+                'product_id' => $success_product->id,
+                'product_model' => $success_product->productModel,
+                'ean' => $success_product->ean,
+                'created_at' => now(),
+                'updated_at' => now()
+            );
+
+        }
+
+        DB::table('gambio_products')->whereNotIn('ean', $success_product_ean)->where('shop_id', $this->shop_id)->insert($info);
+
+
+        DB::table('gambio_products')->whereIn('ean', $success_product_ean)->where('shop_id', $this->shop_id)->update(['updated_at' => now()]);
+
+        $info = null;  
+
+    }
+
+
+    /* Start Gambio Product Delete process */
+
+    /* Gambio Duplicate Product Delete */
+
+    public static function findDuplicateProducts($shop)
+    {
+
+        $api_path = "api.php/v2/";
+        $auth = base64_encode("$shop->user:$shop->userpas");
+        $url = $shop->url . $api_path . "products";
+        $headers = array("Authorization: Basic " . $auth, "content-type: application/json");
+
+        $response = self::doCulrRequest($url, $headers, $alldata, 'GET');
+        $allProducts = json_decode($response);
+
+        $api_product_ean = array();
+        $api_product_id = array();
+        $set_ean = array();
+
+        foreach ((array) $allProducts as $productValue) {
+            $api_product_ean[] = $productValue->ean;
+            $api_product_id[] = $productValue->id;
+        }
+
+        foreach ($api_product_ean as $key => $value) {
+            $set_ean[$value]++;
+            if ($set_ean[$value] > 1) {
+                if ($api_product_ean[$key] != '') {
+                    $productId[] = $api_product_id[$key];
+                    $productEan[] = $api_product_ean[$key];
+                }
+            }
+        }
+
+        if (isset($productId)) {
+            self::deleteDuplicateProducts($shop, $productId);
+        }
+
+    }
+
+
+    /* Delete Products Process From Gambio Shop */
+
+    public static function deleteGambioShopProduct($product_ids, $shop_details)
+    {
+        if (count((array) $product_ids) > 0) {
+            foreach ($product_ids as $id) {
+                $product = DB::table('drm_products')->where('drm_products.id', $id)->first();
+                $exists = self::gambioSearchProduct($shop_details, $product->ean);
+
+                if ($exists) {
+
+                    $auth = base64_encode("$shop_details->user:$shop_details->userpas");
+                    $url = $shop_details->url . "api.php/v2/products/" . $exists;
+                    $curl_header = array("accept: application/json", "authorization: Basic " . $auth, "content-type: application/json");
+                    $delete_response = self::doCulrRequest($url, $curl_header, $alldata, 'DELETE');
+                    
+                    if (json_decode($delete_response)->code == 200) {
+                        $delete_items_ean[] = $product->ean;
+                    }elseif (json_decode($delete_response)->code == NULL) {
+                        $delete_items_ean[] = $product->ean;
+                    }
+
+                }
+            }
+
+            DB::table('gambio_products')->whereIn('ean',$delete_items_ean)->where('shop_id',$shop_details->id)->delete();
+
+        }
+    }
+
+
+    public static function deleteDuplicateProducts($shop, $product_ids)
+    {
+        foreach ($product_ids as $product_id) {
+            $api_path = "api.php/v2/";
+            $user = $shop->user;
+            $pass = $shop->userpas;
+            $auth = base64_encode("$user:$pass");
+            $url = $shop->url . $api_path . "products/" . $product_id;
+            $curl_header = array("accept: application/json", "authorization: Basic " . $auth, "content-type: application/json");
+            self::doCulrRequest($url, $curl_header, $alldata, 'DELETE');
+        }
+
+    }
+
+    /* End Gambio Product Delete process */
+
+
+    /* Gambio Image Upload Process */
+
+    public function makeImageArray($src, $product)
+    {
+        $image = array();
+        $all_images = drm_fix_image($src);
+        if (count((array) $all_images) > 0) {
+            foreach ($all_images as $image => $single_image) {
+                $single_image = $single_image->src;
+                $image_name = explode("/", urldecode($single_image));
+                $lastname = end($image_name);
+                $image_details['filename'] = (preg_match('/(\.jpg|\.png|\.bmp)$/i', $lastname)) ? $product->ean . "_" . $lastname : $product->ean . "_" . $lastname . ".jpg";
+                $image_details['isPrimary'] = ($image == 0) ? true : false;
+                $image_details['isVisible'] = 1;
+                $img[] = $image_details;
+            }
+        }
+        return $img;
+    }
+
+    public static function GambioImageUploadArray($shop, $ids)
+    {
+        foreach ($ids as $id) {
+            GambioApi::GambioImageUploadSingle($shop, $id);
+        }
+    }
+
+    public static function GambioImageUploadSingle($shop, $id)
+    {
+        $api_path = "api.php/v2/";
+        $user = $shop->user;
+        $pass = $shop->userpas;
+        $auth = base64_encode("$user:$pass");
+        $url = $shop->url . $api_path . "product_images/";
+        $product = DB::table('drm_products')->where('id', $id)->first();
+        $all_images = drm_fix_image($product->image);
+        if (count((array) $all_images) > 0) {
+            $img_name = array();
+            $img = array();
+            $total_error = 0;
+            $total_success = 0;
+            $msg = array();
+            $count = 0;
+            $already_uploaded = 0;
+            foreach ($all_images as $image => $single_image) {
+                $count++;
+                $single_images = urldecode($single_image->src);
+
+                if (filter_var($single_images, FILTER_VALIDATE_URL) === FALSE) {
+                    $single_images = url($single_images);
+                }
+
+                $image_name = explode("/", urldecode($single_images));
+                $lastname = end($image_name);
+                $filename = (preg_match('/(\.jpg|\.png|\.bmp)$/i', $lastname)) ? $product->ean . "_" . $lastname : $product->ean . "_" . $lastname . ".jpg";
+
+                $exits_image = $shop->url . 'images/product_images/original_images/' . $filename;
+
+                $image_exists = checImageUrl($exits_image);
+                if ($image_exists) {
+                    // echo $exits_image . "image exits<br/>";
+                    $already_uploaded++;
+                    continue;
+                }
+                $download_image = @file_get_contents($single_images, false);
+
+                if ($download_image === false) {
+                    // echo "Invalid image" . "</br>";
+                    User::find($shop->userid)->notify(new DRMNotification('Gambio export image invalid, product ean - '.$product->ean, '', '#'));
+                    continue;
+                }
+                $file_saved = storage_path() . '/' . $filename;
+                $img_name[$image] = $file_saved;
+                $upload = file_put_contents($file_saved, $download_image);
+                $cfile = curl_file_create($file_saved, 'image/jpeg', $filename);
+                $params = array('upload_product_image' => $cfile, 'filename' => $filename);
+                $headers = array("Authorization: Basic " . $auth);
+                $output = GambioApi::doCulrRequest($url, $headers, $params);
+                @unlink($file_saved);
+                $all_response_array = json_decode($output);
+                if ($all_response_array->code == 201) {
+                    $msg = $output;
+                    $total_success++;
+                } else {
+                    $msg = $output;
+                    $total_error++;
+                }
+            }
+            $curl_response['msg'] = $msg;
+            $curl_response['success'] = $total_success;
+            $curl_response['error'] = $total_error;
+            $curl_response['total'] = $count;
+            $curl_response['already_uploaded'] = $already_uploaded;
+
+            $image_response = json_encode($curl_response);
+
+        }
+
+    }
+
+
+    /* Search Gambio Shop Product */
+
+    public static function gambioSearchProduct($shop_details, $ean)
+    {
+        $api_path = "api.php/v2/";
+        $user = $shop_details->user;
+        $pass = $shop_details->userpas;
+        $auth = base64_encode("$user:$pass");
+        $url = $shop_details->url . $api_path . "products/search";
+        $curl_header = array("accept: application/json", "authorization: Basic " . $auth, "content-type: application/json");
+        $criteria['match']['products.products_ean'] = $ean;
+        $search['search'] = $criteria;
+        $alldata = json_encode($search);
+        $updateProducts = self::doCulrRequest($url, $curl_header, $alldata, 'POST');
+        $update_products = json_decode($updateProducts, true);
+
+        if (isset($update_products[0]['ean']) && $update_products[0]['ean'] == $ean) {
+            return $update_products[0]['id'];
+        } else {
+            return false;
+        }
+    }
+
+
+    /* Gambio Shop Product Category Process */
+
+    public function productCategoriesProcess($category)
+    {
+        $trans_category = 'category_name_' . $this->lang;
+
+        foreach ($category as $value) {
+            $category_name_translation = $value->category_name ?: $value->$trans_category;
+
+            if(!empty($category_name_translation)){
+
+                if (preg_match("/(-|>)/", $category_name_translation)) {
+
+                    $category_items = array_map('trim', preg_split("/(-|>)/", trim($category_name_translation)));
+
+                    foreach ((array)$category_items as $key => $category_item_value) {
+                        $category_info = self::gambioSearchCategories($this->shop_details, $category_item_value);
+                        
+                        if (empty($category_info)) {
+
+                            sleep(1);
+                            $category_info = self::gambioSearchCategories($this->shop_details, $category_item_value);
+                            $category_first_info = self::gambioSearchCategories($this->shop_details, $category_items[0]);
+                            $category_key_info = self::gambioSearchCategories($this->shop_details, $category_items[$key - 1]);
+
+                            if (empty($category_info) && empty($category_first_info)) {
+
+                                $this->postProductcategories($this->lang, trim($category_item_value), 0);
+                            } elseif (empty($category_info) && !empty($category_key_info) && count($category_key_info) > 1) {
+
+                                $category_info_collection = collect($category_key_info);
+
+                                if (isset($category_first_info[0]['id']) && $category_info_collection->contains('parentId',$category_first_info[0]['id'])  && !$category_info_collection->contains('name',$category_item_value) || !$category_info_collection->contains('name',trim($category_item_value))) {
+
+                                    $category_id = $category_info_collection->where('parentId', $category_first_info[0]['id'])->first();
+                                    
+                                    if (!empty($category_id)) {
+                                        $this->postProductcategories($this->lang, trim($category_item_value), $category_id['id']);
+                                    } elseif (empty($category_id)) {
+                                        $category_second_info = collect(self::gambioSearchCategories($this->shop_details, $category_items[$key - 2]));
+                                        $category_second_info_id = $category_second_info->where('parentId', $category_first_info[0]['id'])->first();
+                                        $category_id = $category_info_collection->where('parentId', $category_second_info_id['id'])->first();
+                                        if (!empty($category_id)) {
+                                            $this->postProductcategories($this->lang, trim($category_item_value), $category_id['id']);
+                                        }
+                                    }
+
+                                }
+
+                            } elseif (empty($category_info) && !empty($category_key_info)) {
+
+                                $this->postProductcategories($this->lang, trim($category_item_value), $category_key_info[0]['id']);
+                            }
+
+                        } else {
+                            
+                            $category_info_collection = collect($category_info);
+
+                            if ($key == 1) {
+                                $category_first_info = self::gambioSearchCategories($this->shop_details, $category_items[0]);
+
+                                if(isset($category_first_info[0]['id']) && !$category_info_collection->contains('parentId',$category_first_info[0]['id'])){
+                                    
+                                    $this->postProductcategories($this->lang, trim($category_item_value), $category_first_info[0]['id']);
+                                }
+                                
+                            }elseif ($key == 2) {
+                                $category_first_info = self::gambioSearchCategories($this->shop_details, $category_items[0]);
+                                $category_second_info = collect(self::gambioSearchCategories($this->shop_details, $category_items[1]));
+                                $category_second_info_id = $category_second_info->where('parentId',$category_first_info[0]['id'])->first();
+                                
+                                if(!empty($category_second_info_id) && !$category_info_collection->contains('parentId',$category_second_info_id['id'])){
+
+                                    $this->postProductcategories($this->lang, trim($category_item_value), $category_second_info_id['id']);
+                                }
+                                
+                            } elseif ($key == 3) {
+                                $category_first_info = self::gambioSearchCategories($this->shop_details, $category_items[0]);
+                                $category_second_info = collect(self::gambioSearchCategories($this->shop_details, $category_items[1]));
+                                $category_third_info = collect(self::gambioSearchCategories($this->shop_details, $category_items[2]));
+                                $category_second_info_id = (object)$category_second_info->where('parentId',$category_first_info[0]['id'])->first();
+                                $category_third_info_id = $category_third_info->where('parentId',$category_second_info_id->id)->first();
+
+                                if(!empty($category_third_info_id) && !$category_info_collection->contains('parentId',$category_third_info_id['id'])){
+                                    
+                                    $this->postProductcategories($this->lang, trim($category_item_value), $category_third_info_id['id']);
+                                }
+
+                            } elseif ($key == 4) {
+                                $category_first_info = self::gambioSearchCategories($this->shop_details, $category_items[0]);
+                                $category_second_info = collect(self::gambioSearchCategories($this->shop_details, $category_items[1]));
+                                $category_third_info = collect(self::gambioSearchCategories($this->shop_details, $category_items[2]));
+                                $category_four_info = collect(self::gambioSearchCategories($this->shop_details, $category_items[3]));
+                                $category_second_info_id = (object)$category_second_info->where('parentId',$category_first_info[0]['id'])->first();
+                                $category_third_info_id = (object)$category_third_info->where('parentId',$category_second_info_id->id)->first();
+                                $category_four_info_id = $category_four_info->where('parentId',$category_third_info_id->id)->first();
+
+                                if(!empty($category_four_info_id) && !$category_info_collection->contains('parentId',$category_four_info_id['id'])){
+                                    
+                                    $this->postProductcategories($this->lang, trim($category_item_value), $category_four_info_id['id']);
+                                }
+
+                            }
+
+                        }
+                    }
+                } else {
+
+                    $category_info = self::gambioSearchCategories($this->shop_details, $category_name_translation);
+
+                    if (empty($category_info) && is_array($category_info)) {
+
+                        sleep(1);
+                        $category_info = self::gambioSearchCategories($this->shop_details, $category_name_translation);
+
+                        if (empty($category_info) && is_array($category_info)) {
+                            $this->postProductcategories($this->lang, trim($category_name_translation), 0);
+                        }
+                    }
+                }
+
+            }
+
+        }
+
+    }
+
+
+    public function postProductcategories($lang = 'DE', $category, $parentId)
+    {
+        $api_path = "api.php/v2/";
+        $user = $this->shop_details->user;
+        $pass = $this->shop_details->userpas;
+        $auth = base64_encode("$user:$pass");
+        $url = $this->shop_details->url . $api_path . "categories";
+        $headers = array("accept: application/json", "authorization: Basic " . $auth, "content-type: application/json");
+
+        $data['parentId'] = $parentId;
+        $data['isActive'] = true;
+        $namearray[$lang] = $category;
+        $data['name'] = $namearray;
+        $data['headingTitle'] = $namearray;
+        $data['description'] = $namearray;
+        $data['urlKeywords'] = $namearray;
+        $data['metaDescription'] = $namearray;
+        $data['metaKeywords'] = $namearray;
+        $data['metaTitle'] = $namearray;
+        $data['sortOrder'] = 0;
+        $data['icon'] = "";
+        $data['image'] = "";
+        $postcategory_new[] = $data;
+
+        $alldata = json_encode($postcategory_new);
+        $response = $this->doCulrRequest($url, $headers, $alldata, 'POST');
+
+        $all_response_array = json_decode($response, true);
+
+        return $all_response_array;
+    }
+
+
+    /* Gambio Product Link With Categories Process */
+
+    public function productLinkWithCategories($category)
+    {
+        $trans_category = 'category_name_' . $this->lang;
+
+        foreach ($category as $value) {
+
+            $category_name_trans = $value->category_name ?: $value->$trans_category;
+
+            if (!empty($category_name_trans)) {
+
+                if (preg_match("/(-|>)/", $category_name_trans)) {
+                    $category_collection = new Collection(array_map('trim', preg_split("/(-|>)/", trim($category_name_trans))));
+
+                    $category_info = self::gambioSearchCategories($this->shop_details, $category_collection->last());
+
+                    if (empty($category_info) && is_array($category_info)) {
+                        sleep(1);
+                        $category_info = self::gambioSearchCategories($this->shop_details, $category_collection->last());
+                    }
+
+
+                    if (count($category_info)>1) {
+                        $category_new_info = collect(self::gambioSearchCategories($this->shop_details, $category_collection->get($category_collection->count() - 2)));
+                        $category_key_info = self::gambioSearchCategories($this->shop_details, $category_collection->get(0));
+
+                        if (empty($category_new_info) && is_array($category_new_info)) {
+                            sleep(1);
+                            $category_new_info = collect(self::gambioSearchCategories($this->shop_details, $category_collection->get($category_collection->count() - 2)));
+                        }
+                        
+                        $category_info_list = collect($category_info);
+
+                        $category_new_info_id = (object)$category_new_info->where('parentId',$category_key_info[0]['id'])->first();
+
+                        $find_category_info = $category_info_list->where('parentId',$category_new_info_id->id)->first();
+                        
+                        if (empty($find_category_info)) {
+
+                            $find_category_info = $category_info_list->where('parentId',$category_key_info[0]['id'])->first();
+                            if(empty($find_category_info)){
+                                $find_category_info = $category_info_list->where('parentId',$category_new_info[0]['id'])->first();
+                                $category_id[] = $find_category_info['id'];
+                            } elseif (!empty($find_category_info)) {
+                                $category_id[] = $find_category_info['id'];
+                            }
+                            
+
+                        } elseif (!empty($find_category_info)) {
+                            $category_id[] = $find_category_info['id'];
+                        }
+
+                    } elseif (count($category_info) == 1) {
+                        $category_id[] = $category_info[0]['id'];
+                    }
+                } else {
+                    $category_info = self::gambioSearchCategories($this->shop_details, $category_name_trans);
+
+                    if (empty($category_info) && is_array($category_info)) {
+                        sleep(1);
+                        $category_info = self::gambioSearchCategories($this->shop_details, $category_name_trans);
+                    }
+
+                    if (count($category_info) == 1) {
+                        $category_id[] =$category_info[0]['id'];
+                    } elseif (count($category_info) > 1) {
+
+                        $category_info_list = collect($category_info);
+                        $find_category_info = $category_info_list->where('parentId',0)->first();
+
+                        if (!empty($find_category_info)) {
+                            $category_id[] = $find_category_info['id'];
+                        }
+
+                    }
+                }
+            }
+
+        }
+
+        return $category_id;
+
+    }
+
+    /* Search Gambio Shop Categories */
+
+    public static function gambioSearchCategories($shop_details, $category_name)
+    {
+        $api_path = "api.php/v2/";
+        $user = $shop_details->user;
+        $pass = $shop_details->userpas;
+        $auth = base64_encode("$user:$pass");
+        $url = $shop_details->url . $api_path . "categories/search";
+        $curl_header = array("accept: application/json", "authorization: Basic " . $auth, "content-type: application/json");
+
+        $criteria['match']['categories_description.categories_name'] = $category_name;
+        $criteria1['match']['categories_description.categories_name'] = trim($category_name);
+        $criteria2['match']['categories_description.categories_name'] = Str::start($category_name, ' ');
+        $criteria3['match']['categories_description.categories_name'] = Str::finish($category_name, ' ');
+        $criteria4['match']['categories_description.categories_description'] = $category_name;
+        $criteria5['match']['categories_description.categories_description'] = trim($category_name);
+        $criteria6['match']['categories_description.categories_description'] = Str::start($category_name, ' ');
+        $criteria7['match']['categories_description.categories_description'] = Str::finish($category_name, ' ');
+
+        $should_criteria['should'] = [$criteria, $criteria1, $criteria2, $criteria3, $criteria4, $criteria5, $criteria6, $criteria7];
+        $search['search'] = $should_criteria;
+        $alldata = json_encode($search);
+
+        $updateProducts = self::doCulrRequest($url, $curl_header, $alldata, 'POST');
+        $update_products = json_decode($updateProducts, true);
+        return $update_products;
+    }
+
+
+    public function getProductLink($product_id)
+    {
+        $api_path = "api.php/v2/";
+        $user = $this->shop_details->user;
+        $pass = $this->shop_details->userpas;
+        $auth = base64_encode("$user:$pass");
+
+        $url = $this->shop_details->url . $api_path . "products/$product_id/links";
+        $headers = array("authorization: Basic " . $auth, "content-type: application/json");
+
+        $response = $this->doCulrRequest($url, $headers, $alldata, 'GET');
+
+        return $response;
+    }
+
+    public function postProductLink($product_id, $category_id = NULL)
+    {
+        $api_path = "api.php/v2/";
+        $user = $this->shop_details->user;
+        $pass = $this->shop_details->userpas;
+        $auth = base64_encode("$user:$pass");
+
+        $url = $this->shop_details->url . $api_path . "products/$product_id/links";
+        $headers = array("accept: application/json", "authorization: Basic " . $auth, "content-type: application/json");
+        $data['categoryId'] = $category_id;
+
+        $alldata = json_encode($data);
+        $response = $this->doCulrRequest($url, $headers, $alldata, 'POST');
+        return $response;
+
+    }
+
+
+    public function deleteProductLink($product_id, $category_id)
+    {
+        $api_path = "api.php/v2/";
+        $user = $this->shop_details->user;
+        $pass = $this->shop_details->userpas;
+        $auth = base64_encode("$user:$pass");
+
+        $url = $this->shop_details->url . $api_path . "products/$product_id/links";
+        $headers = array("authorization: Basic " . $auth, "content-type: application/json");
+
+        $data['categoryId'] = $category_id;
+        $alldata = json_encode($data);
+
+        $response = $this->doCulrRequest($url, $headers, $alldata, 'DELETE');
+        return $response;
+    }
+
+
+    /* Gambio Product Manufacturers */
+
+    public function gambioSearchManufacturers($manufacturers_name)
+    {
+        $api_path = "api.php/v2/";
+        $user = $this->shop_details->user;
+        $pass = $this->shop_details->userpas;
+        $auth = base64_encode("$user:$pass");
+        $url = $this->shop_details->url . $api_path . "manufacturers/search";
+
+        $curl_header = array("accept: application/json", "authorization: Basic " . $auth, "content-type: application/json");
+
+        $criteria['match']['manufacturers.manufacturers_name'] = $manufacturers_name;
+        $criteria1['match']['manufacturers.manufacturers_name'] = trim($manufacturers_name);
+
+        $should_criteria['should'] = [$criteria, $criteria1];
+        $search['search'] = $should_criteria;
+        $alldata = json_encode($search);
+
+        $response = self::doCulrRequest($url, $curl_header, $alldata, 'POST');
+        $manufacturers = json_decode($response, true);
+        return $manufacturers;
+    }
+
+    public function postProductManufacturers($manufacturers)
+    {
+        $api_path = "api.php/v2/";
+        $user = $this->shop_details->user;
+        $pass = $this->shop_details->userpas;
+        $auth = base64_encode("$user:$pass");
+        $url = $this->shop_details->url . $api_path . "manufacturers";
+        $headers = array("accept: application/json", "authorization: Basic " . $auth, "content-type: application/json");
+
+        $data['name'] = $manufacturers;
+
+        $alldata = json_encode($data);
+        $response = $this->doCulrRequest($url, $headers, $alldata, 'POST');
+
+        $manufacturers = json_decode($response);
+        return $manufacturers;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
