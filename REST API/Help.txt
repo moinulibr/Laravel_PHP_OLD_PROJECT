@@ -1,0 +1,169 @@
+
+
+
+	Model 
+	php artisan help make:model
+
+
+	CREATE MODEL
+	php artisan make:model Model/Product -a #[--all]
+
+	
+
+	Resource
+	php artisan help make:resource  
+
+	CREATE RESOURCE
+	php artisan make:resource Product/ProductResource
+
+
+
+	Resource Collection
+	php artisan help make:resource 
+
+	CREATE RESOURCE
+	php artisan make:resource Product/ProductCollection
+
+	
+
+
+	Resource [Review]
+	php artisan make:resource ReviewResource
+
+
+
+	Passport Configuration
+	#====================#
+
+	composer require laravel/passport
+
+	php artisan migrate
+
+	php artisan passport:install
+
+	## IN The Model
+	use Laravel\Passport\HasApiTokens;
+	class User extends Authenticatable
+	{
+    		use HasApiTokens, Notifiable;
+	}
+	
+	# In the App/Provider/AuthServiceProvider
+		IN THE boot METHOD
+    	public function boot()
+    	{
+        	Schema::defaultStringLength(191);
+		Passport::routes();
+    	}
+	
+
+	### NOW config/auth.php
+	## default##
+	'api' => [
+            'driver' => 'token',
+            'provider' => 'users',
+            'hash' => false,
+        ],
+	## CHANGE it##
+
+	'guards' => [
+    		'web' => [
+        	'driver' => 'session',
+        	'provider' => 'users',
+    		],
+
+    	'api' => [
+        	'driver' => 'passport',
+        	'provider' => 'users',
+    		],
+	],
+
+	Passport Configuration End
+	#=========================#
+
+	
+
+	#=======Now uses Postman========#
+	#===============================#
+	POST#[method] **http://127.0.0.1:8000/oauth/token
+	
+		###****In The HEADER*****# [section]
+	KEY				VALUE
+	Accept				application/json
+	Content-Type			application/json
+	#==============set as first always================#
+
+		#In The BODY#
+	**and select #*raw*# part **
+	{
+	
+		"grant_type" : "password",
+		"client_id" : "2",
+		"client_secret" : "Qj8Z1gc0zvHaQM8SGlj6qQgAZKLLYGlen9Qg2tC9",   ###[from the oauth_clients tables]
+		"username" : "moinulibr@gmail.com",
+		"password" : "12345678"
+	}
+
+	#####result like this########
+	{
+    		"token_type": "Bearer",
+    		"expires_in": 31535999,
+    		"access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIyIiwianRpIjoiY2QyZjk1NDRhNDg0MzVmZDJjZTk0NTAwMDFjN2Q0MTcyNjA3NmU5M2Q0YmM2NGVjZDRlOTc5NDA1MDBhOTA1YTMxOWFmMDkwZGRhYzYzMzkiLCJpYXQiOjE1ODkwODExOTksIm5iZiI6MTU4OTA4MTE5OSwiZXhwIjoxNjIwNjE3MTk4LCJzdWIiOiIxIiwic2NvcGVzIjpbXX0.JidpszC86ACAvWSlkZwJOC01IUjSupcSCcgpT8rPIKiH_i_0clQ5g2Pb3YGoaNrZ9HNqn5tZCAmqpRDvZ7CZntyrRUIQRJGTnbk2QxA28SqZOjE8cTyTMDgD_u_ADW4XsE5hfKMda9zVYapBY7aPTt-zy80wMt0PUbRVNUD0YrWrMqZAR-Ib7jmpFWbuSPkC3utb_cWTaJGshUToiWoy6M_q5XujzVhqkR1-oLgJSIDMf4KSjbiyHg9OyIn15j3x88aIMcvalk4kcqg1gqntkUwjrG3t1-VnHC2VCynspSka0XxPnqlVqxMTFZ1WPiUSdA2ZyUpvwQXhPELh7qNIzWWhi-EeDOxS0hekh3gcZuA6JPp0CpDUQGoUL-qEQ3aESrLfEeWUjlF8GJVtuWPs2bTweXQn6TI-ihiAF9_J8AB6vhlPt6vjlwNnx7hxs2hgDnmeOGpbOJbaLU2kGh-emnajBX_iHGI4GN2gF_ikLIXAQtuY9arl4GbAqlKt6AExnsjxdASrYOCQQFuFL6MLLpRddiXtWXEnpFS4GkFiyfe06f7Fki93xaUruTKiG4rECJZD1cCpJpMWoYgIZubhqYYreE8Wwk_JGvYRQ6S4oN6kPlmUpq4fFS5jFYVHt9l_rMoGqE0xgDjlGlgTBVEkhgN4JWSX-1km1hlAtvF120I",
+    		"refresh_token": "def502005e5f36adcbc1feefa9327e8ae2a9cd6ad56e3981f74071ba59fb6b335a2855ca8e99ff8adb04fc7ad0a03573738c55393b07752f7f257ae5e16333cce5b273d85fca097eb709cbee97825168e2e1cd06f50292af730f63f257c48446639e30ac0c5f99a56151c8f5cf5b99dc628ae65a78c8e9995d95874009164d9d3b7920b156cc37496be3978217783b716c801e3db9d29da6c20538df7cd46e07d1be1baa673bbeeecd367b705b4d120b4cd6ff462fddd4864d2bc19d42e8d7581b744025dd4a991c1b67335d2e7097e4412a0d566b0ab49c2418413273a27acacb78a2d6c06e539fbbfc69f1e06e2baa7b06f0bfd9842f386c46950e400d54e372e19544fd51450c9ce950ab4bf541b5279117db335433d66165d63ece44be8c4059e5e319229e98d6f6cf929713ac5ce5f760a3007f877232c810cf587f695948d43654c4cf724625d31465fae17bb62e2a5f5eb951365f474e672decccacb314"
+	}
+
+	*** Take access_token the top section
+	AND
+
+	GET #[method] , **http://127.0.0.1:8000/api/user
+
+	##**** Headers*****#### [section]
+	KEY				VALUE
+	Accept				application/json
+	Content-Type			application/json
+	Authorization			Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIyIiwianRpIjoiY2QyZjk1NDRhNDg0MzVmZDJjZTk0NTAwMDFjN2Q0MTcyNjA3NmU5M2Q0YmM2NGVjZDRlOTc5NDA1MDBhOTA1YTMxOWFmMDkwZGRhYzYzMzkiLCJpYXQiOjE1ODkwODExOTksIm5iZiI6MTU4OTA4MTE5OSwiZXhwIjoxNjIwNjE3MTk4LCJzdWIiOiIxIiwic2NvcGVzIjpbXX0.JidpszC86ACAvWSlkZwJOC01IUjSupcSCcgpT8rPIKiH_i_0clQ5g2Pb3YGoaNrZ9HNqn5tZCAmqpRDvZ7CZntyrRUIQRJGTnbk2QxA28SqZOjE8cTyTMDgD_u_ADW4XsE5hfKMda9zVYapBY7aPTt-zy80wMt0PUbRVNUD0YrWrMqZAR-Ib7jmpFWbuSPkC3utb_cWTaJGshUToiWoy6M_q5XujzVhqkR1-oLgJSIDMf4KSjbiyHg9OyIn15j3x88aIMcvalk4kcqg1gqntkUwjrG3t1-VnHC2VCynspSka0XxPnqlVqxMTFZ1WPiUSdA2ZyUpvwQXhPELh7qNIzWWhi-EeDOxS0hekh3gcZuA6JPp0CpDUQGoUL-qEQ3aESrLfEeWUjlF8GJVtuWPs2bTweXQn6TI-ihiAF9_J8AB6vhlPt6vjlwNnx7hxs2hgDnmeOGpbOJbaLU2kGh-emnajBX_iHGI4GN2gF_ikLIXAQtuY9arl4GbAqlKt6AExnsjxdASrYOCQQFuFL6MLLpRddiXtWXEnpFS4GkFiyfe06f7Fki93xaUruTKiG4rECJZD1cCpJpMWoYgIZubhqYYreE8Wwk_JGvYRQ6S4oN6kPlmUpq4fFS5jFYVHt9l_rMoGqE0xgDjlGlgTBVEkhgN4JWSX-1km1hlAtvF120I 
+
+	
+	#####************** Now we can set an environment *****************####
+		From the right side.. setting --> Manage Environment  -->  Add
+		
+	VARIABLE	INITIAL VALUE
+	auth		Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIyIiwianRpIjoiY2QyZjk1NDRhNDg0MzVmZDJjZTk0NTAwMDFjN2Q0MTcyNjA3NmU5M2Q0YmM2NGVjZDRlOTc5NDA1MDBhOTA1YTMxOWFmMDkwZGRhYzYzMzkiLCJpYXQiOjE1ODkwODExOTksIm5iZiI6MTU4OTA4MTE5OSwiZXhwIjoxNjIwNjE3MTk4LCJzdWIiOiIxIiwic2NvcGVzIjpbXX0.JidpszC86ACAvWSlkZwJOC01IUjSupcSCcgpT8rPIKiH_i_0clQ5g2Pb3YGoaNrZ9HNqn5tZCAmqpRDvZ7CZntyrRUIQRJGTnbk2QxA28SqZOjE8cTyTMDgD_u_ADW4XsE5hfKMda9zVYapBY7aPTt-zy80wMt0PUbRVNUD0YrWrMqZAR-Ib7jmpFWbuSPkC3utb_cWTaJGshUToiWoy6M_q5XujzVhqkR1-oLgJSIDMf4KSjbiyHg9OyIn15j3x88aIMcvalk4kcqg1gqntkUwjrG3t1-VnHC2VCynspSka0XxPnqlVqxMTFZ1WPiUSdA2ZyUpvwQXhPELh7qNIzWWhi-EeDOxS0hekh3gcZuA6JPp0CpDUQGoUL-qEQ3aESrLfEeWUjlF8GJVtuWPs2bTweXQn6TI-ihiAF9_J8AB6vhlPt6vjlwNnx7hxs2hgDnmeOGpbOJbaLU2kGh-emnajBX_iHGI4GN2gF_ikLIXAQtuY9arl4GbAqlKt6AExnsjxdASrYOCQQFuFL6MLLpRddiXtWXEnpFS4GkFiyfe06f7Fki93xaUruTKiG4rECJZD1cCpJpMWoYgIZubhqYYreE8Wwk_JGvYRQ6S4oN6kPlmUpq4fFS5jFYVHt9l_rMoGqE0xgDjlGlgTBVEkhgN4JWSX-1km1hlAtvF120I
+	
+	
+
+	#### After Set The Environment , WE MAY USE {{auth}} aginst of the HEADERS --> Authorization    [Bearer (-Token) / {{auth}}]
+
+
+
+
+
+
+
+	#### API Project ####
+	Now We CREATE
+	**request**
+
+	php artisan make:request ProductRequest
+
+
+
+
+
+
+
+	###### Create Exception ############
+	php artisan make:exception ProductNotBelongsToUser
+
+
+
+	### php artisan passport:install
+
+
+
+
+	#################### Reviews Request ####################
+	php artisan make:request ReviewsRequest
+
+
+
