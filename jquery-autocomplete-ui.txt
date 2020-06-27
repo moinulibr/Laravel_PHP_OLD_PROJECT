@@ -317,11 +317,105 @@
 
 
 
+	/*								      *
+	|---------------------------------------------------------------------|
+	|		I also try this, 28.06.2020,working file	      |
+	|---------------------------------------------------------------------|
+	*/								      *
+
+	
+	/*								      *
+	|---------------------------------------------------------------------|
+	|		IN The Route					      |
+	|---------------------------------------------------------------------|
+	*/								      *
+	   Route::post('area/search', 'LocationAllAjaxController@areaSearchAutocomplete')->name('areaSearchAutocomplete');
+		
+	/*								      *
+	|---------------------------------------------------------------------|
+	|		In The Controller				      |
+	|---------------------------------------------------------------------|
+	*/								      *
+    public function areaSearchAutocomplete(Request $request)
+    {
+        /*
+        $data = Area::select("area_name")
+                ->where("area_name","LIKE","%{$request->query}%")
+                //->where('')
+                ->get();
+        return response()->json($data);
+        */
+
+        if($request->term)
+        {
+            /*   if($district_id){
+                    $query->where('district_id',$district_id);
+                }
+                if($upazila_id){
+                    $query->where('upazila_id',$upazila_id);
+                } */
+            $upazila_id = $request->upazila_id;
+            $district_id =  $request->district_id;
+            $search = $request->term;
+            $query =  Area::query();
+            if($region = Region::where('district_id',$district_id)->where('upazila_id',$upazila_id)->first())
+            {
+                $region_id = $region->id;
+                $areas = $query->where('area_name','like','%'.$search.'%')->where('region_id',$region_id)->get();
+
+                $output = '<ul class="list-group clickLiDiv" style="display:block;position:relation;">';
+                foreach($areas as $area)
+                {
+                    $output .='<li class="list-group-item clickLi"><a  href="#">'.$area->area_name.'</a> </li>';
+                }
+                $output .= "</ul>";
+
+                if(count($areas)>0)
+                {
+                    return response()->json([
+                        'status' => true,
+                        'data' => $output
+                    ]);
+                }
+                else{
+                    return response()->json([
+                        'status' => false
+                    ]);
+                }
+                return $output;
+            }
+
+        }
 
 
-
-
-
+        if($request->term)
+        {
+            $search = $request->term;
+            $products =  Area::where('area_name','like','%'.$search.'%')->get();
+            return $products;
+        }
+        return $products =  Area::get();
+    }
+	/*								      *
+	|---------------------------------------------------------------------|
+	|		In The Blade File				      |
+	|---------------------------------------------------------------------|
+	*/								      *
+		Boostrap 4*
+		==============
+	 <div class="form-group">
+		<label for="area">Area</label>
+		<input autocomplete="off" type="text" name="shop_area" id="shop_address_ajax" class="form-control">
+		<small class="form-text text-muted" id="filloutArea">
+		    Please fillout the field
+		</small>
+		@if ($errors->has('shop_area'))
+		<span class="red" role="alert">
+			<strong>{{ $errors->first('shop_area') }}</strong>
+		</span>
+		@endif
+		<div id="shop_area_list" class="" > </div>
+    	</div>
 
 
 
