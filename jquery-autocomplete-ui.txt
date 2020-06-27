@@ -418,6 +418,66 @@
     	</div>
 
 
+	
+        <!--==================================================shop address Area search auto complete=========================-->
+        <script>
+            $(document).ready(function(){
+                $.ajaxSetup({
+                        headers: {
+                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                            }
+                        });
+
+                $('#shop_address_ajax').keyup(function(){
+
+                var term = $(this).val();
+                    if(term != '')
+                    {
+                        var district_id = $(".district_id_get option:selected").val();
+                        var upazila_id = $(".upazila_id option:selected").val();
+                        var url = $('#url_ajax').data('url');
+                            $.ajax({
+                                url: url,
+                                type: "POST",
+                                data: {term:term,district_id:district_id,upazila_id:upazila_id},
+                                datatype: "html",
+                                success:function(response){
+                                    if(response.status == true)
+                                    {
+                                        $('#shop_area_list').fadeIn();
+                                        $('#filloutArea').fadeOut();
+                                        $('#shop_area_list').html(response.data);
+                                        $('#shop_area_list').css({
+                                            "border":".5px solid #e6e6e6",
+                                            "border-radius":" 0.8rem"
+                                        });
+                                    }
+                                },
+                            });
+                    }
+                    else{
+                        $('#shop_area_list').fadeOut();
+                        $('#filloutArea').fadeIn();
+                    }
+                });
+
+            /*
+            |-----------
+            |
+            |-----------
+            */
+
+            $(document).on('click','.clickLiDiv .clickLi',function(e){
+                        e.preventDefault();
+                        $('#shop_address_ajax').val($(this).text());
+                        $('#shop_area_list').fadeOut();
+                        $('#filloutArea').fadeIn();
+                });
+            });
+        </script>
+        <!--====================================================shop address Area search auto complete=========================-->
+
+
 
 
 
