@@ -1,0 +1,20 @@
+
+	1. Add a extra field in the users table
+		[[[[[  permission_power ]]]]] tinyInteger
+
+	2. 
+
+
+		// Then have command this
+		composer dump-autoload
+
+
+
+
+
+
+
+
+
+
+

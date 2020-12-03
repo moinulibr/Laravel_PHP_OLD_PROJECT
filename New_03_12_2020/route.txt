@@ -1,0 +1,13 @@
+
+
+
+	@php
+    		$prefix = Request::route()->getPrefix();
+    		$route = Route::current()->getName();
+    		$url = url()->current();
+    	@endphp
+
+	
+
+	 <li class="nav-item has-treeview {{($prefix == '/permission'|| $prefix == '/admin')?'menu-open':''}}">
+                        <a href="#" class="nav-link {{($prefix == '/permission')?'active':''}}">

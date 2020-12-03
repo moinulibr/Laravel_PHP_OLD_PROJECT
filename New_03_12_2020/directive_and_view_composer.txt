@@ -1,0 +1,78 @@
+	
+	use App\Notice;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Schema;
+use phpDocumentor\Reflection\Types\Null_;	
+
+	
+    public function boot()
+    {
+        Schema::defaultStringLength(191);
+
+        // only admin directive
+        Blade::if('admin', function () {
+            return auth()->check() && auth()->user()->role_id == 1;
+        });
+
+        // Admin and Manager directive
+        Blade::if('manager', function () {
+            return auth()->check() && (auth()->user()->role_id == 1 || auth()->user()->role_id == 2);
+        });
+        // Manager only directive
+        Blade::if('managerOnly', function () {
+            return auth()->check() && (auth()->user()->role_id == 2);
+        });
+
+        // Admin and Merchant directive
+        Blade::if('exceptboy', function () {
+            return auth()->check() && auth()->user()->role_id != 4;
+        });
+
+        // Only Boy directive
+        Blade::if('boy', function () {
+            return auth()->check() && auth()->user()->role_id == 4;
+        });
+
+        // Only Merchant directive
+        Blade::if('merchant', function () {
+            return auth()->check() && (auth()->user()->role_id == 3);
+        });
+
+        // Except merchant directive
+        Blade::if('except_merchant', function () {
+            return auth()->check() && auth()->user()->role_id != 3;
+        });
+
+        // Except Admin and Manager directive
+        Blade::if('except_a_m', function () {
+            return auth()->check() && (auth()->user()->role_id == 3 || auth()->user()->role_id == 4);
+        });
+
+
+        // view composer
+        view()->composer('*', function ($view){
+            // notifications
+            $notifications = [];
+            if (auth::check()){
+                if (auth::user()->role_id == 1){
+                    $notifications = Notice::where([['user_id', null], ['read_status_admin', 0]])->orderBy('id', 'desc')->paginate(20);
+                }elseif (auth::user()->role_id == 2){
+                    $notifications = Notice::where([['user_id', null], ['read_status_manager', 0], ['branch_id', auth()->user()->branch_id]])->orderBy('id', 'desc')->paginate(20);
+                }else{
+                    $notifications = Notice::where([['user_id', auth::id()], ['read_status_user', 0]])->orderBy('id', 'desc')->paginate(20);
+                }
+            }
+            $view->with('notifications', $notifications);
+        });
+
+    }
+
+
+
+	in the blade page
+	....
+	@merchant
+	@endmerchant
+	

@@ -1,0 +1,5 @@
+/usr/local/bin/ea-php73 /home/milonfeni/public_html/smtradingbd.com/test/artisan backup:database 1>> /dev/null 2>&1
+
+
+
+/usr/local/bin/ea-php73 /home/milonfeni/public_html/test/artisan backup:database >> '/dev/null' 2>&1

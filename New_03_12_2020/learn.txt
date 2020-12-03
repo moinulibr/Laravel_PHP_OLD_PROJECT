@@ -1,0 +1,50 @@
+1.This process process of insulating insulating an object’ object’s data is
+called data hiding or information hiding.
+   *setValues(),
+   *getValues(),
+2.
+3.Multiple Inheritance
+4.objects of the same class
+5. 2
+6.inheritance.
+6.inheritance.
+7. 3 and 4
+8.Simula
+9.structure and common behavior
+10.One–to–Many
+
+20. 
+*Identifying objects
+*Organizing the objects by creating object model diagram
+*Defining the internals of the objects, or object attributes
+*Defining the behavior of the objects, i.e., object actions
+*Describing how the objects interact
+
+21.Encapsulation in programming is the process of combining elements to 
+create a new entity for the purpose of hiding or protecting information
+
+
+
+
+
+
+	Q. 11 . Specialization is the reverse reverse process of 
+		ans : 2 -> generalization.
+	Q 12. Message passing between two objects is generally 
+		Ans: 1-> unidirectional.
+
+
+	Q. 13. An aggregate aggregate object is an object that is composed composed
+		of one or more .
+		Ans: other objects
+	Q . 14. Objects  enables reuse of objects, designs, and functions.
+
+	Q 15. Encapsulation is the process process of binding binding both and methods methods together together within a class.
+		Ans: attributes ;
+		
+	
+	Object is an part features of a class
+
+
+
+

@@ -1,0 +1,59 @@
+
+	<input type="text" name="username"/>
+	
+  public function login(Request $request)
+    {
+        $input = $request->all();
+
+        $this->validate($request, [
+            'username' => 'required',
+            'password' => 'required',
+        ]);
+
+        $fieldType = filter_var($request->username, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+        if(auth()->attempt(array($fieldType => $input['username'], 'password' => $input['password'])))
+        {
+            if(auth()->user()->verifiable == user_verifiable_verify_need_HS)
+            {
+                if(auth()->user()->verifiable == user_verifiable_verify_need_HS && Auth::user()->aproved_id == USER_APPROVAL_STATUS_ID_UN_APPROVED_NULL_HS )
+                {
+                    Auth::logout();
+                    return redirect()->route(landing_url_route_HS);
+                }else{
+                    return redirect()->route('home');
+                }
+            }
+            if(auth()->user()->verifiable == user_verifiable_not_verify_need_HS && Auth::user()->aproved_id != USER_APPROVAL_STATUS_ID_UN_APPROVED_NULL_HS)
+            {
+                return redirect()->route('home');
+            }
+            else{
+                Auth::logout();
+                return redirect()->route(landing_url_route_HS);
+            }
+        }else{
+            return redirect()->route('login')
+                ->with('error','Email-Address And Password Are Wrong.');
+        }
+    }
+
+
+    /* public function login(Request $request)
+    {
+        $input = $request->all();
+
+        $this->validate($request, [
+            'username' => 'required',
+            'password' => 'required',
+        ]);
+
+        $fieldType = filter_var($request->username, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+        if(auth()->attempt(array($fieldType => $input['username'], 'password' => $input['password'])))
+        {
+            return redirect()->route('home');
+        }else{
+            return redirect()->route('login')
+                ->with('error','Email-Address And Password Are Wrong.');
+        }
+    } */
+

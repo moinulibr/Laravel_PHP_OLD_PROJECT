@@ -1,0 +1,34 @@
+
+  {{--Making Cart--}}
+  <script>
+    $(document).ready(function(){
+
+        var ctrlDown = false,
+          ctrlKey = 17,
+          cmdKey = 91,
+          vKey = 86,
+          cKey = 67;
+
+       $('#order_id').on('keyup',function(e)
+        {   
+          if (e.keyCode == ctrlKey || e.keyCode == cmdKey) ctrlDown = true;
+          if (ctrlDown && (e.keyCode == vKey || e.keyCode == cKey)) return false;
+            var url = $('#quickAssignParcelAddCart').data("url");
+            var orderuid = $(this).val();
+          if(orderuid.length > 4)
+          {
+           $.ajax({
+              url: url,
+              type: "GET",
+              data: {orderuid:orderuid},
+              success: function(response)
+              {
+                $('#showResult').html(response);
+                $('#order_id').val('');
+                 $('#order_id').attr('autofocus','autofocus');
+              },  
+           });
+          }
+        });
+    });
+  </script>

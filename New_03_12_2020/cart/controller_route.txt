@@ -1,0 +1,170 @@
+
+
+	/**
+	 * About Bar code
+	*/
+	Route::get('quick/assign','OrderController@quickAssignParcel')->name('quickAssignParcel');
+	Route::get('quick/assign/order','OrderController@quickAssignParcelAddCart')->name('quickAssignParcelAddCart');
+
+	Route::get('quick/assign/exist/cart','OrderController@quickAssignParcelExistCart')->name('quickAssignParcelExistCart');
+	Route::get('quick/assign/remove/single/cart','OrderController@quickAssignParcelRemoveSingleCart')->name('quickAssignParcelRemoveSingleCart');
+	Route::get('quick/assign/remove/cart','OrderController@quickAssignParcelRemoveCart')->name('quickAssignParcelRemoveCart');
+	Route::post('quick/assign/order/store','OrderController@quickAssignParcelStoreFromCart')->name('quickAssignParcelStoreFromCart');
+	/**
+	 * About Bar code
+	*/
+
+
+
+
+
+
+
+
+
+    /**
+     * For Bar code.....
+    */
+
+    public function quickAssignParcel()
+    {
+        $data['marchants'] = User::where('type',7)->orderBy('name','DESC')->get();
+        $data['deliverymans'] = User::whereIn('type',[8,9])->orderBy('name','DESC')->get();
+        $data['districts'] = District::orderBy('district_name','DESC')->get();
+        return view('admin.orders.quick_assign_parcel',$data);
+    }
+
+
+    public function status($id)
+    {
+        if($id == 1)
+        {
+            $status = "Pickup Request";
+        }
+        if($id == 2)
+        {
+            $status = "Picked";
+        }
+        if($id == 3)
+        {
+            $status = "On the Way";
+        }
+        if($id == 4)
+        {
+            $status = "Hold";
+        }
+        if($id == 5)
+        {
+            $status = "Reschedule";
+        }
+        if($id == 6)
+        {
+            $status = "Delivered";
+        }
+        if($id == 7)
+        {
+            $status = "Return";
+        }
+        if($id == 8)
+        {
+            $status = "Return to Marchant";
+        }
+        if($id == 9)
+        {
+            $status = "Rejected";
+        }
+        if($id == 10)
+        {
+            $status = "Deleted";
+        }
+        if($id == 12)
+        {
+            $status = "Third Party Courier";
+        }
+        return $status;
+    }
+
+    public function quickAssignParcelAddCart(Request $request)
+    {
+        $cartName = [];
+        $orderuid =  $request->orderuid;
+        $cartName = session()->has('cartName') ? session()->get('cartName')  : [];
+        $order =  Order::where('orderuid',$orderuid)->first();
+        if($order)
+        {
+            $status =  $this->status($order->status);
+            if(array_key_exists($order->id,$cartName))
+                {
+                //$cartName[$order->id]['total_price'] = $cartName[$order->id]['quantity'] * $cartName[$order->id]['unit_price'];
+                }
+            else{
+                $cartName[$order->id] = [
+                    'order_id' => $order->id,
+                    'orderuid' => $order->orderuid,
+                    'status' => $status,
+                    'receivername' => $order->receivername,
+                    'receivermobile' => $order->receivermobile,
+                ];
+            }
+            session(['cartName' => $cartName]);
+        }
+        return view('admin.orders.ajax.quick_assign');
+    }
+
+
+    public function quickAssignParcelExistCart()
+    {
+        $cartName = session()->has('cartName') ? session()->get('cartName')  : [];
+        if($cartName)
+        {
+            return view('admin.orders.ajax.quick_assign');
+        }else{
+            return false;
+        }
+    }
+
+    public function quickAssignParcelRemoveSingleCart(Request $request)
+    {
+        $cartName = session()->has('cartName') ? session()->get('cartName')  : [];
+		unset($cartName[$request->input('orderuid')]);	
+        session(['cartName'=>$cartName]);
+        return view('admin.orders.ajax.quick_assign');
+    }
+
+
+
+    public function quickAssignParcelRemoveCart()
+    {
+        session(['cartName' => []]);
+        return view('admin.orders.ajax.quick_assign');
+    }
+
+
+    public function quickAssignParcelStoreFromCart(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'order_id.*' => 'required',
+            'delivery_man' => 'required'
+        ]);
+        if(empty($request->order_id))
+        {
+            Session::flash('error','Please Select Order ID First');
+            return back();
+        }
+        foreach($request->order_id as $key => $order)
+        {
+            $orderChangeStatus = Order::find($order);
+            $orderChangeStatus->status = 2;
+            $orderChangeStatus->picked_id = $request->delivery_man;
+            $orderChangeStatus->save();
+
+            // order changing status with delivery man in another table 
+        }
+        session(['cartName' => []]);
+        Session::flash('success','Assigned Successfully!');
+        return back();
+    }
+
+    /**
+     * For Bar code End
+    */

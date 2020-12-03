@@ -1,0 +1,232 @@
+
+	    public function index()
+    {
+        if(Auth::user()->role_id == 5)
+        {
+            return redirect()->route('admin.supplier.show',Auth::user()->id);
+        }
+
+        else if(Auth::user()->role_id == 6)
+        {
+            return redirect()->route('admin.client.show',Auth::user()->id);
+        }
+
+
+        $data['salesPaidTotalInvoice'] = Final_sale::whereNull('is_deleted')
+                                            ->where('status_of_payment','Paid')->count();
+        $data['salesUnpaidTotalInvoice'] = Final_sale::whereNull('is_deleted')
+                                            ->where('status_of_payment','!=','Paid')
+                                            ->orWhereNull('status_of_payment')
+                                            ->count();
+                                                               
+        $data['purchasePaidTotalInvoice'] = Final_purchase::whereNull('is_deleted')
+                                            ->where('payment_status','Paid')->count();
+        $data['purchaseUnpaidTotalInvoice'] = Final_purchase::whereNull('is_deleted')
+                                            ->where('payment_status','!=','Paid')
+                                            ->orWhereNull('payment_status')
+                                            ->count();
+
+
+
+
+        $data['total_supplier']   = User::whereNull('is_deleted')->where('role_id',5)->count();
+        $data['total_client']     = User::whereNull('is_deleted')->where('role_id',6)->count();
+
+        $data['accounts']         = Account::whereNull('is_deleted')
+                                        ->select('*',DB::raw('sum(amount) as amount'))
+                                        ->whereNull('no_calculation')
+                                        ->groupBy('payment_method_id')
+                                        ->get();
+
+        //dd($data['accounts']) ;
+        function totalExpense($dateTime)
+        {
+            $exp =  Total_expense_payment_history::whereNull('is_deleted')
+                                            ->where('category_type','expense')
+                                            ->where(function($query) use($dateTime){
+                                                    if($dateTime == "thisMonth")
+                                                    {
+                                                        $query->whereMonth('payment_date', '=', Carbon::now()->month) ;
+                                                        $query->whereYear('payment_date', date('Y', strtotime('0 year')));
+                                                    }
+                                                    elseif($dateTime == "thisYear")
+                                                    {
+                                                        $query->whereYear('payment_date', date('Y', strtotime('0 year')));
+                                                    }
+                                            })
+                                            ->sum('paid_total');
+
+            $pur = Total_bill_payment_history::whereNull('is_deleted')
+                                            ->where(function($query) use($dateTime){
+                                                if($dateTime == "thisMonth")
+                                                {
+                                                $query->whereMonth('payment_date', '=', Carbon::now()->month) ;
+                                                $query->whereYear('payment_date', date('Y', strtotime('0 year')));
+                                                }
+                                                elseif($dateTime == "thisYear")
+                                                {
+                                                    $query->whereYear('payment_date', date('Y', strtotime('0 year')));
+                                                }
+                                            })
+                                    ->sum('paid_total');
+                $toalExp =  $exp + $pur ;
+            return  $toalExp;
+        }
+
+        function totalIncome($dateTime)
+        {
+            $inc =  Total_expense_payment_history::whereNull('is_deleted')
+                                        ->where('category_type','income')
+                                        ->where(function($query) use($dateTime){
+                                                if($dateTime == "thisMonth")
+                                                {
+                                                    $query->whereMonth('payment_date', '=', Carbon::now()->month);
+                                                    $query->whereYear('payment_date', date('Y', strtotime('0 year')));
+                                                }
+                                                elseif($dateTime == "thisYear")
+                                                {
+                                                    $query->whereYear('payment_date', date('Y', strtotime('0 year')));
+                                                }
+                                            })
+                                        ->sum('paid_total');
+            $sale = Total_sale_payment_history::whereNull('is_deleted')
+                                            ->where(function($query) use($dateTime){
+                                                if($dateTime == "thisMonth")
+                                                {
+                                                //$query->where('payment_date','>=',Carbon::now()->subdays(30));
+                                                $query->whereMonth('payment_date', '=', Carbon::now()->month) ;
+                                                $query->whereYear('payment_date', date('Y', strtotime('0 year')));
+                                                }
+                                                elseif($dateTime == "thisYear")
+                                                {
+                                                    $query->whereYear('payment_date', date('Y', strtotime('0 year')));
+                                                }
+                                            })
+                                    ->sum('paid_total');
+
+            $totalSaleIncome = $inc + $sale;
+            return $totalSaleIncome;
+        }
+
+        Total_sale_payment_history::whereYear('created_at', Carbon::now()->year)
+        ->whereMonth('payment_date', '=', Carbon::now()->month)
+                ->sum('paid_total');
+
+        //$data['accountOpening']         = Account::whereNull('is_deleted')->sum('amount');
+        $data['allTimeTotalExpense']    =  totalExpense('allTime');
+        $data['thisMonthTotalExpense']  =  totalExpense('thisMonth');
+        $data['thisYearTotalExpense']   =  totalExpense('thisYear');
+
+        $data['allTimeTotalIncome']     =  totalIncome('allTime');
+        $data['thisMonthTotalIncome']   =  totalIncome('thisMonth');
+        $data['thisYearTotalIncome']    =  totalIncome('thisYear');
+
+        //dd('allTime - '.$data['allTimeTotalIncome']." thisYear " .$data['thisYearTotalIncome']);
+
+        $data['totalSaleAmount']        = Final_sale::sum('final_total');
+        $data['totalPurchaseAmount']    = Final_purchase::sum('final_total');
+
+
+
+        //==============
+        $sale = Final_sale::query();
+        $purchase = Final_purchase::query();
+        $sale->whereMonth('sale_date', '=', Carbon::now()->month) ;
+        $sale->whereYear('sale_date', date('Y', strtotime('0 year')));
+        $sale->whereNull('is_deleted');
+
+        $purchase->whereMonth('purchase_date', '=', Carbon::now()->month) ;
+        $purchase->whereYear('purchase_date', date('Y', strtotime('0 year')));
+        $purchase->whereNull('is_deleted');
+
+        $data['finalSaleAmount'] =  $sale->sum('final_total');
+        $data['finalPurchaseAmount'] =  $purchase->sum('final_total');
+        //==============
+        return view('home',$data);
+    }
+
+    public function saleAndPurchaseSummary(Request $request)
+    {
+            $lastyear = Carbon::now()->subYears(1);
+            $lastYear = date("Y",strtotime($lastyear."+0 day"));
+         
+            $thisYear = date('Y', strtotime('0 year'));
+            //return Carbon::now()->month;
+
+
+        $sale = Final_sale::query();
+        $purchase = Final_purchase::query();
+        if($request->input == "this_month")
+        {
+            $sale->whereMonth('sale_date', '=', Carbon::now()->month) ;
+            $sale->whereYear('sale_date', date('Y', strtotime('0 year')));
+
+            $purchase->whereMonth('purchase_date', '=', Carbon::now()->month) ;
+            $purchase->whereYear('purchase_date', date('Y', strtotime('0 year')));
+        }
+        elseif($request->input == "last_month")
+        {
+            $lastmonth =  Carbon::now()->subMonths(1);
+            $lastMonth = date("m",strtotime($lastmonth."+0 day"));
+
+            $sale->whereMonth('sale_date', '=', $lastMonth) ;
+            $sale->whereYear('sale_date', date('Y', strtotime('0 year')));
+
+            $purchase->whereMonth('purchase_date', '=', $lastMonth) ;
+            $purchase->whereYear('purchase_date', date('Y', strtotime('0 year')));
+        }
+        elseif($request->input == "this_year")
+        {
+            //$sale->whereMonth('sale_date', '=', Carbon::now()->month) ;
+            $sale->whereYear('sale_date', date('Y', strtotime('0 year')));
+
+            //$purchase->whereMonth('purchase_date', '=', Carbon::now()->month) ;
+            $purchase->whereYear('purchase_date', date('Y', strtotime('0 year')));
+        }
+        elseif($request->input == "last_year")
+        {
+            $lastyear = Carbon::now()->subYears(1);
+            $lastYear = date("Y",strtotime($lastyear."+0 day"));
+
+            //$sale->whereMonth('sale_date', '=', Carbon::now()->month) ;
+            $sale->whereYear('sale_date', $lastYear);
+            //$sale->whereYear('sale_date', date('Y', strtotime('0 year')));
+
+            //$purchase->whereMonth('purchase_date', '=', Carbon::now()->month) ;
+            $purchase->whereYear('purchase_date', $lastYear);
+        }
+        else{
+            if($request->from)
+            {
+                $dateFrom = $request->from;
+                $dayFrom = substr($dateFrom,0,2);
+                $monthFrom = substr($dateFrom,3,2);
+                $yearFrom = substr($dateFrom,6,4);
+                $fromDate = $yearFrom."-".$monthFrom."-".$dayFrom;
+                $start = $fromDate;
+            }
+            if($request->to)
+            {
+                $dateTo = $request->to;
+                $dayTo = substr($dateTo,0,2);
+                $monthTo = substr($dateTo,3,2);
+                $yearTo = substr($dateTo,6,4);
+                $toDate = $yearTo."-".$monthTo."-".$dayTo;
+                $end = date('Y-m-d',strtotime($toDate."+1 day"));
+            }else{
+                $end = date('Y-m-d',strtotime("+1 day"));  
+            }
+            $sale->whereBetween('sale_date', [$start,$end ]);
+            $purchase->whereBetween('purchase_date', [$start,$end ]);
+        }
+
+       $finalSaleAmount =  $sale->sum('final_total');
+       $finalPurchaseAmount =  $purchase->sum('final_total');
+
+       return response()->json([
+           'status' => true,
+           'finalSaleAmount' => $finalSaleAmount,
+           'finalPurchaseAmount' => $finalPurchaseAmount,
+       ]);
+        return $finalSaleAmount;
+    }

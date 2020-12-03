@@ -1,0 +1,67 @@
+
+
+<input id="url" type='hidden' value="{{route('admin.sale-and-purchase-dashboard')}}" />
+<script>
+    $(document).ready(function(){
+
+       $('.getId').click(function(){
+          var id = $(this).attr("id");
+          let url = $('#url').val();
+          //console.log(id);
+          //$(document).on('click', '.update_single_sale_cart' ,function(ed){
+            //ed.preventDefault();
+            //let product_id = $(this).data('id');
+            //let id = product_id;
+            //let quantity = $('#qty-' + id).val();
+            //let unit_sale_price = $('#utp-' + id).val();
+            //let description = $('#des-' + id).val();
+           $.ajax({
+               url:url,
+                type:'GET',
+                datatype:'html',
+                data:{input:id},
+                success:function(response)
+                {
+                    $('#finalSaleAmount').text(response.finalSaleAmount);
+                    $('#finalPurchaseAmount').text(response.finalPurchaseAmount);
+                },
+            });
+
+        //});
+
+       });
+
+
+       $('.customsearch').click(function(){
+          //var id = $(this).attr("id");
+          var id = 'custom';
+          let url = $('#url').val();
+          var from = $('#from').val();
+          var to = $('#to').val();
+
+          //console.log(from);
+          //$(document).on('click', '.update_single_sale_cart' ,function(ed){
+            //ed.preventDefault();
+            //let product_id = $(this).data('id');
+            //let id = product_id;
+            //let quantity = $('#qty-' + id).val();
+            //let unit_sale_price = $('#utp-' + id).val();
+            //let description = $('#des-' + id).val();
+           $.ajax({
+               url:url,
+                type:'GET',
+                datatype:'html',
+                data:{input:id,from:from,to:to},
+                success:function(response)
+                {
+                    $('#finalSaleAmount').text(response.finalSaleAmount);
+                    $('#finalPurchaseAmount').text(response.finalPurchaseAmount);
+                },
+            });
+
+        //});
+
+       });
+
+    });
+</script>
