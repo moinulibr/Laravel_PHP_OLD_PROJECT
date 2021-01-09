@@ -1,0 +1,159 @@
+
+	git reset
+	========= : go to back recent command
+
+
+	changes file or folder or directory to stage...by git command
+
+	git add . ,&&  git add -A  ,  && git --all  , git add *
+==============================================================
+	
+	git add . 
+	==========
+		not include all directory , just add current all (files and folders)
+
+	
+	git add -A 
+	===========
+		
+
+	git add *
+	=========
+		add all except deleted . change to stage all file and folder without delete file and folders
+
+	git add *.txt   , git add *.php   , git add *.js
+	============:
+		    change to stage all file which have .php extension , or .txt ,or .js 
+
+
+	git add singleFile
+	================= : git add myFile.php_or_others
+			    git add myFolder/myFile.php _or_others
+
+
+
+
+	git commit -m "comment message"
+	=========
+
+	=====------=====-------=======------=========-----=======
+	NOW , if we want to back like reset, how ? 
+	=======
+	git reset HEAD~   [~=til sine] [if we delete some things. then its command return deleted modufication but not physically]
+	==================
+	==================
+	back to working directory , then again have to before process ,, like stage, commit
+	
+	=====------=====-------=======------=========-----=======
+	NOW , if we want to back like reset, how ? 
+	=======
+	git reset --heard   [if we delete some things. then its command return deleted with physically]
+	==================
+	==================
+	back to working directory , then again have to before process ,, like stage, commit
+	=====------=====-------=======------=========-----=======
+
+
+
+	git remove 
+	git rm file.extension :[its remove heardly and solfty]
+	=======================: and also make stage at a time 
+	======================= delete from directory by this command
+
+
+	git remove force
+	git rm file.extension -f:[its remove heardly and solfty]
+	=======================: and also make stage at a time 
+	======================= delete from directory by this command
+
+
+	git remove cached
+	git rm --cached file.extension 
+	============================::[change part deleted and make stage at a time but not delted from directory, mean not physically deleted]
+	
+	
+	git remove -r
+	git rm -r folder [recursivelly deleted all from folders... all deleted from thats folders]
+	============================::[]
+	
+
+
+
+
+
+========================== branch=======================================
+========================================================================
+
+	git branch   [check branch]
+	============================
+
+	git branch newBranchName  [add a new branch]
+
+
+	git checkout newBranchName  [switched to another branch]
+	
+	 
+
+	________________________________________________________________________
+	Merge
+	====================================
+	first of all , have to merge from another branch 
+		then main branch...
+	so try
+	now i im in development branch..
+	__________________________________________
+	git merge main -m "merging with main branch from this current (development) branch"
+	====================================================================================
+	============================
+	
+
+	NOW Merge from Main branch
+	===========================
+	
+	git merge development -m "merging with development branch from current main branch"
+	=-====------------====------------===-----------
+	
+	Merge conflict
+	========---------=========----------
+	git branch staging 
+	git checkout staging
+	NOW I am in Staging branch
+
+	(((if we chage the same file from different branch, then auto merge face conflict))
+	resolve confliction
+	=====================
+	=====================
+	change some things from conflict line, or file by physically, 
+	merge as regular rules... like git merge development
+	 
+________________________________________________________________________
+	
+
+
+	Local repository To Remote (hosted, like github,bitlab)
+		Push Command
+
+	Remote repository To Local Repository
+		Fetch.... [fetch only changes file and folders and others, but not merge with my local repository]
+		
+		PUll ... [Fetch and merge at a time with my local repository]
+		pull  = git fetch + git merge like that
+
+
+
+
+
+	push: [origin == remote]
+	git push origin main
+
+	git push origin branchName  [first of all , it create a branch and push all data in the branch]
+	=======---------=============----------------=============----------------	
+
+
+	git pull
+
+
+
+
+
+

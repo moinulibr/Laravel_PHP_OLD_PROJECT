@@ -1,0 +1,247 @@
+	
+	ssh key and link between ssh key and git hub...from 
+
+	/*
+	|---------------------------------------------------
+	| ssh key
+	|---------------------------------------------------
+	*/
+	
+	 	 ssh-keygen -t rsa -b 4096 -C "your_email@example.com"
+		#now enter
+		# enter again [Enter file in which to save the key]
+			# no changes , just enter
+		# Enter passphrase (empty for no passphrase):
+			# no change , just enter
+		# Enter same passphrase (empty for no passphrase):
+			# no change , just enter
+
+		Your public key has been saved in /c/Users/Hi/.ssh/id_rsa.pub.
+		The key fingerprint is:
+		SHA256:TIuwcZRa6s9ttaP0waGd2mkDkFIchPbpEaHfI4Snux4 moinulibr@gmail.com
+		The key's randomart image is:
+		+---[RSA 4096]----+
+		|     +=+         |
+		|    o+*          |
+		|   .=*++.        |
+		|    +X*= .       |
+		|   .oo+oS .      |
+		|    .....=.o     |
+		|    Eo .oo=.     |
+		|     oo.o+=o     |
+		|   .o  .oo+o     |
+		+----[SHA256]-----+
+		#### NOW COMPLETE ###
+	## This key [ssh and GPG Keys] will stored in my pc/c drive
+
+	##---Then Copy the SSH key or ssh-rsa code from the C drive/User/Hi or moinul/.ssh folder/ id_rsa.pub  --##
+		#** AND Pate the code in to the  git hub , below link...
+		## github/setting/Personal settings/SSH and GPG keys / New SSH keys
+			Set the title and Key file by the copied code , past here
+
+		## and also Github/setting/Personal settings/SSH and GPG keys 
+
+	/*
+	|---------------------------------------------------
+	|  In the shall / git bash here , login before init
+	|---------------------------------------------------
+	*/
+	
+		git config --global user.name "moinulibr"
+		git config --global user.email "moinulibr@gmail.com"
+		git config --list
+
+		
+		git status
+		git log
+	/*
+	|---------------------------------------------------
+	|  Some things init in the github , flow the code
+	|---------------------------------------------------
+	*/
+
+		git init #[One Time For a Project]
+
+		git add index.php #[only add this file]
+		git add . #[add all file]
+		git commit -m "my commit here"
+		git remote add origin git@github.com.......link #[one time for a Project]
+		git push origin master
+	
+	############################################################################
+		Clone from git hub   OR pull
+	git clone git@github.com:moinulibr/mr-shop.git ##[download all file]
+	OR
+	git pull git@github.com:moinulibr/mr-shop.git ##[download only edited file]
+	############################################################################
+
+
+	############################################################################
+	Update code again and again by this command
+	
+	git add .
+	git commit -m "my commit here"
+	git push origin master
+	############################################################################
+	
+	
+
+
+
+
+	/*
+	|---------------------------------------------------
+	| Branch
+	|---------------------------------------------------
+	*/
+		Target A Repository
+
+		Branch : master  / Switch branches/tags
+		write a branch name in the [Find or create a branch] .....and press enter
+	
+	######## download Project from Branch
+		****Select a Branch
+		*** Create a Folder... and Copy the github project/repository link....and open Git bash in to  the Folder
+			and past like this...
+		##### git clone git@github.com:moinulibr/firstclass.git -b myBranchName
+	############ git clone .................. -b myBranchName ###############
+		
+		**Changes somethings /code from any  file of this project , which is cloned from myBranch **
+
+
+		##### update this modified code in the myBranch #######
+	############################################################################
+		git add .
+		git pull
+		git push
+	############################################################################
+	
+	Now Have To Pul Request to The master for update this code
+
+		****Select myBranch
+		*** Compare & pull request press here #[right side of this repository **AND It WILL BE SHOW AFTER PUSH Somethings]
+			*** we may create message , that will be shown to the master
+		**** Last of all press Create pull request
+
+	##########******* master can see the request in the *Pul requests* section, which is beside of the Code - Issues - Pull requests
+
+	***** If the master want to merge the code , just press *Merge pull request* 
+	**** If the master don't want to merge the code , just press *Close pull request*
+
+
+
+
+	*****#####******#############################***************************
+	WE MAY CREATE BRANCH BY COMMAND LINE......
+		## git branch newBranchName
+	**check branch 
+		## git branch
+
+	WE MAY SWITCH or ACCESS or GO TO THE BRANCH BY COMMAND LINE
+		## git checkout branchName
+
+
+		##WE CAN MERGE ALL BRANCH FROM COMMAND LINE AS MASTER##
+		*******************************************************
+		###** git merge singleBranchName
+
+		git push
+		git push --set-upstrem origin branchName
+		
+		***********####DELETE BRANCH####*************
+			## git branch -d branchName ##
+	
+	*****#####******#############################***************************
+
+
+
+
+
+	/*
+	|---------------------------------------------------
+	| Fork    same to  the Branch
+	|---------------------------------------------------
+	*/
+
+		Like Branch ,,,,,, but repository will be  other's github user's must 
+		
+
+
+	/*
+	|---------------------------------------------------
+	| Issues
+	|---------------------------------------------------
+	*/
+		IF YOU WANT TO ASSIGN A PERSON / BRANCH FOR SOLVING PROBLEM OR OTHERS
+
+	#### Press Issues AND  *New issue*
+	**Title and Comment can be fill....
+	RIGHT SIDE OF THIS SECTION... 
+	*	Assignees	##[Assign a person/branch]
+	*	Labels		##[which typies of this problems, can be set from here]
+	*	Projects	##[]
+
+	##### Find Issues and after solve this issue
+		** go to Issues AND checked this issue AND *Mark as*== Closed
+		*******and Solved this issues**********
+	
+
+
+
+
+
+
+	/*
+	|---------------------------------------------------
+	| Git Checkout , git revert  , git reset
+	|---------------------------------------------------
+	*/
+
+	##  Undo , uncommited changes
+
+		###**** git checkout -- fileName.php	##[its remove changes code of this file, untill commit this]
+		###**** git checkout -- .	##[its remove changes code of all the file, untill commit]
+
+
+	### Commited Changes  ##[WITH COMMITED CHANGES]
+		##[if we commited more then 2 or more, but we feel all commited code  is error/have some problem, *THEN WE WANT TO GO  BACK TO FIRST COMMIT*]
+			** Now CODE IS............
+		###*** git log
+			#*copy the commit id....
+		###** git revert pastTheCommitIdHere
+				#we may check again *git log
+
+	
+	
+	### Commit Changes   = -n  ##[NOT COMMITED CHANGES]
+		
+		###*** git revert -n pastTheCommitIdHere
+
+		###*** git commit -m "commit now"
+
+
+	###############******************	RESERT
+	RETURN MY COMMIT , WHICH I revert LAST/BEFORE
+	
+		###*** git log
+			#*copy the commit id....
+		###** git reset --heard pastTheCommitIdHere
+				#we may check again *git log
+		
+		
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
