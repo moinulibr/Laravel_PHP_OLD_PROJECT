@@ -18,7 +18,7 @@
 
 		Your public key has been saved in /c/Users/Hi/.ssh/id_rsa.pub.
 		The key fingerprint is:
-		SHA256:TIuwcZRa6s9ttaP0waGd2mkDkFIchPbpEaHfI4Snux4 moinulibr@gmail.com
+		SHA256:******************************* moinulibr@gmail.com
 		The key's randomart image is:
 		+---[RSA 4096]----+
 		|     +=+         |
@@ -47,8 +47,8 @@
 	|---------------------------------------------------
 	*/
 	
-		git config --global user.name "moinulibr"
-		git config --global user.email "moinulibr@gmail.com"
+		git config --global user.name "moinul***"
+		git config --global user.email "moinul****"
 		git config --list
 
 		
