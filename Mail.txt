@@ -1,3 +1,212 @@
+	
+
+	/*----======----===Laravel Mail----======----===*/
+	
+	MAIL_DRIVER=smtp
+	MAIL_HOST=smtp.gmail.com
+	MAIL_PORT=587
+	MAIL_USERNAME=kamalibr2@gmail.com
+	MAIL_PASSWORD=********
+	MAIL_ENCRYPTION=tls
+
+
+
+
+	/*----=====---- config/mail.php---=====-----======---*/
+	'driver' => env('MAIL_DRIVER', 'smtp'),
+    	'host' => env('MAIL_HOST', 'smtp.gmail.com'),
+    	//'host' => env('MAIL_HOST', 'smtp.mailgun.org'),
+
+	 'port' => env('MAIL_PORT', 587), 
+
+	 'from' => [
+        	'address' => env('MAIL_FROM_ADDRESS', 'moinul35@gmail.com'),
+        	'name' => env('MAIL_FROM_NAME', 'For Test'),
+    		],
+
+	'encryption' => env('MAIL_ENCRYPTION', 'tls'),
+
+	/*----============------------==========-----------==========*/
+	
+	
+
+	/*----============------------==========-----------==========*/	
+		there are two ways can send mail
+		1. without create mail class...
+		2. with create mail class
+			/*for create mail class*/
+			php artisan make:mail DynamicMailSending
+				by commanding this, create a DynamicMailSending class, which contain App/Mail/DynamicMailSending
+
+	/*----============------------==========-----------==========*/	
+
+
+	/*----============------------==========-----------==========*/	
+		#first of all, send mail by Mail Class
+	/**---====-----in the Controller---====----===---**/
+	use PDF;
+	use App\Mail\DynamicMailSending;
+	
+	$data['quotation'] = Quotation::find($id);
+        $data['from_mail'] = "email@smtradingbd.com";//"moinul35@gmail.com";
+        $data['to_mail'] = "moinulibr@gmail.com";//"moinul35@gmail.com";
+        $data['mail'] = "this is mail content";
+        $data['client_name'] = "Client";
+        $data['subject'] = "Mail subject";
+
+        Mail::to("moinulibr@gmail.com")->send(new DynamicMailSending($data));
+	/*----============------------==========-----------==========*/	
+			
+				#------#
+	Now, in the DynamicMailSending.php #[from app/Mail/DynamicMailSending]	
+	/*----============------------==========-----------==========*/		
+		
+   <?php
+	namespace App\Mail;
+
+	use Illuminate\Bus\Queueable;
+	use Illuminate\Mail\Mailable;
+	use Illuminate\Queue\SerializesModels;
+	use Illuminate\Contracts\Queue\ShouldQueue;
+
+	class DynamicMailSending extends Mailable
+	{
+    		use Queueable, SerializesModels;
+
+    	/**
+     	* Create a new message instance.
+     	*
+     	* @return void
+     	*/
+    	public $data;
+ 
+    	/**
+     	* Create a new message instance.
+     	*
+     	* @return void
+     	*/
+    	public function __construct($data)
+    	{
+        	$this->data = $data;
+    	}
+    	/**
+     	* Build the message.
+     	*
+     	* @return $this
+     	*/
+    	public function build()
+    	{
+        	$pdf_stream = \PDF::loadView('quotation.quotation.quotation_pdf',$this->data)->setWarnings(false)->stream();
+        	return $this->from('sender@example.com',"Rajon Vai")
+                    ->view('quotation.mail_template.template',$this->data)
+                    //->text('mails.demo_plain')
+                    ->subject('Send Invoice From EBSUI')
+                    ->attachData($pdf_stream, 'invoice.pdf', [
+                        'mime' => 'application/pdf',
+                    ]);
+                     /*  ->attach(public_path('/images').'/demo.jpg', [
+                              'as' => 'demo.jpg',
+                              'mime' => 'image/jpeg',
+                      ]); */
+
+    	}
+   }
+
+
+	/*----=====------======--Now Create a blade template--=======------=====----------*/	
+		resources/views/quotation/mail_template/template.blade.php
+			
+		<html>
+    		<title>Hello</title>
+    		<head>Hiii</head>
+    		<body>
+        		<p>   {{ $from_mail }}
+        		</p>
+
+	        	{{ $mail }}
+    		</body>
+		</html>
+
+	/*----============------------==========-----------==========*/
+		Now in the web.php
+	/*----============------------==========-----------==========*/
+	Route::get('clear', function() {
+    	$exitCode = Artisan::call('config:clear');
+    	$exitCode = Artisan::call('cache:clear');
+    	$exitCode = Artisan::call('config:cache');
+    	$exitCode = Artisan::call('storage:link');
+    	return 'DONE'; //Return anything
+	});
+
+	that's mean.... config,cache, have to  clear  and then php artisan serve
+	/*----============------------==========-----------==========*/
+		The End by Mail Class #[created mail class]
+	/*----============------------==========-----------==========*/
+
+
+
+
+
+
+	/*----============------------==========-----------==========*/	
+		#Seconds, send mail from controller
+	/**---====-----in the Controller---====----===---**/
+	use PDF;
+	use App\Mail\DynamicMailSending;
+	
+	 $data['quotation'] = Quotation::find($id);
+        //return view('quotation.quotation.quotation_pdf',$data);
+        $data['from_mail'] = $data['quotation']->from_company_email;//"moinul35@gmail.com";
+        $data['to_mail'] = "moinulibr@gmail.com";//"moinul35@gmail.com";
+        $data['mail'] = "Quotation";
+        $data['client_name'] = $data['quotation']->clients?$data['quotation']->clients->name:NULL;
+        $data['subject'] = $data['quotation']->email_subject;
+       
+
+        $pdf_stream = \PDF::loadView('quotation.quotation.quotation_pdf',$data)->setWarnings(false)->stream();
+
+
+        	\Mail::send('quotation.mail_template.template', $data, function($messages) use ($data, $pdf_stream){
+                $messages->from($data['from_mail'],$data['from_mail']);
+                $messages->to($data['to_mail']);
+                $messages->subject($data['subject']);
+                $messages->attachData($pdf_stream, 'invoice.pdf', [
+                    'mime' => 'application/pdf',
+                ]);
+                });
+                return back()->with('success','Quotation is send successfully by email');
+	/*----============------------==========-----------==========*/	
+
+	/*----=====------======--Now Create a blade template--=======------=====----------*/	
+		resources/views/quotation/mail_template/template.blade.php
+			
+		<html>
+    		<title>Hello</title>
+    		<head>Hiii</head>
+    		<body>
+        		<p>   {{ $from_mail }}
+        		</p>
+
+	        	{{ $mail }}
+    		</body>
+		</html>
+
+	/*----============------------==========-----------==========*/
+
+
+
+	THE EHD THE END END END END END END END
+
+
+
+
+
+
+
+
+
+
+
 	$order_data = [];#somethings
 
 	$pdf_stream = \PDF::loadView('admin.drm_order.invoice_pdf', $order_data)->setWarnings(false)->stream();
