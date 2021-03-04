@@ -51,3 +51,39 @@
         $resultAsArray = checkDataAvailableOrNot($data ,$myParentId);
 
        return $resultAsArray;
+
+	/*--------------------------------------------*/
+
+ 	$data = [];
+        $data = [
+            1 => [
+                'id' => 1,
+                'name'=>'First Person',
+                'parentId' => 1
+            ],
+        ];
+
+        for($i = 2;$i<=10;$i++)
+        {
+            array_push($data,['id'=>$i,'name' => $i."th Person",'parentId'=> $i-1]);
+        }
+        //return $data;
+
+        $myId = 6; 
+        $myParentId = 2;
+     
+        function checkDataAvailableOrNot($data , $parent ) 
+        {
+            $pName = [];
+            $pId = [];
+            foreach($data as $key => $item) {
+                if($item['parentId'] != $parent && $item['parentId'] < $parent) {
+                    $pName[$key] = $item['name'];
+                    $pId[$key]  = checkDataAvailableOrNot([],$item['parentId']);
+                }
+            }
+            return $pName;
+        }
+        $resultAsArray = checkDataAvailableOrNot($data ,$myParentId);
+
+       return $resultAsArray;
