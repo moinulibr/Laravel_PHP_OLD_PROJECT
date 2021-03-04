@@ -1,4 +1,17 @@
-        //$startTime  = date('Y-m-d');
+         ===============================================================
+	 $promo_offer_from   =  strtotime('2021-02-15 12:20');
+         $promo_offer_to     =  strtotime('2021-02-20 12:20');
+         $compareDate  = strtotime(date('Y-m-d h:i:s'));
+         
+         if($promo_offer_from <= $compareDate && $promo_offer_to >= $compareDate )
+         {
+           return "Yes , We can insert somethings here , in this time";
+         }else{
+           return "No , We can not insert anythings in this time, because";
+         }
+
+	===================================================================
+	//$startTime  = date('Y-m-d');
         //return $cenvertedTime = date('d-m-Y -  H:i:s a',strtotime("+24 hour",strtotime($startTime)));
 =================================================================
         //$from   =  strtotime('10:05 Pm');
