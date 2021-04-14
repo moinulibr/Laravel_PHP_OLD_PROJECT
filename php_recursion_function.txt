@@ -87,3 +87,64 @@
         $resultAsArray = checkDataAvailableOrNot($data ,$myParentId);
 
        return $resultAsArray;
+
+
+	/*===================================================*/
+	$data = [];
+        $data = [
+            [
+                'id' => 1,
+                'name'=>'First Person',
+                'parentId' => 1
+            ],
+             [
+                'id' => 2,
+                'name'=>'Second Person' ,
+                'parentId' => 1
+            ],
+             [
+                'id' => 3,
+                'name'=>'3rd Person',
+                'parentId' => 2
+            ],
+             [
+                'id' => 4,
+                'name'=>'4th Person',
+                'parentId' => 3
+            ],
+            [
+                'id' => 5,
+                'name'=>'5th Person',
+                'parentId' => 4
+            ],
+             [
+                'id' => 6,
+                'name'=>'6th Person',
+                'parentId' => 2
+            ],
+        ];
+
+        for($i = 7;$i<=10;$i++)
+        {
+            array_push($data,['id'=>$i,'name' => $i."th Person",'parentId'=> $i-1]);
+        }
+        //return $data;
+
+        $myId = 6; 
+        $myParentId = 2;
+     
+        function checkDataAvailableOrNot($data , $parent ) 
+        {
+            $pName = [];
+            $pId = [];
+            foreach($data as $key => $item) {
+                if($item['parentId'] != $parent && $item['parentId'] < $parent) {
+                    $pName[$key] = $item['name'];
+                    $pId[$key]  = checkDataAvailableOrNot([],$item['parentId']);
+                }
+            }
+            return $pName;
+        }
+        $resultAsArray = checkDataAvailableOrNot($data ,$myParentId);
+
+       return $resultAsArray;
