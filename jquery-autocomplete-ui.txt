@@ -481,3 +481,216 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+			
+				/*For Latest  20-05-2021 */
+				==========================
+
+            |-----------------------------------------------------------------------------------------------------------------------------------
+            |-----------------------------------------------------------------------------------------------------------------------------------
+            |-----------------------------------------------------------------------------------------------------------------------------------
+
+            /*
+            |-----------------------------------------------------------------------------------------------------------------------------------
+            |	
+            |------------------------------------------------------------------------------------------------------------------
+            */
+		
+		/*
+            	|---------------------------------------------------
+            	| in the controller
+            	|------------------------------------------------
+            	*
+		
+    public function getStudentByKeyup(Request $request) //admin.get_student_by_key_up
+    {
+        $search = $request->name;
+        $query = User::query()->where('role_id',3);
+                $query->whereNull('deleted_at')
+                ->where('name','like','%'.$search.'%');
+                $query->orWhere(function($q) use ($search) {
+                    return $q->where('mobile','like','%'.$search . '%')
+                    ->where('role_id',3);
+                });
+                $query->orWhere(function($q) use ($search) {
+                    return $q->where('useruid','like','%'.$search . '%')
+                    ->where('role_id',3);
+                });
+                $query->orWhere(function($q) use ($search) {
+                    return $q->where('email','like','%'.$search . '%')
+                    ->where('role_id',3);
+                });
+        $students =  $query->select('id','useruid','name','mobile','role_id')->get();
+
+
+        $output = '<ul class="dropdown-menu" aria-labelledby="dropdownMenuButton" style="display:block;position:relation;">';
+        foreach($students as $student)
+        {
+            $output .='<li><a href="#" data-id="'.$student->id.'" class="dropdown-item dropdown_class">'.$student->useruid.' - '.$student->name. ' - ('. $student->mobile .')'.'</a> </li>';
+        }
+        $output .= "</ul>";
+        //return $output;
+        return response()->json([
+            'status'    => true,
+            'data'      => $output
+        ]);
+	
+    }
+		
+		/*
+            	|---------------------------------------------------
+            	| in the controller End 
+            	|------------------------------------------------
+            	*
+
+
+		/*
+        	|--------------------------------------------------------
+        	| in the view 
+        	|-------------------------------------------------------
+        	*
+
+	<script>
+		
+	 $.ajaxSetup({
+              headers: {
+                  'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+              }
+          });
+
+        $('.submitButton').attr('disabled','disabled');
+
+
+
+        /** Search and Add to Cart By Product Name/SKU/Bar Code **/
+            //$(document).ready(function(){
+                var ctrlDown = false,
+                ctrlKey = 17,
+                cmdKey = 91,
+                vKey = 86,
+                cKey = 67;
+                $(document).on('keyup','#p_name_sku_bar_code_id',function(e){
+                    e.preventDefault();
+                    if (e.keyCode == ctrlKey || e.keyCode == cmdKey) ctrlDown = true;
+                    if (ctrlDown && (e.keyCode == vKey || e.keyCode == cKey)) return false;
+                    searchAndAddToCartByPNameSkuBarcode();
+                });
+            //);
+
+        /** Search and Add to Cart By Product Name/SKU/Bar Code **/
+         /*
+    |--------------------------------------------------------------------------------------
+    | Search and Add to Cart By Product Name/SKU/Bar Code
+    |----------------------------------------------------------------
+    */
+        function searchAndAddToCartByPNameSkuBarcode()
+        {
+            var name = $('.studentName').val();
+            var url = $('#searchingStudentByAjax').val();
+            if(name.length > 1)
+            {
+                setTimeout(function (){
+                    $.ajax({
+                        url: url,
+                        type: "GET",
+                        data: {name:name},
+                        success: function(response)
+                        {
+                            $('#student_list').fadeIn();
+                            $('#student_list').html(response.data);
+                        },
+                    });
+                }, 700)
+            }else{
+                $('.student_id').val('');
+                $('#student_list').fadeOut();
+            }
+        }
+
+        /*
+        |-----------------
+        |	After searchAndAddToCartByPNameSkuBarcode Result
+        |-----------------
+        */
+            var ctrlDown = false,
+            ctrlKey = 17,
+            cmdKey = 91,
+            vKey = 86,
+            cKey = 67;
+            $(document).on('click','.dropdown_class',function(e){
+                $('.student_id').val('');
+                e.preventDefault();
+                if (e.keyCode == ctrlKey || e.keyCode == cmdKey) ctrlDown = true;
+                if (ctrlDown && (e.keyCode == vKey || e.keyCode == cKey)) return false;
+                //$('#p_name_sku_bar_code_id').val($(this).data('id'));
+                $('#student_list').fadeOut();
+
+                    var product_text = $(this).text();
+                    var product_id = $(this).data('id');
+                    $('.student_id').val(product_id);
+                    $('#p_name_sku_bar_code_id').val(product_text)
+                    /*
+                    var url = $('#setProductIdByClickingThisUrl').val();
+                    $.ajax({
+                    url: url,
+                    type: "GET",
+                    data: {product_id:product_id},
+                    success: function(response)
+                    {
+                        $('#showResult').html(response.data);
+                        $('#p_name_sku_bar_code_id').val('');
+                        //$('#p_name_sku_bar_code_id').focus();
+                    },
+                });
+                */
+            });
+            $(document).click(function(){
+                $('#student_list').fadeOut();
+                //$('#p_name_sku_bar_code_id').val('');
+                //$('#p_name_sku_bar_code_id').focus();
+            });
+        /*
+        |-----------------
+        |	After searchAndAddToCartByPNameSkuBarcode Result
+        |-----------------
+        */
+    /*
+    |----------------------------------------------------------------
+    | Search and Add to Cart By Product Name/SKU/Bar Code
+    |--------------------------------------------------------------------------------------------
+    */
+</script>
+
+            |-----------------------------------------------------------------------------------------------------------------------------------
+            |-----------------------------------------------------------------------------------------------------------------------------------
+            |-----------------------------------------------------------------------------------------------------------------------------------
+            |-----------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
