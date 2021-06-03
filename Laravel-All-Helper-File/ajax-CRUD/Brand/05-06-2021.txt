@@ -1,0 +1,1131 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use App\Models\Brand;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Validator;
+use Illuminate\Support\Str;
+class BrandController extends Controller
+{
+    public function __construct()
+    {
+        $this->middleware('auth:admin');
+    }
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+
+    //*** JSON Request
+    public function datatables()
+    {
+        $datas = Brand::orderBy('id', 'desc')->get();
+        //--- Integrating This Collection Into Datatables
+        return Datatables::of($datas)
+        ->addColumn('status', function (Category $data) {
+            $class = $data->status == 1 ? 'drop-success' : 'drop-danger';
+            $s = $data->status == 1 ? 'selected' : '';
+            $ns = $data->status == 0 ? 'selected' : '';
+            return '<div class="action-list"><select class="process select droplinks ' . $class . '"><option data-val="1" value="' . route('admin-cat-status', ['id1' => $data->id, 'id2' => 1]) . '" ' . $s . '>Activated</option><option data-val="0" value="' . route('admin-cat-status', ['id1' => $data->id, 'id2' => 0]) . '" ' . $ns . '>Deactivated</option></select></div>';
+        })
+            ->addColumn('attributes', function (Category $data) {
+                $buttons = '<div class="action-list"><a data-href="' . route('admin-attr-createForCategory', $data->id) . '" class="attribute" data-toggle="modal" data-target="#attribute"> <i class="fas fa-edit"></i>Create</a>';
+                if ($data->attributes()->count() > 0) {
+                    $buttons .= '<a href="' . route('admin-attr-manage', $data->id) . '?type=category' . '" class="edit"> <i class="fas fa-edit"></i>Manage</a>';
+                }
+                $buttons .= '</div>';
+
+                return $buttons;
+            })
+            ->addColumn('action', function (Category $data) {
+
+                $action = '<div class="action-list">';
+                if(Auth::guard('admin')->user()->role->permissionCheck('categories|edit'))
+                {
+                    $action .= '<a data-href="' . route('admin-cat-edit', $data->id) . '" class="edit" data-toggle="modal" data-target="#modal1"> <i class="fas fa-edit"></i>Edit</a>';
+                }
+
+                if(Auth::guard('admin')->user()->role->permissionCheck('categories|delete'))
+                {
+                    $action .= '<a href="javascript:;" data-href="' . route('admin-cat-delete', $data->id) . '" data-toggle="modal" data-target="#confirm-delete" class="delete"><i class="fas fa-trash-alt"></i></a>';
+                }
+                $action .= '</div>';
+                
+                return $action;
+            })
+            ->rawColumns(['status', 'attributes', 'action'])
+            ->toJson(); //--- Returning Json Data To Client Side
+    }
+  
+    //*** GET Request
+    public function index(Request $request)
+    {
+        if($request->ajax()){
+            $pageNo     =  $request->pagination ? $request->pagination : 2 ; 
+            $search     = $request->search;
+            $query = Brand::query();
+            $query->when($search,function($q) use($search) {
+                return $q->where('name','like','%' . $search . '%')
+                ->orWhere('slug','like','%' . $search . '%')
+                ->orWhere('email','like','%' . $search . '%')
+                ->orWhere('web_address','like','%' . $search . '%');
+            });
+            $data['brands'] =  $query->whereNull('deleted_at')->orderBy('id', 'desc')->paginate($pageNo);
+            $html = view('admin.brand.ajax_index',$data)->render();
+            return response()->json([
+                'status' => true,
+                'html' => $html
+            ]);
+        }
+        return view('admin.brand.index');
+    }
+  
+    //*** GET Request
+    public function create()
+    {
+        return view('admin.category.create');
+    }
+  
+    //*** POST Request
+    public function store(Request $request)
+    {
+        //--- Validation Section
+        $rules = [
+            'name' => 'required|min:2|max:255',
+            'email' => 'required|email|unique:brands,email',
+            'web_address' => 'required|min:2|max:255',
+            'logo' => 'mimes:jpeg,jpg,png,svg',
+            'slug' => 'required|min:3|unique:brands|regex:/^[a-zA-Z0-9\s-]+$/'
+            ];
+        $customs =[
+            'name.required'   => 'Name is required.',
+            'name.min'        => 'Name minimum 2 characters.',
+            'name.max'        => 'Name maximum 255 characters.',
+
+            'email.required'  => 'Email is required.',
+            'email.unique'    => 'This slug has already been taken.',
+
+            'web_address.required' => 'Web Address is required.',
+            'web_address.min'      => 'Web Address minimum 2 characters.',
+            'web_address.max'      => 'Web Address maximum 255 characters.',
+
+            'logo.mimes'      => 'Logo Type is Invalid.',
+
+            'slug.required'   => 'Slug is required.',
+            'slug.unique'     => 'This slug has already been taken.',
+            'slug.regex'      => 'Slug Must Not Have Any Special Characters.'
+            ];
+        $validator = Validator::make($request->all(), $rules, $customs);
+
+        if ($validator->fails()) {
+            return response()->json(array('status' => 'errors','error' => $validator->getMessageBag()->toArray()));
+        }
+        //--- Validation Section Ends
+
+        //--- Logic Section
+        $data = new Brand();
+        $input = $request->except('_token') ;//$request->all();
+        
+        if ($file = $request->file('logo'))
+        {
+            $name = time().str_replace(' ', '', $file->getClientOriginalName());
+            $file->move('assets/images/brands',$name);
+            $input['logo'] = $name;
+        }
+        $data->fill($input)->save();
+        //cache()->forget('brands');
+        //--- Logic Section Ends
+        
+        //--- Redirect Section
+        $msg = 'New Data Added Successfully.';
+
+        return response()->json([
+            'status' => true,
+            'message' => $msg 
+        ]);
+        //--- Redirect Section Ends
+    }
+  
+    /**
+     * Display the specified resource.
+     *
+     * @param  \App\Models\Brand  $brand
+     * @return \Illuminate\Http\Response
+     */
+    public function show(Request $request)
+    {
+        $data['brand'] = Brand::find($request->id);
+        $html = view('admin.brand.show',$data)->render();
+        return response()->json([
+            'status' => true,
+            'html' => $html
+        ]);
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  \App\Models\Brand  $brand
+     * @return \Illuminate\Http\Response
+     */
+    public function edit(Request $request)
+    {
+        $data['brand'] = Brand::find($request->id);
+        $html = view('admin.brand.edit',$data)->render();
+        return response()->json([
+            'status' => true,
+            'html' => $html
+        ]);
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Models\Brand  $brand
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request)
+    {
+        $rules = [
+            'name' => 'required|min:2|max:255',
+            'email' => 'required|email|unique:brands,email,'.$request->id.'',
+            'web_address' => 'required|min:2|max:255',
+            'logo' => 'mimes:jpeg,jpg,png,svg',
+            'slug' => 'required|min:3|unique:brands,slug,'.$request->id.'|regex:/^[a-zA-Z0-9\s-]+$/'
+            ];
+        $customs =[
+            'name.required'   => 'Name is required.',
+            'name.min'        => 'Name minimum 2 characters.',
+            'name.max'        => 'Name maximum 255 characters.',
+
+            'email.required'  => 'Email is required.',
+            'email.unique'    => 'This slug has already been taken.',
+
+            'web_address.required' => 'Web Address is required.',
+            'web_address.min'      => 'Web Address minimum 2 characters.',
+            'web_address.max'      => 'Web Address maximum 255 characters.',
+
+            'logo.mimes'      => 'Logo Type is Invalid.',
+
+            'slug.required'   => 'Slug is required.',
+            'slug.unique'     => 'This slug has already been taken.',
+            'slug.regex'      => 'Slug Must Not Have Any Special Characters.'
+            ];
+        $validator = Validator::make($request->all(), $rules, $customs);
+
+        if ($validator->fails()) {
+            return response()->json(array('status' => 'errors','error' => $validator->getMessageBag()->toArray()));
+        }
+        //--- Validation Section Ends
+
+        //--- Logic Section
+        $data = Brand::findOrFail($request->id);
+        $input = $request->all();
+            if ($file = $request->file('logo'))
+            {
+                $name = time().str_replace(' ', '', $file->getClientOriginalName());
+                $file->move('assets/images/brands',$name);
+                if($data->logo != null)
+                {
+                    if (file_exists(public_path().'/assets/images/brands/'.$data->logo)) {
+                        unlink(public_path().'/assets/images/brands/'.$data->logo);
+                    }
+                }
+                $input['logo'] = $name;
+            }
+
+        $data->update($input);
+        //cache()->forget('categories');
+        //--- Logic Section Ends
+
+        //--- Redirect Section
+        $msg = 'Data Updated Successfully.';
+
+        return response()->json([
+            'status' => true,
+            'message' => $msg 
+        ]);
+        //--- Redirect Section Ends
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  \App\Models\Brand  $brand
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy(Request $request)
+    {
+        $brand =  Brand::findOrfail($request->id);
+         //If logo Doesn't Exist
+         if($brand->logo == null){
+            $brand->deleted_at = date('Y-m-d h:i:s');
+            $brand->save();
+            //--- Redirect Section
+            $msg = 'Data Deleted Successfully.';
+            return response()->json([
+                'status' => true,
+            ]);
+            //--- Redirect Section Ends
+        }
+        //If logo Exist
+        if (file_exists(public_path().'/assets/images/brands/'.$brand->logo)) {
+            //unlink(public_path().'/assets/images/brands/'.$brand->logo);
+        }
+        $brand->deleted_at = date('Y-m-d h:i:s');
+        $brand->save();
+        //cache()->forget('categories');
+        //--- Redirect Section
+        $msg = 'Data Deleted Successfully.';
+        return response()->json([
+            'status' => true,
+        ]);
+        //--- Redirect Section Ends
+    }
+}
+
+
+
+	/**********************************************************/
+
+		index.js
+		=========
+        $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+
+    /**show  Brand Modal */
+    $(document).on('click','.addNewBrandModal',function(){
+        $('.message').text('');
+        $('.img-upload').val('');
+        $('#addNewBrandModal').modal('show');
+    });
+    /**show  Brand Modal */
+
+
+    /**create Brand */
+    $(document).on("submit",'.createBrand',function(e){
+        e.preventDefault();
+       /*  var form = $(this);
+        var url = form.attr("action");
+        var type = form.attr("method");
+        var data = form.serialize(); */
+        $('.color-red').text('');
+        $.ajax({
+            /* url: url,
+            data: data,
+            type: type,
+            datatype:"JSON", */
+            type: 'POST',
+            url: $(this).attr('action'),
+            enctype: 'multipart/form-data',
+            data: new FormData(this),
+            processData: false,
+            contentType: false,
+            beforeSend:function(){
+                $('.loading').fadeIn();
+            },
+            success: function(response){
+                console.log(response);
+                if(response.status == 'errors')
+                {   
+                    printErrorMsg(response.error);
+                }
+                else if(response.status == true)
+                {
+                    $('.mess').text('Data Inserted Successfully');
+                    $('.mess').css({
+                        'color':'green',
+                        'background-color':'#f8f9fa',
+                        'padding' :'2%',
+                        'font-size' : '15px',
+                        'font-weight':'700'
+                    });
+                    $('.message').text(response.message);
+                    document.getElementById("formResetId").reset();
+                    setTimeout(function() 
+                    {
+                        $('#addNewBrandModal').modal("hide");
+                        getIndexData($('.getIndexData').val());
+                    }, 200);
+                }
+                else if(response.status == false)
+                {
+                    
+                }
+            },
+            complete:function(){
+                $('.loading').fadeOut();
+            },
+        });
+        //end ajax
+
+        function printErrorMsg(msg) {
+            $('.color-red').css({'color':'red'});
+            $.each(msg, function(key, value ) {
+                $('.'+key+'_err').text(value);
+            });
+        }
+    });
+    /**create Brand */
+
+    
+    /** index / view Brand list */
+    $(document).ready(function(){
+        var url = $('.getIndexData').val();
+        getIndexData(url);
+    });
+
+    /** index / view Brand list by pagination*/
+    $(document).on("click",".pagination li a",function(e){
+        e.preventDefault();
+        var page = $(this).attr('href');
+        var pageNumber = page.split('?page=')[1];
+        return getPagination(pageNumber);
+	});
+        function getPagination(pageNumber){
+            var createUrl = $('.getIndexData').val();
+            var url =  createUrl+"?page="+pageNumber;
+            getIndexData(url);
+        }
+    /** index / view Brand list by pagination*/
+
+    /** index / view Brand list by search or show per page*/
+    $(document).on('change keyup','.search ,.pagination',function(){
+        var url = $('.getIndexData').val();
+        getIndexData(url)
+    });
+    /** index / view Brand list by search or show per page*/
+
+    function getIndexData(url)
+    {
+        var search      = $('.search').val();
+        var pagination = $('.pagination option:selected').val();
+        $.ajax({
+            url: url,
+            type: "GET",
+            data:{pagination:pagination,search:search},
+            datatype:"HTML",
+            success: function(response){
+                $('.showResult').html(response.html);
+            },
+        });  
+    }
+/** index / view Brand list by search or show per page*/
+
+
+
+/** Show single Data*/
+    $(document).on('click','.showSingle',function(e){
+        e.preventDefault();
+        var id      = $(this).data('id');
+        var url     = $('.showModalUrl').val();
+        $.ajax({
+            url: url,
+            type: "GET",
+            data:{id:id},
+            datatype:"HTML",
+            success: function(response){
+                $('#editBrandModal').html(response.html).modal('show');
+            },
+        });  
+    });
+
+/** Show single Data*/
+
+
+/** Delete Single Brand*/
+    $(document).on('click','.singleDelete',function(e){
+        e.preventDefault();
+        var id      = $(this).data('id');
+        var create  = $('.deleteModalUrl').val();
+        var url     = create+ '?id='+id; 
+        $.ajax({
+            url: url,
+            type: "GET",
+            data:{id:id},
+            datatype:"HTML",
+            success: function(response){
+                if(response.status == true)
+                {
+                    $('.mess').text('Data Deleted Successfully');
+                    $('.mess').css({
+                        'color':'green',
+                        'background-color':'#f8f9fa',
+                        'padding' :'2%',
+                        'font-size' : '15px',
+                        'font-weight':'700'
+                    });
+                    getIndexData($('.getIndexData').val());
+                }
+            },
+        });  
+    });
+/** Delete Single Brand*/
+
+
+
+	/*********************************************/
+	edit.js
+	==========
+
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+  
+    $(document).on('click','.edit',function(e){
+        e.preventDefault();
+        var id      = $(this).data('id');
+        var url     = $('.editModalUrl').val();
+        $.ajax({
+            url: url,
+            type: "GET",
+            data:{id:id},
+            datatype:"HTML",
+            success: function(response){
+                $('#editBrandModal').html(response.html).modal('show');
+            },
+        });  
+    });
+
+
+    /**Edit Brand */
+    $(document).on("submit",'.editBrand',function(e){
+        e.preventDefault();
+        $('.color-red').text('');
+        $.ajax({
+            type: 'POST',
+            url: $(this).attr('action'),
+            enctype: 'multipart/form-data',
+            data: new FormData(this),
+            processData: false,
+            contentType: false,
+            beforeSend:function(){
+                $('.loading').fadeIn();
+            },
+            success: function(response){
+                if(response.status == 'errors')
+                {   
+                    printErrorMsg(response.error);
+                }
+                else if(response.status == true)
+                {   
+                    $('.mess').text('Data Updated Successfully');
+                    $('.mess').css({
+                        'color':'green',
+                        'background-color':'#f8f9fa',
+                        'padding' :'2%',
+                        'font-size' : '15px',
+                        'font-weight':'700'
+                    });
+                    
+                    $('.message').text(response.message);
+                    document.getElementById("formResetId").reset();
+                    setTimeout(function() 
+                    {
+                        $('#editBrandModal').html('').modal("hide");
+                        getIndexData($('.getIndexData').val());
+                    }, 200);
+                }
+                else if(response.status == false)
+                {
+                    
+                }
+            },
+            complete:function(){
+                $('.loading').fadeOut();
+            },
+        });
+        //end ajax
+
+        function printErrorMsg(msg) {
+            $('.color-red').css({'color':'red'});
+            $.each(msg, function(key, value ) {
+                $('.'+key+'_err').text(value);
+            });
+        }
+    });
+    /**create Brand */
+
+        /** index / view Brand list */
+    $(document).ready(function(){
+        var url = $('.getIndexData').val();
+        getIndexData(url);
+    });
+    function getIndexData(url)
+    {
+        var search      = $('.search').val();
+        var pagination = $('.pagination option:selected').val();
+        $.ajax({
+            url: url,
+            type: "GET",
+            data:{pagination:pagination,search:search},
+            datatype:"HTML",
+            success: function(response){
+                $('.showResult').html(response.html);
+            },
+        });  
+    }
+	
+
+	--------------------------------------------------------------------
+		edit
+	  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content ">
+                <div class="submit-loader">
+                    <img class="loading" src="{{ asset('assets/images/xloading.gif') }}" alt="">
+                </div>
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Brand</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+                    <div class="modal-body">
+                        <div class="add-product-content1">
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <div class="product-description">
+
+                                        <div class="body-area">
+                                            
+                                            <p class="message" style="text-align: center;padding-bottom: 13px;font-size: 15px;color: green;"></p>
+                                            
+                                            @include('includes.admin.form-error')
+                                            <form action="{{route('admin-brand-update')}}" method="POST" class="editBrand" id="formResetId" enctype="multipart/form-data">
+                                                @csrf
+                                                <input type="hidden" value="{{$brand->id}}" name="id" />
+                                                <div class="row">
+                                                    <div class="col-lg-4">
+                                                        <div class="left-area">
+                                                            <h4 class="heading">{{ __('Name') }} *</h4>
+                                                            <p class="sub-heading">{{ __('(In Any Language)') }}</p>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-7">
+                                                        <input type="text" class="input-field" name="name"
+                                                            placeholder="{{ __('Enter Name') }}" required="" value="{{$brand->name}}">
+                                                            <strong class="name_err color-red"></strong>
+                                                    </div>
+                                                </div>
+
+                                                <div class="row">
+                                                    <div class="col-lg-4">
+                                                        <div class="left-area">
+                                                            <h4 class="heading">{{ __('Slug') }} *</h4>
+                                                            <p class="sub-heading">{{ __('(In English)') }}</p>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-7">
+                                                        <input type="text" class="input-field" name="slug"
+                                                            placeholder="{{ __('Enter Slug') }}" required="" value="{{$brand->slug}}">
+                                                            <strong class="slug_err color-red"></strong>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-lg-4">
+                                                        <div class="left-area">
+                                                            <h4 class="heading">{{ __('Web Address') }}*</h4>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-7">
+                                                    <input type="text" class="input-field" name="web_address"
+                                                            placeholder="{{ __('Web Address') }}" required="" value="{{$brand->web_address}}">
+                                                            <strong class="web_address_err color-red"></strong>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-lg-4">
+                                                        <div class="left-area">
+                                                            <h4 class="heading">{{ __('Email') }}*</h4>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-7">
+                                                    <input type="text" class="input-field" name="email"
+                                                            placeholder="{{ __('Email') }}" required="" value="{{$brand->email}}">
+                                                            <strong class="email_err color-red"></strong>
+                                                    </div>
+                                                </div>
+                                                <br>
+                                                <div class="row">
+                                                    <div class="col-lg-4">
+                                                        <div class="left-area">
+                                                            <h4 class="heading">{{ __('Logo') }} *</h4>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-7">
+                                                        <div class="img-upload">
+                                                            <div id="image-preview" class="img-preview" >
+                                                                <label for="image-upload" class="img-label" id="image-label"><i class="icofont-upload-alt"></i>Upload Icon</label>
+                                                                <input type="file" name="logo" class="img-upload" id="image-upload">
+                                                                <strong class="logo_err color-red"></strong>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-lg-4">
+                                                        <div class="left-area">
+                                                            
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-7">
+                                                        <div class="col-lg-7">
+                                                            <button class="addProductSubmit-btn" type="submit">{{ __('Update') }}</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ __('Close') }}</button>
+                </div>
+            </div>
+        </div>
+
+	/// index...
+	--------------------------------------------------
+@extends('layouts.admin')
+
+@section('content')
+    <input type="hidden" id="headerdata" value="{{ __('BRAND') }}">
+    <input type="hidden" id="attribute_data" value="{{ __('ADD NEW BRAND') }}">
+    <div class="content-area">
+        <div class="mr-breadcrumb">
+            <div class="row">
+                <div class="col-lg-12">
+                    <h4 class="heading">{{ __('Brand') }}</h4>
+                    <ul class="links">
+                        <li>
+                            <a href="{{ route('admin.dashboard') }}">{{ __('Dashboard') }} </a>
+                        </li>
+                        <li><a href="javascript:">{{ __('Manage Brand') }}</a></li>
+                        <li>
+                            <a href="{{ route('admin-brand-index') }}">{{ __('Brand') }}</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="product-area">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="mr-table allproduct">
+
+                        @include('includes.admin.form-success')
+                            
+                           
+                        {{-- <div class="table-responsiv">
+                                <table id="geniustable" class="table table-hover dt-responsive" cellspacing="0"
+                                    width="100%">
+                                    <thead>
+                                    <tr>
+                                        <th>{{ __("Category") }}</th>
+                                        <th>{{ __("Name") }}</th>
+                                        <th>{{ __("Slug") }}</th>
+                                        <th>{{ __('Attributes') }}</th>
+                                        <th>{{ __("Status") }}</th>
+                                        <th>{{ __("Options") }}</th>
+                                    </tr>
+                                    </thead>
+                                </table>
+                            </div> --}}
+
+                        <div class="table-responsiv">
+                            
+                            <p class="mess" style="text-align:center;"></p>
+                            
+                            <div id="geniustable_wrapper" class="dataTables_wrapper dt-bootstrap4 no-footer">
+                                <div class="row btn-area">
+                                    <div class="col-sm-4">
+                                        <div class="dataTables_length" id="geniustable_length">
+                                            <label>Show
+                                                <select
+                                                    name="pagination" 
+                                                    class="pagination custom-select custom-select-sm form-control form-control-sm" style="padding: 0 5px;">
+                                                    <option value="10">10</option>
+                                                    <option value="20">20</option>
+                                                    <option value="30">30</option>
+                                                    <option value="50">50</option>
+                                                    <option value="100">100</option>
+                                                    <option value="500">500</option>
+                                                    <option value="1000">1000</option>
+                                                    <option value="all">All</option>
+                                                </select>
+                                                entries
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <div id="geniustable_filter" class="dataTables_filter">
+                                            <label>Search:
+                                                <input
+                                                    type="search" class="search form-control form-control-sm" placeholder=""
+                                                    aria-controls="geniustable">
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4 table-contents">
+                                        <a class="add-btn addNewBrandModal" data-url="{{ route('admin-brand-create') }}"
+                                            >
+                                            <i class="fas fa-plus"></i> Add New Brand
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-12" >
+                                    <input type="hidden" class="getIndexData" value="{{route('admin-brand-index')}}">
+                                    <div class="showResult">
+
+                                    </div>
+                                       
+                                       {{--   <div id="geniustable_processing" class="dataTables_processing card"
+                                            style="display: none;"><img
+                                                src="http://localhost/Laravel_8/Akib_bhai/ecom/ebaskat-admin/public/assets/images/xloading.gif">
+                                        </div>  --}}
+                                    </div>
+                                </div>
+
+
+                            </div>
+                        </div>
+
+                        <!---------------------------->
+
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- ADD / EDIT MODAL --}}
+    <div class="modal fade" id="addNewBrandModal" tabindex="-1" role="dialog" aria-labelledby="addNewBrandModal" aria-hidden="true">
+
+        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content ">
+                <div class="submit-loader">
+                    <img class="loading" src="{{ asset('assets/images/xloading.gif') }}" alt="">
+                </div>
+                <div class="modal-header">
+                    <h5 class="modal-title">Add New Brand</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+                    <div class="modal-body">
+                        <div class="add-product-content1">
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <div class="product-description">
+
+                                        <div class="body-area">
+                                            
+                                            <p class="message" style="text-align: center;padding-bottom: 13px;font-size: 15px;color: green;"></p>
+                                            
+                                            @include('includes.admin.form-error')
+                                            <form action="{{route('admin-brand-store')}}" method="POST" class="createBrand" id="formResetId" enctype="multipart/form-data">
+                                                @csrf
+                                                <div class="row">
+                                                    <div class="col-lg-4">
+                                                        <div class="left-area">
+                                                            <h4 class="heading">{{ __('Name') }} *</h4>
+                                                            <p class="sub-heading">{{ __('(In Any Language)') }}</p>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-7">
+                                                        <input type="text" class="input-field" name="name"
+                                                            placeholder="{{ __('Enter Name') }}" required="" value="">
+                                                            <strong class="name_err color-red"></strong>
+                                                    </div>
+                                                </div>
+
+                                                <div class="row">
+                                                    <div class="col-lg-4">
+                                                        <div class="left-area">
+                                                            <h4 class="heading">{{ __('Slug') }} *</h4>
+                                                            <p class="sub-heading">{{ __('(In English)') }}</p>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-7">
+                                                        <input type="text" class="input-field" name="slug"
+                                                            placeholder="{{ __('Enter Slug') }}" required="" value="">
+                                                            <strong class="slug_err color-red"></strong>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-lg-4">
+                                                        <div class="left-area">
+                                                            <h4 class="heading">{{ __('Web Address') }}*</h4>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-7">
+                                                    <input type="text" class="input-field" name="web_address"
+                                                            placeholder="{{ __('Web Address') }}" required="" value="">
+                                                            <strong class="web_address_err color-red"></strong>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-lg-4">
+                                                        <div class="left-area">
+                                                            <h4 class="heading">{{ __('Email') }}*</h4>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-7">
+                                                    <input type="text" class="input-field" name="email"
+                                                            placeholder="{{ __('Email') }}" required="" value="">
+                                                            <strong class="email_err color-red"></strong>
+                                                    </div>
+                                                </div>
+                                                <br>
+                                                <div class="row">
+                                                    <div class="col-lg-4">
+                                                        <div class="left-area">
+                                                            <h4 class="heading">{{ __('Logo') }} *</h4>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-7">
+                                                        <div class="img-upload">
+                                                            <div id="image-preview" class="img-preview" >{{---style="background: url(http://localhost/Laravel_8/Akib_bhai/ecom/ebaskat-admin/public/assets/admin/images/upload.png);"--}}
+                                                                <label for="image-upload" class="img-label" id="image-label"><i class="icofont-upload-alt"></i>Upload Icon</label>
+                                                                <input type="file" name="logo" class="img-upload" id="image-upload">
+                                                                <strong class="logo_err color-red"></strong>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-lg-4">
+                                                        <div class="left-area">
+                                                            
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-lg-7">
+                                                        <div class="col-lg-7">
+                                                            <button class="addProductSubmit-btn" type="submit">{{ __('Create') }}</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ __('Close') }}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {{-- ADD / EDIT MODAL ENDS --}}
+
+    {{-- Edit Brand MODAL --}}
+    <input type="hidden" value="{{route('admin-brand-edit')}}" class="editModalUrl">
+    <div class="modal fade" id="editBrandModal" tabindex="-1" role="dialog" aria-labelledby="editBrandModal" aria-hidden="true">
+    </div>
+    {{-- Edit Brand MODAL ENDS --}}
+
+    {{-- Show Brand MODAL --}}
+    <input type="hidden" value="{{route('admin-brand-show')}}" class="showModalUrl">
+    <div class="modal fade" id="editBrandModal" tabindex="-1" role="dialog" aria-labelledby="editBrandModal" aria-hidden="true">
+    </div>
+    {{-- Show Brand MODAL ENDS --}}
+
+    <input type="hidden" value="{{route('admin-brand-delete')}}" class="deleteModalUrl">
+
+
+
+    {{-- ATTRIBUTE MODAL --}}
+    <div class="modal fade" id="attribute" tabindex="-1" role="dialog" aria-labelledby="attribute" aria-hidden="true">
+
+        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="submit-loader">
+                    <img src="{{ asset('assets/images/xloading.gif') }}" alt="">
+                </div>
+                <div class="modal-header">
+                    <h5 class="modal-title"></h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ __('Close') }}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- ATTRIBUTE MODAL ENDS --}}
+
+
+    {{-- DELETE MODAL --}}
+
+    <div class="modal fade" id="confirm-delete" tabindex="-1" role="dialog" aria-labelledby="modal1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <div class="modal-header d-block text-center">
+                    <h4 class="modal-title d-inline-block">{{ __('Confirm Delet') }}e</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+                <!-- Modal body -->
+                <div class="modal-body">
+                    <p class="text-center">
+                        {{ __('You are about to delete this Category. Everything under this category will be deleted.') }}
+                    </p>
+                    <p class="text-center">{{ __('Do you want to proceed?') }}</p>
+                </div>
+
+                <!-- Modal footer -->
+                <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">{{ __('Cancel') }}</button>
+                    <a class="btn btn-danger btn-ok">{{ __('Delete') }}</a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    {{-- DELETE MODAL ENDS --}}
+    <input type="hidden" id="can_add"
+        value="{{ Auth::guard('admin')->user()->role->permissionCheck('categories|add') }}">
+    <input type="hidden" id="can_edit"
+        value="{{ Auth::guard('admin')->user()->role->permissionCheck('categories|edit') }}">
+
+@endsection
+
+
+@section('scripts')
+    <script src="{{asset('custom_js/brand/index.js?a=1')}}" ></script>
+    <script src="{{asset('custom_js/brand/edit.js?a=1')}}" ></script>
+    {{-- DATA TABLE --}}
+
+    {{-- <script type="text/javascript">
+
+        var table = $('#geniustable').DataTable({
+            ordering: true,
+            processing: true,
+            serverSide: true,
+            ajax: '{{ route('admin-subcat-datatables') }}',
+            columns: [
+                {data: 'category', searchable: false, orderable: false},
+                {data: 'name', name: 'name'},
+                {data: 'slug', name: 'slug'},
+                {data: 'attributes', name: 'attributes', searchable: false, orderable: false},
+                {data: 'status', searchable: false, orderable: false},
+                {data: 'action', searchable: false, orderable: false}
+
+            ],
+            language: {
+                processing: '<img src="{{asset('assets/images/xloading.gif')}}">'
+            },
+            drawCallback: function (settings) {
+                $('.select').niceSelect();
+            }
+        });
+
+        if (! +$('#can_edit').val() ) {
+            // status -> 4
+            table.column(4).visible(0);
+        }
+
+        if($('#can_add').val())
+        $(function () {
+            $(".btn-area").append('<div class="col-sm-4 table-contents">' +
+                '<a class="add-btn" data-href="{{route('admin-subcat-create')}}" id="add-data" data-toggle="modal" data-target="#modal1">' +
+                '<i class="fas fa-plus"></i> {{{ __("Add New Sub Category") }}}' +
+                '</a>' +
+                '</div>');
+        });
+
+
+    </script> --}}
+
+@endsection
+
+
+
+//*********************************************************************//
+ <table id="geniustable"class="table table-hover dt-responsive dataTable no-footer dtr-inline"
+                                            cellspacing="0" width="100%" role="grid" aria-describedby="geniustable_info"
+                                            style="width: 100%;">
+                                            <thead>
+                                                <tr role="row">
+                                                    <th class="sorting_asc">Sl</th>
+                                                    <th class="sorting_asc">Name</th>
+                                                    <th class="sorting" tabindex="0" >Slug</th>
+                                                    <th class="sorting" tabindex="0">Web Address</th>
+                                                    <th class="sorting_disabled">Email Address </th>
+                                                    <th class="sorting_disabled">Action</th>
+                                                </tr>
+                                            </thead>
+                                            
+                                            <tbody>
+                                            @foreach ($brands as $item)
+                                                <tr role="row" class="odd">
+                                                    <td class="sorting_1" tabindex="0">
+                                                        {{$loop->iteration}}
+                                                    </td>
+                                                    <td>
+                                                        {{$item->name}}
+                                                    </td>
+                                                    <td>
+                                                        {{$item->slug}}
+                                                    </td>
+                                                    <td>
+                                                        {{$item->web_address}}
+                                                    </td>
+                                                    <td>
+                                                        {{$item->email}}
+                                                    </td>
+                                                    <td>
+                                                        <div class="action-list">
+                                                            <a data-id="{{$item->id}}" class="showSingle show" > <i class="fas fa-eye"></i>
+                                                                View
+                                                            </a>
+                                                            <a data-id="{{$item->id}}" class="edit" > <iclass="fas fa-edit"></i>
+                                                                    Edit
+                                                            </a>
+                                                           {{--   <a href="javascript:;"
+                                                                data-href="http://localhost/Laravel_8/Akib_bhai/ecom/ebaskat-admin/public/admin/subcategory/delete/17"
+                                                                data-toggle="modal" data-target="#confirm-delete"
+                                                                class="delete">
+                                                                <i class="fas fa-trash-alt"></i>
+                                                                </a>  --}}
+                                                            <a data-id="{{$item->id}}" class="singleDelete delete" onclick="return confirm(' you want to delete?');">
+                                                                <i class="fas fa-trash-alt"></i>
+                                                            </a>
+
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                        {{$brands->links()}}
