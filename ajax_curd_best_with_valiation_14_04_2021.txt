@@ -367,8 +367,98 @@
 
 
 
+/***************************************************************/
+		/*When form hase file */
+/***************************************************************/
+    $(document).on("submit",'.createBrand',function(e){
+        e.preventDefault();
+       /*  var form = $(this);
+        var url = form.attr("action");
+        var type = form.attr("method");
+        var data = form.serialize(); */
+        $('.color-red').text('');
+        $.ajax({
+            /* url: url,
+            data: data,
+            type: type,
+            datatype:"JSON", */
+            type: 'POST',
+            url: $(this).attr('action'),
+            enctype: 'multipart/form-data',
+            data: new FormData(this),
+            processData: false,
+            contentType: false,
+            beforeSend:function(){
+                $('.loading').fadeIn();
+            },
+            success: function(response){
+                console.log(response);
+                if(response.status == 'errors')
+                {   
+                    printErrorMsg(response.error);
+                }
+                else if(response.status == true)
+                {
+                    $('.message').text(response.message);
+                    document.getElementById("formResetId").reset();
+                    setTimeout(function() 
+                    {
+                        $('#addNewBrandModal').modal("hide");
+                    }, 200);
+                }
+                else if(response.status == false)
+                {
+                    
+                }
+            },
+            complete:function(){
+                $('.loading').fadeOut();
+            },
+        });
+        //end ajax
+
+        function printErrorMsg(msg) {
+            $('.color-red').css({'color':'red'});
+            $.each(msg, function(key, value ) {
+                $('.'+key+'_err').text(value);
+            });
+        }
+    });
+/***************************************************************/
+/***************************************************************/
 
 
+	 //--- Validation Section
+          $rules = [
+                'name' => 'required|min:2|max:255',
+                'email' => 'required|unique:brands,email',
+                'web_address' => 'required|min:2|max:255',
+                'logo' => 'mimes:jpeg,jpg,png,svg',
+                'slug' => 'required|min:3|unique:brands|regex:/^[a-zA-Z0-9\s-]+$/'
+                ];
+          $customs =[
+              'name.required'   => 'Name is required.',
+              'name.min'        => 'Name minimum 2 characters.',
+              'name.max'        => 'Name maximum 255 characters.',
+
+              'email.required'  => 'Email is required.',
+              'email.unique'    => 'This slug has already been taken.',
+
+              'web_address.required' => 'Web Address is required.',
+              'web_address.min'      => 'Web Address minimum 2 characters.',
+              'web_address.max'      => 'Web Address maximum 255 characters.',
+
+              'logo.mimes'      => 'Logo Type is Invalid.',
+
+              'slug.required'   => 'Slug is required.',
+              'slug.unique'     => 'This slug has already been taken.',
+              'slug.regex'      => 'Slug Must Not Have Any Special Characters.'
+                ];
+          $validator = Validator::make($request->all(), $rules, $customs);
+  
+          if ($validator->fails()) {
+                return response()->json(array('status' => 'errors','error' => $validator->getMessageBag()->toArray()));
+          }
 
 
 
