@@ -484,7 +484,8 @@
 
 
 
-
+		 $('.brand_id').html(response.html);
+                  $('#brand_id option[value="'+selectedBrandId+'"]').attr("selected", "selected");
 
 
 
