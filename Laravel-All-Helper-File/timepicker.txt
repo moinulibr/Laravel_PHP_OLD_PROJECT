@@ -1,3 +1,4 @@
+
  <label>Default Time Picker</label>
                                 <div class="input-group m-b-15">
                                     
@@ -120,3 +121,53 @@ echo  $diff->s . ' seconds';
 
 echo 'The difference in days : ' . $diff->days;
 // Output: The difference in days : 10398
+
+
+//////////////////////////////////////////////////////////////////////////////////
+	//25-09-2021
+ 	if($request->ajax())
+        {
+            $pagination     = $request->pagination ?? 50;
+            $search         = $request->search ?? NULL;
+            $date_from = Carbon::parse($request->input('start_date'));
+            $date_to = Carbon::parse($request->input('end_date') ?? date("Y-m-d h:i:s",strtotime(date("Y-m-d h:i:s")."-7 day")));
+            
+            $data['orders'] = Order::withCount('ebaskatMerchantPackages')
+                ->when($search && ($date_from  == NULL),function($q)use($search){
+                    return $q->where('order_number','like','%'.$search.'%')
+                    ->orWhere('customer_email','like','%'.$search.'%')
+                    ;
+                })
+                ->when($date_from && ($search  == NULL),function($d)use($date_from,$date_to){
+                    return $d->whereDate('created_at', '<=', $date_from)
+                    ->whereDate('created_at', '>=', $date_to);
+                })
+                ->when($date_from && $search,function($dq)use($date_from,$date_to,$search){
+                    return $dq
+                    ->whereDate('created_at', '<=', $date_from)
+                    ->whereDate('created_at', '>=', $date_to)
+                    ->where('order_number','like','%'.$search.'%')
+                    ->orWhere('customer_email','like','%'.$search.'%')
+                    ;
+                })
+                /* 
+                    ->when($date_from || $search,function($ds)use($date_from,$date_to,$search){
+                        return 
+                        $ds->when($date_from,function($dq)use($date_from,$date_to){
+                            return $dq->whereDate('created_at', '<=', $date_from)
+                            ->whereDate('created_at', '>=', $date_to);
+                        })
+                        ->when($search,function($q)use($search){
+                            return $q->where('order_number','like','%'.$search.'%')
+                            ->orWhere('alix_order_id','like','%'.$search.'%');
+                        });
+                    }) 
+                */
+                ->orderBy('id', 'desc')
+                ->paginate($pagination); 
+            $html = view('admin.order-ebaskat.ajax.order_list',$data)->render();
+            return response([
+                'status' => true,
+                'data'  => $html
+            ]);
+        }

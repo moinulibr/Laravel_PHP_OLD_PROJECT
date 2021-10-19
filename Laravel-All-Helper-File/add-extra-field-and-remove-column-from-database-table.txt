@@ -90,3 +90,56 @@ class AddStatusToCountries extends Migration
 
 	### php artisan migrate
 
+
+
+/********************************************************************/
+			drop column
+/********************************************************************/
+	remove / drop column 
+	php artisan make:migration remove_alix_variation_id_from_products --table=products
+
+	
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+class RemoveAlixVariationIdFromProducts extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        if (Schema::hasColumn('products', 'alix_variation_id')){
+            Schema::table('products', function (Blueprint $table) {
+                $table->dropColumn('alix_variation_id');
+            });
+        }
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::table('products', function (Blueprint $table) {
+            //
+        });
+    }
+}
+
+
+
+/********************************************************************/
+			Remove Multiple Column using Migration
+/********************************************************************/
+
+	 $table->dropColumn(['body', 'title']);
+
+https://www.itsolutionstuff.com/post/how-to-remove-column-from-table-in-laravel-migrationexample.html

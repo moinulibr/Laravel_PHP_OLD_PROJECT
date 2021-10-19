@@ -1,0 +1,121 @@
+
+
+
+===============================================================================
+
+"autoload": {
+        "files": [
+            "app/Helpers/dependency.php",
+            "app/Helpers/helper.php"
+        ],
+        "psr-4": {
+            "App\\": "app/"
+        },
+        "classmap": [
+            "database/seeds",
+            "database/factories"
+        ]
+    },
+
+
+
+	composer dump-autoload
+==========================================================================
+			
+
+
+		Just we can use laravel healper
+				============== > which is usable in any where in the project ,,, no required to controller
+		.in the App Folder.. have to create a healper.php file..
+		like....... App/healper.php
+
+	now its register in composer.json file..
+		
+		"autoload": {
+       			 "files": [
+            			"app/helpers.php"
+        			],
+        		"psr-4": {
+            			"App\\": "app/"
+        			},
+        		"classmap": [
+            			"database/seeds",
+            			"database/factories"
+        			]
+   			 },
+
+
+		// Then have command this
+
+		composer dump-autoload
+	==================================
+
+		Now we can use it from any where, which method we will declire in the healper.php file... 
+			like....... healper.php
+		----------------------------------
+		use App\Model\Product\Product;
+
+		function count_product($id){
+    				return Product::where('cat_id', $id)->count();
+				}
+			Now count_product() this method is useable in any where in the project..
+		
+	like.... show-category.blade.php
+		_______________________
+				{{ count_product($item->id) }}	//[used it in the foreach()]
+				
+		 @foreach ($category as $item)
+                             <tr>
+                          	<td>{{ $item->name }}</td>
+                                <td>{{ $item->description }}</td>
+				<td>{{ count_product($item->id) }} </td>
+                            </tr>
+                @endforeach
+==========================================================================
+
+have to create a folder into the app folder.. like
+	Clasess. in this Classes folder , also have to a create
+		a file. name: CommonClasses  ..... then 
+-----------------
+<?php
+
+namespace App\Classes;
+//use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+
+class CommonClasses
+{
+    public static function tagName($postId){
+        //return  (DB::table('postedtags')->where('post_id','=',"$postId")->first())->project_name;
+       return  $tags =  DB::table('postedtags')
+                    ->leftJoin('tags','postedtags.tag_id','=','tags.id')
+                    ->select('postedtags.*','tags.name as tname')
+                    ->where('postedtags.post_id','=',"$postId")
+                    ->get();
+        //return $tags;     
+    }
+}
+
+
+
+------------------------------------- this uses in blade file
+
+@php $tags =  \App\Classes\CommonClasses::tagName($item->id) @endphp
+                     
+                      @php $i = 0; @endphp
+                      @foreach ($tags as $t)
+                          
+                         @if ($i>0)
+                               ,
+                               
+                          @endif
+                          {{ $t->tname }}
+                         @php $i += 1; @endphp
+                        @endforeach
+
+
+
+
+
+
+
