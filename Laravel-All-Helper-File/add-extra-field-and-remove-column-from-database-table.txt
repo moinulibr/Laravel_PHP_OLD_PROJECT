@@ -136,10 +136,60 @@ class RemoveAlixVariationIdFromProducts extends Migration
 
 
 
-/********************************************************************/
+/***********************************************************************************************************/
 			Remove Multiple Column using Migration
-/********************************************************************/
+/***********************************************************************************************************/
 
 	 $table->dropColumn(['body', 'title']);
 
 https://www.itsolutionstuff.com/post/how-to-remove-column-from-table-in-laravel-migrationexample.html
+
+
+
+
+
+
+
+
+
+/***********************************************************************************************************/
+				add or remove enum option/parameter
+/***********************************************************************************************************/
+
+	php artisan make:migration add_variant_enumparameter_to_products --table=products
+	
+
+
+<?php
+
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
+
+class AddVariantEnumParameterToProducts extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::table('products', function (Blueprint $table) {
+            \DB::statement("ALTER TABLE `products` CHANGE `product_type` `product_type` ENUM('normal','affiliate','variant') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'normal';");
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::table('products', function (Blueprint $table) {
+
+        });
+    }
+
+}
