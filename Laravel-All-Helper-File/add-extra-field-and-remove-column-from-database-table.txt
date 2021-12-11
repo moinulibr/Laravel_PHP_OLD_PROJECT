@@ -193,3 +193,111 @@ class AddVariantEnumParameterToProducts extends Migration
     }
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+======================================================================
+when add a new column
+$table->string('alix_order_data',255)->nullable()->after('note');
+
+
+
+
+
+
+
+//====================add new column with comment========================
+php artisan make:migration add_variation_sku_colum_to_product_variants_table
+
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+class AddVariationSkuColumToProductVariantsTable extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::table('product_variants', function (Blueprint $table) {
+            $table->string('variation_sku',50)->nullable()->after('alix_variation_id')->comment('bigbuy variation sku');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::table('product_variants', function (Blueprint $table) {
+            //
+        });
+    }
+}
+//====================add new column with comment========================
+
+
+
+
+
+	//=============================== existing column add comment=======================
+	php artisan make:migration add_comment_in_da_product_id_to_products --table=products
+
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+class AddCommentInDaProductIdToProducts extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::table('products', function (Blueprint $table) {
+            \DB::statement("ALTER TABLE `products` CHANGE `da_product_id` `da_product_id` INT(11) NULL DEFAULT NULL COMMENT 'this is for all dropshipping product id';");
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::table('products', function (Blueprint $table) {
+            //
+        });
+    }
+}
+
+	
