@@ -1,31 +1,14 @@
 
 
 	
-	use Illuminate\Support\Facades\App;
-        //dd(env('APP_URL'));
-        //dd(env('APP_NAME'));
-        if (App::environment('local')) {
-            // The environment is local
-            echo "local ;  ";
-        }
-        
-        if (App::environment(['local', 'staging'])) {
-            // The environment is either local OR staging...
-            echo "  local and staging";
-        }
-
-        echo env('APP_ENV') ."<br/>";
-        if(env('APP_ENV')!='Production')
-        {
-            echo "development";
-        }else{
-            echo "production";
-        }exit;
-        ---------------------------------------------------------------
-
-	 function bigbuyApiUrl_hd()
+	 /*
+        |-------------------------------------------------------
+        |       bigbuy  api  key and secret for production
+        |-------------------------------------------------------
+        */
+            function bigbuyApiUrl_hd()
             {
-                if(env('APP_ENV')!='Production' || env('APP_ENV')!='production')
+                if(strtolower(config('app.env'))!='production')
                 {
                     return "https://api.sandbox.bigbuy.eu";//sandbox
                 }else{
@@ -35,7 +18,7 @@
             } 
             function bigbuyApiKey_hd()
             {
-                if(env('APP_ENV')!='Production' || env('APP_ENV')!='production')
+                if(strtolower(config('app.env'))!='production')
                 {
                     //sandbox key
                     return 'ZGRiZWQwNTExY2Q4ZGUxYzUzMDkwZWQ2NGMyN2YxNGJhODJhMjA5N2E4MjRkNmRkYzA0MGRiN2U5MWEyMDU0Zg';
@@ -46,3 +29,8 @@
                 //production key 
                 //return 'ZWQwYzFhZDczZGY0ZmNlYjk0ZGQwZTMwNmUwNGRkOGUyOTUyZDNlMGYzOTE1NDRlZjNiYzFiZmJiNjczMWNkYw';
             }
+        /*
+        |-------------------------------------------------------
+        |       bigbuy  api  key and secret for production
+        |-------------------------------------------------------
+        */
