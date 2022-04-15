@@ -14,7 +14,9 @@
 	mysql -u root -p test < "C:\Users\lenovo E450\desktop\backup.sql"
 	mysql -u root -p test < "C:\Users\lenovo E450\desktop\backup.sql"
 
-
+	
+	//this uses to.... 
+	------------------
 	.\mysql -u root -p
 	password
 	show databases; show databases;
