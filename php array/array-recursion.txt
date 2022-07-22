@@ -1,0 +1,55 @@
+:: what is array_walk_recursive :???
+
+function array_value_recursive($key, array $arr){
+    $val = array();
+    array_walk_recursive($arr, function($v, $k) use($key, &$val){
+        if($k == $key) array_push($val, $v);
+    });
+    return count($val) > 1 ? $val : array_pop($val);
+}
+
+ $singleArray = [["name" =>"color"],["value"=>"Nude"],["name"=>"Cup Size"],["value"=>"B"],["name"=>"Bands Size"],["value"=>"80AB"]];
+ 
+$arr = array(
+    'foo' => 'value of foo',
+    'bar' => array(
+        'baz' => 'value of bar of baz',
+        'candy' => 'value of bar of candy',
+        'vegetable' => array(
+            'carrot' => 'value of bar of vagetable of carrot',
+        )
+    ),
+    'vegetable' => array(
+        'carrot' => 'value of direct vegetable of carrot2',
+    ),
+    'fruits' => 'value of direct fruits of fruits',
+);
+echo "<pre>";
+print_r(array_value_recursive('value', $singleArray));
+echo "</pre>";
+echo "----------";
+echo "<pre>";
+print_r(array_value_recursive('carrot', $arr));
+echo "</pre>";
+// array(2) { [0]=> string(6) "carrot" [1]=> string(7) "carrot2" }
+
+echo "<br/>";
+echo "<pre>";
+print_r(array_value_recursive('apple', $arr)); // null
+echo "</pre>";
+echo "<br/>";
+echo "<pre>";
+print_r(array_value_recursive('baz', $arr)); // string(3) "baz"
+echo "</pre>";
+echo "<br/>";
+echo "<pre>";
+print_r(array_value_recursive('candy', $arr)); // string(5) "candy"
+echo "</pre>";
+echo "<br/>";
+echo "<pre>";
+print_r(array_value_recursive('pear', $arr)); // null
+echo "</pre>";
+echo "<br/>";
+
+exit;
+	
