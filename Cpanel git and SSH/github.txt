@@ -35,7 +35,7 @@
 	## This key [ssh and GPG Keys] will stored in my pc/c drive
 
 	##---Then Copy the SSH key or ssh-rsa code from the C drive/User/Hi or moinul/.ssh folder/ id_rsa.pub  --##
-		#** AND Pate the code in to the  git hub , below link...
+		#** AND Paste the code in to the  git hub , below link...
 		## github/setting/Personal settings/SSH and GPG keys / New SSH keys
 			Set the title and Key file by the copied code , past here
 
