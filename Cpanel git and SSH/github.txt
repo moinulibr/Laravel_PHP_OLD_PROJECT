@@ -58,7 +58,7 @@
 	|---------------------------------------------------
 	|  Some things init in the github , flow the code
 	|---------------------------------------------------
-	*/
+	*/3Ksc2t1s50wfAAAAE21vaW51bGlickBnbWFpbC5jb20BAgMEBQYH  password1234
 
 		git init #[One Time For a Project]
 

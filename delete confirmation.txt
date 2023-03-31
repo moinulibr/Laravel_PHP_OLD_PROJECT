@@ -1,0 +1,35 @@
+ <form action="{{route('admin.blog.post.delete', $item->id)}}" method="post">
+         <input type="hidden" name="_method" value="DELETE">
+              @csrf
+        <button class="btn btn-danger btn-sm" style="width: 100%;text-align:left;"><i class="fas fa-trash"></i> Delete</button>
+   </form>
+
+ <script >
+        document.onsubmit=function(){
+            return confirm('Are you sure want to delete this?');
+        }
+    </script>
+
+
+
+
+
+
+
+
+
+ Route::delete('/blog/delete/{blogPost}', 'Admin\Blog\BlogPostController@destroy')->name('admin.blog.post.delete')->middleware('permissions:blog|delete');
+
+
+ public function destroy(BlogPost $blogPost)
+    {
+        $blogPost->delete();
+        return redirect()->back()->with('success','Deleted successfully');
+    }
+
+
+
+
+
+
+
