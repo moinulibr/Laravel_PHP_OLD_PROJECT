@@ -1,0 +1,114 @@
+
+	npm install
+	
+	npm install vue-loader@next vue@next vue-router@next --force
+	
+	npm install @vitejs/plugin-vue --force --save-dev	
+
+	npm run dev
+
+	-------------------------------------
+
+
+	vite.config.js
+	--------------
+	import { defineConfig } from 'vite';
+	import laravel from 'laravel-vite-plugin';
+	import vue from '@vitejs/plugin-vue';
+
+	export default defineConfig({
+    		plugins: [
+        		laravel({
+            			input: ['resources/css/app.css', 'resources/js/app.js'],
+            			refresh: true,
+        		}),
+        		vue()
+    		],
+	});
+	---	---------	----
+	import vue from '@vitejs/plugin-vue'
+
+	plugins:[
+
+		laravel({}),
+		vue()
+	]
+	---------------------------------------
+
+
+
+
+
+
+	---------------------------------------------------------------------------------------------------------
+	composer require laravel/ui
+	php artisan ui vue --auth
+	npm install
+	npm install vue-template-compiler vue-loader vue-router vuex axios vue-axios --save-dev --legacy-peer-deps
+	npm run dev
+	---------------------------------------------------------------------------------------------------------
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
