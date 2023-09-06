@@ -14,7 +14,7 @@
 		# Enter passphrase (empty for no passphrase):
 			# no change , just enter
 		# Enter same passphrase (empty for no passphrase):
-			# no change , just enter
+			# no change , just enterp
 
 		Your public key has been saved in /c/Users/Hi/.ssh/id_rsa.pub.
 		The key fingerprint is:

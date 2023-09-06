@@ -1,0 +1,71 @@
+
+
+
+
+
+
+
+
+
+
+
+	to view all installed extension: @installed
+	-------------------------------------------
+
+	Auto Close Tag
+	Auto Import
+	Beautify
+	Community Material Theme
+	Composer
+	DotENV
+	Format HTML in PHP
+	Laravel Artisan
+	Laravel Blade
+	Laravel Blade Snippets
+	Laravel Blade Spacer
+	Laravel Extra Intellisense
+	Laravel Goto Path
+	Laravel goto view
+	laravel intellisense
+	Laravel Model Snippets
+	Laravel Snippets
+	laravel-blade
+	laravel-goto-components
+	laravel-jump-controller
+	Material Icon Theme
+	vscode-icons
+	Paste JSON as Code
+	PHP
+	PHP Debug
+	PHP DocBlocker
+	PHP Extension Pack
+	PHP Intelephense
+	PHP IntelliSense
+	PHP Namespace Resolver
+	PHP Profiler
+	PHPDoc Comment
+	Tailwind CSS IntelliSense	
+
+	MySQL
+
+
+
+
+
+
+
+
+
+	database client
+
+
+
+
+
+
+
+
+
+
+
+
