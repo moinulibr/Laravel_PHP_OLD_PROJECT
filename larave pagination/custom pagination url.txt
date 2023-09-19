@@ -1,0 +1,53 @@
+
+	
+	$posts = Post::paginate(10)->withQueryString();
+
+	OR
+
+	{{ $posts->withQueryString()->links() }}	
+	
+	
+
+	$users = User::paginate()->withQueryString();
+	$users = User::paginate()->appends([
+    			'role' => $request->role,
+    			'group' => $request->group,
+		]);
+
+	users?role=admin&group=1&page=2
+	/users?role=admin&group=1&page=3
+
+	https://laraveldaily.com/post/laravel-pagination-keep-query-parameters-second-page
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
