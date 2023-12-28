@@ -196,6 +196,10 @@ class AddVariantEnumParameterToProducts extends Migration
 
 
 
+		Its for nullable 
+	------------------------------------
+	ALTER TABLE `users` CHANGE `status` `state` INT(10) UNSIGNED NULL DEFAULT NULL;
+
 
 
 

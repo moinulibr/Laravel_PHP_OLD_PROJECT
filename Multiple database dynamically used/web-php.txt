@@ -1,0 +1,7 @@
+Route::get('/admin', [AdminAuthController::class, 'getLogin'])->name('admin.login')->middleware('adminBLogin');
+Route::post('admin/login', [AdminAuthController::class, 'postLogin'])->name('admin.loginPost')->middleware('adminBLogin');;
+
+
+	Route::get('home', [AdminController::class, 'dashboard'])->name('home')->middleware('adminALogin');
+
+    Route::get('profile', [AdminController::class, 'profile'])->name('profile')->middleware('adminALogin');

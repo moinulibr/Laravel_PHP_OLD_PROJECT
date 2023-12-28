@@ -1,0 +1,9 @@
+
+    protected $routeMiddleware = [
+        'auth' => \App\Http\Middleware\Authenticate::class,
+
+        'adminALogin' => \App\Http\Middleware\AdminDbConAfterLogin::class,
+        'adminBLogin' => \App\Http\Middleware\AdminDBSetLogin::class,
+	..............
+	...........
+	];
