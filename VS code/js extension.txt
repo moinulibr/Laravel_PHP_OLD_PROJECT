@@ -1,0 +1,49 @@
+
+	Stylelint
+	Sublime VSCode Theme
+	//Tailwind CSS IntelliSense
+	Thunder Client
+	VsCode React Refactor
+	vscode-icons	
+	Snipped
+	Reactjs code snippets
+	Postman
+	Path Intellisense
+	Paste JSON as Code
+	npm Intellisense
+	JavaScript (ES6) code snippets
+	indent-rainbow
+	expand-region
+	Duplicate selection or line
+	DotENV
+	Database Client JDBC
+	Auto Rename Tag
+	Atuo Inport - ES6, TS, JSX, TSX
+	Andromeda Mariana
+	Andromeda Dark Theme
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
