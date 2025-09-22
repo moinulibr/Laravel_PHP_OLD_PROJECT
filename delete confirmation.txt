@@ -30,6 +30,9 @@
 
 
 
+ onclick="return confirm('Are you sure you want to CANCEL this Plan?');"
+<a href="{{ route('cleaner.canceledActivateSubscriptionPlan') }}" class="btn btn-danger" onclick="return confirm('Are you sure you want to CANCEL this Plan?');">
+
 
 
 

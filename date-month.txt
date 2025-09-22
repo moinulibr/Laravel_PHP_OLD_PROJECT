@@ -207,3 +207,9 @@ strtotime("12-12-2012 +1 Year");
 
 
 
+	return Application::where('user_id',$authUserId)
+        ->where('subscription_plan_id', $subscriptionPlanId)
+        ->whereBetween('created_at',[$startDate, $endDate])
+        ->count();
+        /* ->whereYear('created_at', Carbon::now()->year)->whereMonth('created_at', Carbon::now()->month)
+        ->count(); */

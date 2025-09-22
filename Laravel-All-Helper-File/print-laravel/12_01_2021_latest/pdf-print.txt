@@ -258,5 +258,10 @@
 
 
 
+        $cleaner = CleanerInfo::where('user_id', auth()->user()->id)->first();
+        $imageLink = asset('storage/'.$cleaner->photo_id);
 
+        return Storage::disk('public')->download($cleaner->photo_id);  // or
+
+        return Storage::disk('images')->download('2568346.jpg');
 
