@@ -22,7 +22,12 @@
 	Andromeda Mariana
 	Andromeda Dark Theme
 	
+	Stylelint
 
+	WSL
+	ESLint
+	Beautify
+	Andromeda
 
 
 

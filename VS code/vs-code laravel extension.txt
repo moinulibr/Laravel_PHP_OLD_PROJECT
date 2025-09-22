@@ -49,21 +49,23 @@
 
 	MySQL
 
+	Daatabase client JDBC
+	
 
 
+	postman
 
-
-
-
-
+	Live Server
 
 	database client
 
 
+	Sublime VSCode Theme
+	Thunder Client
 
+	Format HTML in PHP	
 
-
-
+	
 
 
 
