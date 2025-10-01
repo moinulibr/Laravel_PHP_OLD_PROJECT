@@ -98,9 +98,34 @@
 
 
 
+--------------------------------------------------
+	PHP Intelephense	PHP	PHP-এর জন্য সেরা, দ্রুততম এবং শক্তিশালী IntelliSense।
+	ESLint	JavaScript, React, Node	JavaScript 			কোডের মান নিশ্চিত করার জন্য অপরিহার্য।
+	Prettier - Code Formatter	ALL (PHP, JS, CSS, HTML)	একমাত্র ফরম্যাটার হিসেবে ব্যবহার করুন। এটি Beautify-কে প্রতিস্থাপন করবে।
+	Tailwind CSS IntelliSense	ALL (Blade, React, Next)	Tailwind ক্লাসের জন্য অটোকমপ্লিশন।
+	GitLens			ALL	Git-এর কাজ (কে কখন কোড পরিবর্তন করেছে) সহজে দেখার জন্য।
+	DotENV			ALL	.env ফাইল হাইলাইট করার জন্য।
+	Material Icon Theme	ALL	ফাইল আইকন থিম। vscode-icons বাদ দিন।
+	Laravel Artisan		Laravel		VS Code-এর মধ্যেই Artisan কমান্ড চালানোর জন্য।
+	Laravel Extra Intellisense	Laravel	ভিউ, রাউট, কনফিগ-এর মতো Laravel স্পেসিফিক সাজেশন।
+	ES7+ React/Redux/GraphQL/React-Native snippets		React, Next.js	React	 কম্পোনেন্ট, হুকস দ্রুত তৈরি করার জন্য সেরা স্নপেট প্যাকেজ।
+	Nestjs Snippets	NestJS		NestJS 		কন্ট্রোলার, সার্ভিস, মডিউল ইত্যাদি দ্রুত তৈরির জন্য।
+	Path Intellisense	ALL (বিশেষত JS)		ফাইল এবং ফোল্ডার পাথের নাম স্বয়ংক্রিয়ভাবে পূরণ করে।
+	PHP Debug (বা Xdebug)	PHP		PHP ডিবাগিংয়ের জন্য Xdebug কনফিগার করতে সাহায্য করবে।
+	PHP DocBlocker		PHP	দ্রুত PHPDoc কমেন্ট ব্লক তৈরি করে।
+	Thunder Client (বা REST Client)	ALL	API টেস্টিংয়ের জন্য। যেকোনো একটি রাখবেন।
+	Auto Close Tag / Auto Import	ALL 	(বিশেষত HTML/JSX)	ট্যাগ ও ইমপোর্ট স্বয়ংক্রিয়ভাবে বন্ধ করার জন্য।
+	Database Client (যেমন SQLTools)	Database	VS Code-এর মধ্যে ডেটাবেস ডেটা দেখার জন্য। ডুপ্লিকেটগুলো বাদ দিন।
 
-
-
+------------------------------------------------------------------------------------------------------------
+	Beautify	Prettier এটিকে প্রতিস্থাপন করছে। দুটি ফরম্যাটার কনফ্লিক্ট করবে।
+	PHP IntelliSense	PHP Intelephense এর চেয়ে দুর্বল। দুটি ইন্টেলিসেন্স ইঞ্জিন একসাথে চালাবেন না।
+	vscode-icons	Material Icon Theme এর ডুপ্লিকেট। যেকোনো একটি রাখুন।
+	Laravel Blade	Laravel Blade Snippets ও Laravel Extra Intellisense থাকায় এটি অপ্রয়োজনীয়।
+	Laravel Blade Spacer	অটো-ফরম্যাটিং-এ সমস্যা করতে পারে, দরকার নেই।
+	laravel-blade	এটিও ডুপ্লিকেট। বাদ দিন।
+	IntelliPHP -AI Autocomplete for PHP	PHP Intelephense এর সাথে কনফ্লিক্ট করতে পারে বা ওভারলোড তৈরি করতে পারে।
+	MySQL / Daatabase client JDBC / database client	ডুপ্লিকেট ডাটাবেস ক্লায়েন্ট। যেকোনো একটি (যেমন SQLTools বা Database Client) রেখে বাকিগুলি বাদ দিন।
 
 
 
