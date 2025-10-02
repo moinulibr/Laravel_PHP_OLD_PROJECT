@@ -1,3 +1,5 @@
 
 	Note
 --------------------------------
+
+	It's a vs code extension. It's free and it's alternative of copilot
