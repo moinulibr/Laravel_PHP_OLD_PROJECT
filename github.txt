@@ -235,7 +235,10 @@
 
 
 
-
+	for not https.... it only git...
+	---------------------------------------------------
+		git remote set-url origin git@github.com:moinulibr/bigdata-handling.git
+		git push --set-upstream origin main
 
 
 
