@@ -262,7 +262,10 @@
   cd - > /dev/null
 done
 
-
+------------------------------------
+	git remote -v 
+	-------------
+	to see origin of current repository path details
 
 
 
