@@ -240,6 +240,28 @@
 		git remote set-url origin git@github.com:moinulibr/bigdata-handling.git
 		git push --set-upstream origin main
 
+	
+	All childs folder check and change path
+	---------------------------------------
+	find . -type d -name ".git" | while read repo; do
+  cd "$(dirname "$repo")"
+  echo "🔄 Updating repo: $(pwd)"
+
+  OLD_URL=$(git remote get-url origin)
+
+  if [[ $OLD_URL == https://github.com/* ]]; then
+    REPO_PATH=$(echo $OLD_URL | sed -E 's#https://github.com/##; s#\.git$##')
+    NEW_URL="git@github.com:${REPO_PATH}.git"
+
+    git remote set-url origin "$NEW_URL"
+    echo "✅ Updated to SSH: $NEW_URL"
+  else
+    echo "⚠️ Already SSH or not GitHub: $OLD_URL"
+  fi
+
+  cd - > /dev/null
+done
+
 
 
 
