@@ -4,7 +4,9 @@
 	mysql -u root toMyTargetedDB < "E:\laragon\www\wmk-tech\youngar\importableDBSqlFile.sql"
 	[toMyTargetedDB = to targeted db (where want to import sql file). this database had to created in server]
 	[ "E:\laragon\www\wmk-tech\youngar\importableDBSqlFile.sql"  = importable sql file path]
-
+	----------------------------------------
+	mysql -u root toMyTargetedDB < "E:\laragon\www\wmk-tech\youngar\importableDBSqlFile.sql"
+	------------------------------------------
 
 	Import
 	######
