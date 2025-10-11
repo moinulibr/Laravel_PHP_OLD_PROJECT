@@ -1,5 +1,5 @@
 		
-	07-10-2025	
+	07-10-2025
 	Go to your working project - open termianl - 
 	mysql -u root toMyTargetedDB < "E:\laragon\www\wmk-tech\youngar\importableDBSqlFile.sql"
 	----	----	----
@@ -8,6 +8,12 @@
 	----------------------------------------
 	mysql -u root toMyTargetedDB < "E:\laragon\www\wmk-tech\youngar\importableDBSqlFile.sql"
 	------------------------------------------
+
+	Export : 10-10-2025
+	-----------------------
+	E:\laragon\www\wmk-tech\royasztv-zabad
+	λ mysqldump -u root -p wmk_tech_royasztv_zabad > E:\royasztv_zabad_backup.sql
+	Enter password:
 
 	Import
 	######
